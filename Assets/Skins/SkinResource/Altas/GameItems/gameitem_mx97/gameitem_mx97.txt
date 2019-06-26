@@ -1,0 +1,20 @@
+{"frames": {
+
+"13.png":
+{
+	"frame": {"x":2,"y":2,"w":377,"h":389},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":377,"h":389},
+	"sourceSize": {"w":377,"h":389}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_mx97.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:c01388c1c37a97808db4030a4f88c329$"
+}
+}

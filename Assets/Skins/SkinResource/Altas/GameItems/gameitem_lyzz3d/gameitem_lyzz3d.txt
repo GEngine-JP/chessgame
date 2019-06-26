@@ -1,0 +1,20 @@
+{"frames": {
+
+"gameitem_lyzz3d.png":
+{
+	"frame": {"x":2,"y":2,"w":368,"h":363},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":368,"h":363},
+	"sourceSize": {"w":368,"h":363}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_lyzz3d.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:66a9a3f1c7a5454b9ea8d03bec7cd877$"
+}
+}

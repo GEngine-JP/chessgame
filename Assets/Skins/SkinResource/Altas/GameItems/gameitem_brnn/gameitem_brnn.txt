@@ -1,0 +1,20 @@
+{"frames": {
+
+"gameitem_brnn.png":
+{
+	"frame": {"x":2,"y":2,"w":279,"h":462},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":279,"h":462},
+	"sourceSize": {"w":279,"h":462}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_brnn.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:391291158af15f4bbe654bf73d9551f0$"
+}
+}

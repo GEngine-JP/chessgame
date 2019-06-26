@@ -1,0 +1,28 @@
+{"frames": {
+
+"room_middle.png":
+{
+	"frame": {"x":1,"y":1,"w":250,"h":252},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":250,"h":252},
+	"sourceSize": {"w":250,"h":252}
+},
+"room_move.png":
+{
+	"frame": {"x":1,"y":254,"w":250,"h":222},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":250,"h":222},
+	"sourceSize": {"w":250,"h":222}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "roomitem_bjl3d.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:221d36aeeb4929cc3c63c1c6344cb1ba$"
+}
+}

@@ -1,0 +1,52 @@
+{"frames": {
+
+"HallNoticeCloseHight.png":
+{
+	"frame": {"x":47,"y":85,"w":44,"h":35},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":44,"h":35},
+	"sourceSize": {"w":44,"h":35}
+},
+"HallNoticeCloseNormal.png":
+{
+	"frame": {"x":1,"y":85,"w":44,"h":35},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":44,"h":35},
+	"sourceSize": {"w":44,"h":35}
+},
+"HallNoticeReturnHight.png":
+{
+	"frame": {"x":1,"y":43,"w":85,"h":40},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":85,"h":40},
+	"sourceSize": {"w":85,"h":40}
+},
+"HallNoticeReturnNormal.png":
+{
+	"frame": {"x":1,"y":1,"w":88,"h":40},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":88,"h":40},
+	"sourceSize": {"w":88,"h":40}
+},
+"UI_Note_JJ_5.png":
+{
+	"frame": {"x":91,"y":1,"w":4,"h":1},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":4,"h":1},
+	"sourceSize": {"w":4,"h":1}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "window_sysnote.png",
+	"format": "RGBA8888",
+	"size": {"w":128,"h":128},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:3a3ae2028a09bc3fb7bf182de7a6644e$"
+}
+}

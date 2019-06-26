@@ -1,0 +1,20 @@
+{"frames": {
+
+"gameitem_half9.png":
+{
+	"frame": {"x":2,"y":2,"w":242,"h":431},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":242,"h":431},
+	"sourceSize": {"w":242,"h":431}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_half9.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:a18c4afce1de3d2ec3b18b3867ba6c0c$"
+}
+}

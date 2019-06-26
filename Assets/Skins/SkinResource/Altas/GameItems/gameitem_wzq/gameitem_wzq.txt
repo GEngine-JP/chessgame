@@ -1,0 +1,20 @@
+{"frames": {
+
+"item_icon_wzq.png":
+{
+	"frame": {"x":2,"y":2,"w":389,"h":349},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":389,"h":349},
+	"sourceSize": {"w":389,"h":349}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_wzq.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:959f0b5c503913525b96e8d7a3e7e887$"
+}
+}

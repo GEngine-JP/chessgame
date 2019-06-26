@@ -1,0 +1,20 @@
+{"frames": {
+
+"33003706.png":
+{
+	"frame": {"x":2,"y":2,"w":334,"h":500},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":334,"h":500},
+	"sourceSize": {"w":334,"h":500}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_fish3d.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:172939ffbc2fd14c55d9b24f41eaecdd$"
+}
+}

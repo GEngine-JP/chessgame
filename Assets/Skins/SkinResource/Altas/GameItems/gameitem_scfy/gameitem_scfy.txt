@@ -1,0 +1,68 @@
+{"frames": {
+
+"b1.png":
+{
+	"frame": {"x":2,"y":2,"w":250,"h":500},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":250,"h":500},
+	"sourceSize": {"w":250,"h":500}
+},
+"c1.png":
+{
+	"frame": {"x":670,"y":2,"w":268,"h":141},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":268,"h":141},
+	"sourceSize": {"w":268,"h":141}
+},
+"flash_teleport_golden_castStripe.png":
+{
+	"frame": {"x":670,"y":145,"w":128,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":256},
+	"sourceSize": {"w":128,"h":256}
+},
+"g5.png":
+{
+	"frame": {"x":800,"y":145,"w":128,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
+	"sourceSize": {"w":128,"h":128}
+},
+"l1.png":
+{
+	"frame": {"x":254,"y":418,"w":96,"h":89},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":96,"h":89},
+	"sourceSize": {"w":96,"h":89}
+},
+"sf_noise_clouds_01.png":
+{
+	"frame": {"x":254,"y":2,"w":414,"h":414},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":414,"h":414},
+	"sourceSize": {"w":414,"h":414}
+},
+"y1.png":
+{
+	"frame": {"x":352,"y":418,"w":59,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":59,"h":32},
+	"sourceSize": {"w":59,"h":32}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_scfy.png",
+	"format": "RGBA8888",
+	"size": {"w":1024,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:5b71edb8ff44ebc49d9209fd16bd4bbd$"
+}
+}

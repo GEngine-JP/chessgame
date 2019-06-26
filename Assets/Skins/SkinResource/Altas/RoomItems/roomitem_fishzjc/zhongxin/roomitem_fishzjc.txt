@@ -1,0 +1,28 @@
+{"frames": {
+
+"room_middle.png":
+{
+	"frame": {"x":1,"y":1,"w":240,"h":231},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":240,"h":231},
+	"sourceSize": {"w":240,"h":231}
+},
+"room_move.png":
+{
+	"frame": {"x":1,"y":233,"w":240,"h":206},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":240,"h":206},
+	"sourceSize": {"w":240,"h":206}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "roomitem_fishzjc.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:6a60fc8c67c94c00c6bcd7289a42e4f2$"
+}
+}

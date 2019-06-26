@@ -1,0 +1,36 @@
+{"frames": {
+
+"skin_00_gamelist_icon.PNG":
+{
+	"frame": {"x":2,"y":310,"w":324,"h":378},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":324,"h":378},
+	"sourceSize": {"w":324,"h":378}
+},
+"skin_00_roomlist_icon.PNG":
+{
+	"frame": {"x":2,"y":690,"w":324,"h":298},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":324,"h":298},
+	"sourceSize": {"w":324,"h":298}
+},
+"skin_00_roomlist_move.PNG":
+{
+	"frame": {"x":2,"y":2,"w":374,"h":306},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":374,"h":306},
+	"sourceSize": {"w":374,"h":306}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_pdk.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":1024},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:c0f2c9fc8237834160398360b609e619$"
+}
+}

@@ -1,0 +1,20 @@
+{"frames": {
+
+"gameitem_muljh.png":
+{
+	"frame": {"x":2,"y":2,"w":328,"h":393},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":328,"h":393},
+	"sourceSize": {"w":328,"h":393}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_muljh.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:a3807def40174357557101bd23a90f65$"
+}
+}

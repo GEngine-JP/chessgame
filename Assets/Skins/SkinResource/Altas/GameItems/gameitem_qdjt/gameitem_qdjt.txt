@@ -1,0 +1,20 @@
+{"frames": {
+
+"item_icon_qdjt.png":
+{
+	"frame": {"x":2,"y":2,"w":368,"h":377},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":368,"h":377},
+	"sourceSize": {"w":368,"h":377}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_qdjt.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:311f876fd7fffa1217fe9480175f4627$"
+}
+}

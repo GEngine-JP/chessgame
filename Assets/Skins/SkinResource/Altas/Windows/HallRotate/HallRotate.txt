@@ -1,0 +1,68 @@
+{"frames": {
+
+"HallRotateBall.png":
+{
+	"frame": {"x":121,"y":2,"w":71,"h":70},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":1,"w":71,"h":70},
+	"sourceSize": {"w":71,"h":72}
+},
+"HallRotateBar.png":
+{
+	"frame": {"x":2,"y":2,"w":25,"h":160},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":1,"w":25,"h":160},
+	"sourceSize": {"w":27,"h":162}
+},
+"HallRotateCenter.png":
+{
+	"frame": {"x":29,"y":2,"w":90,"h":89},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":90,"h":89},
+	"sourceSize": {"w":90,"h":89}
+},
+"UI_CJ_JJ_3.png":
+{
+	"frame": {"x":194,"y":2,"w":44,"h":84},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":44,"h":84},
+	"sourceSize": {"w":46,"h":84}
+},
+"UI_CJ_JJ_4.png":
+{
+	"frame": {"x":2,"y":164,"w":88,"h":90},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":88,"h":90},
+	"sourceSize": {"w":88,"h":90}
+},
+"UI_CJ_JJ_9.png":
+{
+	"frame": {"x":29,"y":93,"w":21,"h":21},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":21,"h":21},
+	"sourceSize": {"w":21,"h":21}
+},
+"winMask_background.png":
+{
+	"frame": {"x":29,"y":116,"w":5,"h":5},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":5,"h":5},
+	"sourceSize": {"w":5,"h":5}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "HallRotate.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":256},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:25e3e53f59cfd38459af60c92c15dca1$"
+}
+}

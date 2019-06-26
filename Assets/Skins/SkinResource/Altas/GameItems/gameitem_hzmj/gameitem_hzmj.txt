@@ -1,0 +1,36 @@
+{"frames": {
+
+"icon.png":
+{
+	"frame": {"x":2,"y":2,"w":368,"h":278},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":368,"h":278},
+	"sourceSize": {"w":368,"h":278}
+},
+"move.png":
+{
+	"frame": {"x":2,"y":282,"w":200,"h":138},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":138},
+	"sourceSize": {"w":200,"h":138}
+},
+"title.png":
+{
+	"frame": {"x":2,"y":422,"w":357,"h":84},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":357,"h":84},
+	"sourceSize": {"w":357,"h":84}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_hzmj.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:0c869199792a46e9a51502b87c96c3ea$"
+}
+}

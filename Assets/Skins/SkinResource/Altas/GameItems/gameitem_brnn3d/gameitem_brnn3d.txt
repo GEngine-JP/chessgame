@@ -1,0 +1,52 @@
+{"frames": {
+
+"11100500.png":
+{
+	"frame": {"x":276,"y":2,"w":228,"h":341},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":228,"h":341},
+	"sourceSize": {"w":228,"h":341}
+},
+"jewel.png":
+{
+	"frame": {"x":2,"y":457,"w":47,"h":33},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":47,"h":33},
+	"sourceSize": {"w":47,"h":33}
+},
+"lamp.png":
+{
+	"frame": {"x":51,"y":457,"w":29,"h":28},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":29,"h":28},
+	"sourceSize": {"w":29,"h":28}
+},
+"oxhead.png":
+{
+	"frame": {"x":276,"y":345,"w":160,"h":162},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":160,"h":162},
+	"sourceSize": {"w":160,"h":162}
+},
+"tweenbg.png":
+{
+	"frame": {"x":2,"y":2,"w":272,"h":453},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":272,"h":453},
+	"sourceSize": {"w":272,"h":453}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_brnn3d.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:b832892fd215a632759ac6679ea9e3fb$"
+}
+}

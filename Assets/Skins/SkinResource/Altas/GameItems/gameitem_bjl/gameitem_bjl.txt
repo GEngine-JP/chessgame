@@ -1,0 +1,20 @@
+{"frames": {
+
+"gameitem_bjl.png":
+{
+	"frame": {"x":2,"y":2,"w":251,"h":439},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":251,"h":439},
+	"sourceSize": {"w":251,"h":439}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_bjl.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:12b125af9b97c61283845cb1e459b1e2$"
+}
+}

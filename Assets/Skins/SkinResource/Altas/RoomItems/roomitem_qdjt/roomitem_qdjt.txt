@@ -1,0 +1,36 @@
+{"frames": {
+
+"Seat180.png":
+{
+	"frame": {"x":365,"y":1,"w":69,"h":104},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":69,"h":104},
+	"sourceSize": {"w":69,"h":104}
+},
+"room_middle.png":
+{
+	"frame": {"x":1,"y":245,"w":294,"h":243},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":294,"h":243},
+	"sourceSize": {"w":294,"h":243}
+},
+"room_move.png":
+{
+	"frame": {"x":1,"y":1,"w":363,"h":243},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":363,"h":243},
+	"sourceSize": {"w":363,"h":243}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "roomitem_qdjt.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:e11a152de8763c7001e4e3c6e194b5f7$"
+}
+}

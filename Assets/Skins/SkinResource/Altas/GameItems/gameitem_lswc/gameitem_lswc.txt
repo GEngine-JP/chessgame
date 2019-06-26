@@ -1,0 +1,20 @@
+{"frames": {
+
+"41000100.png":
+{
+	"frame": {"x":2,"y":2,"w":271,"h":500},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":271,"h":500},
+	"sourceSize": {"w":271,"h":500}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_lswc.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:2655156439f81bbb3958cc80a6e2c26c$"
+}
+}
