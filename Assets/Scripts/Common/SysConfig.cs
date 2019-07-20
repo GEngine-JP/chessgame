@@ -17,7 +17,7 @@ namespace Assets.Scripts.Common
         {
             get
             {
-                return  AppInfo.StartCfgUrl;
+                return  "";
             }
         }
 
@@ -197,7 +197,7 @@ namespace Assets.Scripts.Common
             //web主url 
             WebUrl = ServerUrl;
             //登录参数
-            _loginParm = AppInfo.LoginUrl;
+            _loginParm = "login_";
             //大厅资源url
             _hallResUrl = AppInfo.HallResUrl;
             //游戏资源参数

@@ -76,7 +76,7 @@ namespace Assets.Scripts.Hall.View
             switch (_model.GameState)
             {
                 case GameState.Developing:
-                    YxMessageBox.Show("游戏在努力开发中，敬请期待!!");
+                    YxMessageBox.Show("演示版暂时不支持此游戏，如有需求请加入QQ群（726099812）或联系管理员（765858558）!!");
                     return;
                 case GameState.CreateMode:
                     OnOpenCreateWindow();
