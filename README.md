@@ -8,7 +8,7 @@
  
 
 ### 软件架构
-#### 开发工具：Unity3D
+#### 开发工具：Unity3D （Unity 5.4.0f3 ）
 #### 开发语言：Java + C#
 #### 服务端框架：SmarkfoxServer2x + MySQL
 #### 客户端语言：C#
