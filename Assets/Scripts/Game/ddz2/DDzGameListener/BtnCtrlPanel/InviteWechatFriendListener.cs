@@ -6,7 +6,6 @@ using Assets.Scripts.Game.ddz2.DdzEventArgs;
 using Assets.Scripts.Game.ddz2.InheritCommon;
 using UnityEngine;
 using YxFramwork.Common;
-using YxFramwork.Common.Model;
 using YxFramwork.Controller;
 using YxFramwork.Framework.Core;
 using YxFramwork.Tool;
@@ -15,55 +14,42 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
 {
     public class InviteWechatFriendListener : ServEvtListener
     {
-        [SerializeField] protected UIGrid BtnsGrid;
 
         [SerializeField]
         protected GameObject IvtWechatFriendBtn;
 
-        [SerializeField]
-        protected GameObject BackToHallBtn;
+      
+
 
         /// <summary>
         /// 房间号
         /// </summary>
         private string _roomId="";
-        /// <summary>
-        /// 最大局数
-        /// </summary>
-        private string _maxRound = "";
-
-        private int _jiabei = 0;
+ 
 
         /// <summary>
         /// 服务器发送过来的牌局信息
         /// </summary>
         private string _ruleInfo;
 
-        private GlobalConstKey.GameType _curGameType = GlobalConstKey.GameType.CallScore;
 
         protected override void OnAwake()
         {
-            Ddz2RemoteServer.AddOnGameInfoEvt(OnGetGameInfoData);
-            Ddz2RemoteServer.AddOnGetRejoinDataEvt(OnGetGameInfoData);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeAllocate, OnAlloCateCds);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyGetGameInfo, OnGetGameInfoData);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyOnRejoin, OnGetGameInfoData);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeAllocate, OnAlloCateCds);
         }
 
 
-        private void OnGetGameInfoData(object obj, DdzbaseEventArgs args)
+        private void OnGetGameInfoData(DdzbaseEventArgs args)
         {
             SetAllBtnsActive(false);
             var data = args.IsfObjData;
 
             if(data.ContainsKey(NewRequestKey.KeyRoomId))_roomId = data.GetInt(NewRequestKey.KeyRoomId).ToString(CultureInfo.InvariantCulture);
 
-            if (data.ContainsKey(NewRequestKey.KeyMaxRound)) _maxRound = data.GetInt(NewRequestKey.KeyMaxRound).ToString(CultureInfo.InvariantCulture);
-
-            if (data.ContainsKey(NewRequestKey.KeyJiaBei)) _jiabei = data.GetInt(NewRequestKey.KeyJiaBei);
-
-            if (data.ContainsKey(NewRequestKey.KeyQt)) _curGameType = (GlobalConstKey.GameType)data.GetInt(NewRequestKey.KeyQt);
-
             if (data.ContainsKey(NewRequestKey.KeyGameStatus)
-                && data.GetInt(NewRequestKey.KeyGameStatus) == GlobalConstKey.StatusIdle&&App.GetGameData<GlobalData>().IsRoomGame)
+                && data.GetInt(NewRequestKey.KeyGameStatus) == GlobalConstKey.StatusIdle&&App.GetGameData<DdzGameData>().IsRoomGame)
             {
                 if (data.ContainsKey(NewRequestKey.KeyCurRound) && data.GetInt(NewRequestKey.KeyCurRound) <= 1) SetAllBtnsActive(true);
             }
@@ -77,9 +63,8 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
         /// <summary>
         /// 已经开始发牌了说明人齐了，开始游戏了，可以隐藏微信好友按钮了
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        private void OnAlloCateCds(object sender, DdzbaseEventArgs args)
+        private void OnAlloCateCds(DdzbaseEventArgs args)
         {
             SetAllBtnsActive(false);
         }
@@ -89,40 +74,34 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
         /// </summary>
         public void OnClickInviteFriend()
         {
-            Facade.Instance<WeChatApi>().InitWechat();
-            var dic = new Dictionary<string, object>();
-            dic.Add("type", 0);
-            dic.Add("roomid", _roomId);
-            dic.Add("event", "findroom");
-            dic.Add("roomRule", _ruleInfo);
-            dic.Add("sharePlat", 0);
-            UserController.Instance.GetShareInfo(dic, (info) =>
-            {
-                Facade.Instance<WeChatApi>().ShareContent(info);
-            }, ShareType.Website, SharePlat.WxSenceSession, null, App.GameKey);
+            WeixinShare();
         }
 
 
-        /// <summary>
-        /// 点击解散房间按钮
-        /// </summary>
-        public void OnClickDismisRoomBtn()
+        void WeixinShare()
         {
-            if (!App.GetGameData<GlobalData>().IsStartGame)
+            var gdata = App.GetGameData<DdzGameData>();
+            var dic = new Dictionary<string, object>();
+            dic.Add("type", 0);
+            dic.Add("sharePlat", 0);
+            dic.Add("event", "findroom");
+            dic.Add("roomid", _roomId);
+            dic.Add("roomRule", _ruleInfo);
+            Facade.Instance<WeChatApi>().InitWechat(AppInfo.WxAppId);
+            UserController.Instance.GetShareInfo(dic, (info) =>
             {
-                if (App.GetGameData<GlobalData>().IsFangZhu)
-                    GlobalData.ServInstance.DismissRoom();
-                else
-                    GlobalData.ServInstance.LeaveRoom();
-            }
+                info.ShareData["title"] = gdata.GetPlayerInfo().NickM + "-" + info.ShareData["title"];
+                info.ShareData["content"] = "[斗地主]房间号:[" + _roomId + "] ;";
+                info.ShareData["content"] += _ruleInfo + "。速来玩吧! (仅供娱乐，禁止赌博)";
+                Facade.Instance<WeChatApi>().ShareContent(info);
+            });
+
         }
 
 
         private void SetAllBtnsActive(bool isActive)
         {
             IvtWechatFriendBtn.SetActive(isActive);
-            BackToHallBtn.SetActive(isActive);
-            if (isActive) BtnsGrid.repositionNow = true;
         }
 
         public override void RefreshUiInfo()

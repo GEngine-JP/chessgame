@@ -6,25 +6,11 @@ namespace Assets.Scripts.Game.lswc
 {
     public class LSTurnTableControl :InstanceControl
     {
-
-        private static LSTurnTableControl _instance;
-
-        public static LSTurnTableControl Instance
-        {
-            get { return _instance; }
-        }
-
         private LSRotate _rotate;
 
         private Animation _animation;
 
         private int _nowPosition = 0;
-
-        private void Awake()
-        {
-            _instance = this;
-        }
-
         // Use this for initialization
         void Start () {
 	        FindChild();
@@ -93,7 +79,6 @@ namespace Assets.Scripts.Game.lswc
 
         public override void OnExit()
         {
-            _instance = null;
         }
     }
 }

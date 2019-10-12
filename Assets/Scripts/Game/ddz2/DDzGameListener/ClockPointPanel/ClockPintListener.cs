@@ -1,90 +1,77 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using Assets.Scripts.Game.ddz2.DDz2Common;
-using Assets.Scripts.Game.ddz2.DdzEventArgs;
+﻿using UnityEngine;
+using System.Collections;
 using Assets.Scripts.Game.ddz2.InheritCommon;
-using UnityEngine;
+using Assets.Scripts.Game.ddz2.DdzEventArgs;
+using Assets.Scripts.Game.ddz2.DDz2Common;
 using YxFramwork.Common;
 using YxFramwork.ConstDefine;
+using Assets.Scripts.Game.ddz2.DDzGameListener.InfoPanel;
+using YxFramwork.Framework.Core;
+
 
 namespace Assets.Scripts.Game.ddz2.DDzGameListener.ClockPointPanel
 {
     public class ClockPintListener : ServEvtListener
     {
+
         [SerializeField]
-        protected GameObject ClockBgGob;
-        
-        [SerializeField] 
-        protected UISprite PointSelf;
-        [SerializeField]
-        protected UISprite PointRight;
-        [SerializeField]
-        protected UISprite PointLeft;
+        protected GameObject ClockGob;
+
 
         [SerializeField]
         protected UILabel CuntDownLabel;
 
         /// <summary>
-        /// 地主皇冠动画
+        /// 无限的标识
         /// </summary>
-        [SerializeField] protected GameObject DizhuHuangGuanGob;
+        [SerializeField]
+        protected GameObject InfinitySprite;
+  
 
-        /// <summary>
-        /// 静态地主图片
-        /// </summary>
-        [SerializeField] protected GameObject DiZhuTextureSprite;
+        private int _countingTime;
 
-        /// <summary>
-        /// 皇冠粒子特效播放时长
-        /// </summary>
-        private float _huangGuanPlayTime = 3f;
+        private bool _isCounting;
 
-        private Vector3 _selfPlayerPos = new Vector3(-590,5,0);
-        private Vector3 _leftPlayerPos = new Vector3(-600, 187, 0);
-        private Vector3 _rightPlayerPos = new Vector3(598, 187, 0);
         protected override void OnAwake()
         {
-
-            Ddz2RemoteServer.AddOnGetRejoinDataEvt(OnRejoinGame);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeFirstOut, OnTypeFirstOut);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeOutCard, OnTypeOutCard);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypePass, OnTypePass);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeGameOver, OnTypeGameOver);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeGrabSpeaker, OnTypeGrabSpeaker);
+            //Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeDoubleOver, OnDoubleOver);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeOneRoundOver, OnTypeOneRoundOver);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypePass, OnTypePass);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeOutCard, OnTypeOutCard);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeFirstOut, OnTypeFirstOut);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyOnRejoin, OnRejoinGame);
         }
 
-        void Start()
+        private void OnTypeGrabSpeaker(DdzbaseEventArgs args)
         {
-            //游戏退出到大厅时，清理可能引起程序崩溃的资源
-            App.GetGameData<GlobalData>().OnClearParticalGob = ClearParticalGob;
-            _huangGuanPlayTime = DDzUtil.ParticleSystemLength(DizhuHuangGuanGob.transform);
-            HideAllGobs();
+            var data = args.IsfObjData;
+            int seat = data.GetInt(RequestKey.KeySeat);
+            int cd = GetCountingTime(args, 10);
+            ShowPointAndCuntDown(seat, cd);
         }
-
+       
         private void HideAllGobs()
         {
-            ClockBgGob.SetActive(false);
-            PointSelf.gameObject.SetActive(false);
-            PointRight.gameObject.SetActive(false);
-            PointLeft.gameObject.SetActive(false);
-            CuntDownLabel.gameObject.SetActive(false);
-
-            DizhuHuangGuanGob.SetActive(false);
-            DiZhuTextureSprite.SetActive(false);
+            ClockGob.gameObject.SetActive(false);
         }
 
-        private void ClearParticalGob()
+
+        private void StopCountDown()
         {
-            DestroyImmediate(DizhuHuangGuanGob);
+            _isCounting = false;
+            StopAllCoroutines();
         }
+
+
 
         public override void RefreshUiInfo()
         {
-            //throw new System.NotImplementedException();
+            
         }
 
 
-        private void OnRejoinGame(object sender, DdzbaseEventArgs args)
+        private void OnRejoinGame(DdzbaseEventArgs args)
         {
             var data = args.IsfObjData;
 
@@ -95,11 +82,8 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.ClockPointPanel
                 return;
             }
 
-            ShowPointAndCuntDown(data.GetInt(NewRequestKey.KeyCurrp));
-
-            DizhuHuangGuanGob.SetActive(false);
-
-            DiZhuTextureSprite.SetActive(false);
+            int cd = data.ContainsKey("cd") ? data.GetInt("cd") : 10;
+            ShowPointAndCuntDown(data.GetInt(NewRequestKey.KeyCurrp), cd);
         }
 
 
@@ -108,130 +92,154 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.ClockPointPanel
         /// <summary>
         /// 当确定地主后，看自己是不是地主，来判断是否显示按钮
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        private void OnTypeFirstOut(object sender, DdzbaseEventArgs args)
+        private void OnTypeFirstOut(DdzbaseEventArgs args)
         {
-            StartCoroutine(PlayerGiveDizhuAnim(args.IsfObjData.GetInt(RequestKey.KeySeat)));
+            var data = args.IsfObjData;
+            int defCd = data.ContainsKey(NewRequestKey.KeyJiaBei) && data.GetBool(NewRequestKey.KeyJiaBei) ? 5 : 10;
+
+            int seat = data.GetInt(RequestKey.KeySeat);
+            int cd = GetCountingTime(args, defCd);
+            ShowPointAndCuntDown(seat, cd);
         }
 
-        private IEnumerator PlayerGiveDizhuAnim(int dizhuSeat)
-        {
-            if (DizhuHuangGuanGob==null) yield break;
-            DiZhuTextureSprite.SetActive(false);
-            DizhuHuangGuanGob.SetActive(false);
-            DizhuHuangGuanGob.SetActive(true);
-            var particalHuanguan = DizhuHuangGuanGob.GetComponent<ParticleSystem>();
-            particalHuanguan.Stop();
-            particalHuanguan.Clear();
-            particalHuanguan.Play();
-
-            yield return new WaitForSeconds(_huangGuanPlayTime);
-            DizhuHuangGuanGob.SetActive(false);
-
-            DiZhuTextureSprite .SetActive(true);
-            var dizhuTexturetween = DiZhuTextureSprite.GetComponent<TweenPosition>();
-            dizhuTexturetween.ResetToBeginning();
-            dizhuTexturetween.from = new Vector3(0,0,0);
-
-            if (dizhuSeat == App.GetGameData<GlobalData>().GetSelfSeat)
-                dizhuTexturetween.to = _selfPlayerPos;
-            else if (dizhuSeat == App.GetGameData<GlobalData>().GetLeftPlayerSeat)
-                dizhuTexturetween.to = _leftPlayerPos;
-            else if (dizhuSeat == App.GetGameData<GlobalData>().GetRightPlayerSeat)
-                dizhuTexturetween.to = _rightPlayerPos;
-            dizhuTexturetween.PlayForward();
-            dizhuTexturetween.onFinished.Clear();
-            dizhuTexturetween.AddOnFinished(() => DiZhuTextureSprite.SetActive(false));
-
-            ShowPointAndCuntDown(dizhuSeat);
-        }
+       
 
         /// <summary>
         /// 当有人出牌时
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        private void OnTypeOutCard(object sender, DdzbaseEventArgs args)
+        private void OnTypeOutCard(DdzbaseEventArgs args)
         {
-            AfterSomeBodyAction(args.IsfObjData.GetInt(RequestKey.KeySeat));
+            AfterSomeBodyAction(args.IsfObjData.GetInt(RequestKey.KeySeat), GetCountingTime(args, 10));
         }
 
+        int GetCountingTime(DdzbaseEventArgs args,int defult)
+        {
+            var data = args.IsfObjData;
+            return data.ContainsKey("cd") ? data.GetInt("cd") : defult;
+        }
 
         /// <summary>
         /// 有人pass的时候
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        private void OnTypePass(object sender, DdzbaseEventArgs args)
+        /// <param name="args"></param>         
+        private void OnTypePass(DdzbaseEventArgs args)
         {
-            AfterSomeBodyAction(args.IsfObjData.GetInt(RequestKey.KeySeat));
+            AfterSomeBodyAction(args.IsfObjData.GetInt(RequestKey.KeySeat), GetCountingTime(args, 10));
         }
 
 
         /// <summary>
         /// 当游戏结算时
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        protected virtual void OnTypeGameOver(object sender, DdzbaseEventArgs args)
+        protected virtual void OnTypeOneRoundOver(DdzbaseEventArgs args)
         {
             HideAllGobs();
+            StopCountDown();
         }
+
 
         /// <summary>
         /// 当某人行动时要进行的动作
         /// </summary>
-        private void AfterSomeBodyAction(int actionPlayerSeat)
+        private void AfterSomeBodyAction(int playerSeat,int time)
         {
-            var selfSeat = App.GetGameData<GlobalData>().GetSelfSeat;
-            var leftSeat = App.GetGameData<GlobalData>().GetLeftPlayerSeat;
-            var rightSeat = App.GetGameData<GlobalData>().GetRightPlayerSeat;
+            var gdata = App.GetGameData<DdzGameData>();
+            int next = gdata.GetPlayer<DdzPlayer>(playerSeat, true).GetLaterHandSeat();
 
-            if (actionPlayerSeat == selfSeat) ShowPointAndCuntDown(rightSeat);
-            else if (actionPlayerSeat == rightSeat) ShowPointAndCuntDown(leftSeat);
-            else if (actionPlayerSeat == leftSeat) ShowPointAndCuntDown(selfSeat);
-
+            var player = gdata.GetPlayer<DdzPlayer>(next, true);
+            
+            SetClockPos(player.ClockParent);
+            BeginCountDown(time);
         }
+
+        private void SetClockPos(Transform parent)
+        {
+            if (parent == null)
+            {
+                return;
+            }
+
+            var tran = ClockGob.transform;
+            tran.parent = parent;
+            tran.localPosition = Vector3.zero;
+            tran.localScale = Vector3.one;
+        }
+
 
         /// <summary>
         /// 箭头指向方位和倒计时开始
         /// </summary>
         /// <param name="playerSeat"></param>
-        private void ShowPointAndCuntDown(int playerSeat)
+        /// <param name="time"></param>
+        private void ShowPointAndCuntDown(int playerSeat, int time)
         {
-            HideAllPoints();
-            if (playerSeat == App.GetGameData<GlobalData>().GetSelfSeat) PointSelf.gameObject.SetActive(true);
-            else if (playerSeat == App.GetGameData<GlobalData>().GetRightPlayerSeat) PointRight.gameObject.SetActive(true);
-            else if (playerSeat == App.GetGameData<GlobalData>().GetLeftPlayerSeat) PointLeft.gameObject.SetActive(true);
-
-            ClockBgGob.SetActive(true);
-
-            StopAllCoroutines();
-            StartCoroutine(ReClock(10));
+            var gdata = App.GetGameData<DdzGameData>();
+            var player = gdata.GetPlayer<DdzPlayer>(playerSeat, true);
+            SetClockPos(player.ClockParent);
+            BeginCountDown(time);
         }
 
-        private IEnumerator ReClock(int cuntTime)
+
+        void BeginCountDown(int time)
+        {
+            ResetClockRock();
+            _countingTime = time > 99 ? 15 : time;
+            CuntDownLabel.text = _countingTime.ToString();
+            ClockGob.SetActive(true);
+
+            if (_isCounting) return;
+            _isCounting = true;
+            StartCoroutine(ReClock());
+        }
+
+
+        private IEnumerator ReClock()
         {
             CuntDownLabel.gameObject.SetActive(true);
-            while (cuntTime>0)
+            while (_isCounting && _countingTime > 0)
             {
-                CuntDownLabel.text = cuntTime.ToString(CultureInfo.InvariantCulture);
+                bool isInfinity = _countingTime > 99;
+                string timeText = isInfinity ? _countingTime%2 > 0 ? "- " : " -" : _countingTime.ToString("00");
+                //InfinitySprite.SetActive(isInfinity);
+                //CuntDownLabel.gameObject.SetActive(!isInfinity);
+                CuntDownLabel.text = timeText;
+                if (_countingTime < 4)
+                {
+                    Facade.EventCenter.DispatchEvent<string, DdzbaseEventArgs>(GlobalConstKey.KeyRemind);
+                    //Facade.Instance<MusicManager>().Play("k_remind");
+                }
                 yield return new WaitForSeconds(1);
-                cuntTime--;
+                _countingTime--;
             }
-            CuntDownLabel.text = "0";
+            CuntDownLabel.text = "00";
+            _isCounting = false;
+            ClockRock();
         }
 
 
-        /// <summary>
-        /// 隐藏所有
-        /// </summary>
-        private void HideAllPoints()
+        void ResetClockRock()
         {
-            PointSelf.gameObject.SetActive(false);
-            PointRight.gameObject.SetActive(false);
-            PointLeft.gameObject.SetActive(false);
+            var tweens = ClockGob.GetComponents<UITweener>();
+            int len = tweens.Length;
+            for (int i = 0; i < len; i++)
+            {
+                var tween = tweens[i];
+                tween.ResetToBeginning();
+                tween.enabled = false;
+            }
+        }
+
+        void ClockRock()
+        {
+            var tweens = ClockGob.GetComponents<UITweener>();
+            int len = tweens.Length;
+            for (int i = 0; i < len; i++)
+            {
+                tweens[i].PlayForward();
+            }
         }
     }
 }

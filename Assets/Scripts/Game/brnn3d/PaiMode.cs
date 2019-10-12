@@ -9,7 +9,6 @@ namespace Assets.Scripts.Game.brnn3d
 {
     public class PaiMode : MonoBehaviour
     {
-        public static PaiMode Instance;
         public Transform[] PaiEasts = new Transform[5];
         public Transform[] PaiSouths = new Transform[5];
         public Transform[] PaiWests = new Transform[5];
@@ -21,12 +20,10 @@ namespace Assets.Scripts.Game.brnn3d
 
         private int[] niuNum = new int[5];
         private bool[] Result = new bool[5];
-        protected void Awake()
-        {
-            Instance = this;
-        }
-
+ 
         public int JiSuan;
+
+        public PaiModeMgr ThePaiModeMgr;
 
         public void BeginGiveCards()
         {
@@ -39,9 +36,9 @@ namespace Assets.Scripts.Game.brnn3d
             var res = 0;
             for (int i = 0; i < niuNum.Length; i++)
             {
-                niuNum[i] = App.GetGameData<GlobalData>().Nn.GetSFSObject(i).GetInt("niu");
-                Result[i] = App.GetGameData<GlobalData>().Nn.GetSFSObject(i).GetBool("win");
-                if (App.GetGameData<GlobalData>().Nn.GetSFSObject(i).GetBool("win"))
+                niuNum[i] = App.GetGameData<Brnn3dGameData>().Nn.GetSFSObject(i).GetInt("niu");
+                Result[i] = App.GetGameData<Brnn3dGameData>().Nn.GetSFSObject(i).GetBool("win");
+                if (App.GetGameData<Brnn3dGameData>().Nn.GetSFSObject(i).GetBool("win"))
                 {
                     res |= (1 << i);
                     //res = res |(1 << i);
@@ -53,7 +50,7 @@ namespace Assets.Scripts.Game.brnn3d
                 Replace++;
             }
             JiSuan++;
-            PaiModeMgr.Instance.SetPaiModeDataEx(); //设置发牌的数据
+            ThePaiModeMgr.SetPaiModeDataEx(); //设置发牌的数据
         }
 
         public int Replace;
@@ -65,19 +62,20 @@ namespace Assets.Scripts.Game.brnn3d
             {
                 return;
             }
+            var gameMgr = App.GetGameManager<Brnn3DGameManager>();
+            var downUIleft = gameMgr.TheDownUICtrl.TheDownUILeftBg;
+            var luziInfoMgr = downUIleft.TheLuziInfoUIMgr;
+            luziInfoMgr.TheLuziInfoUI.InitImg();
 
-            LuziInfoUI.Instance.InitImg();
-
-            int pos = Replace > 10 ? Replace - 10 : 0;
-            for (int i = pos; i < Replace; i++)
+            var pos = Replace > 10 ? Replace - 10 : 0;
+            for (var i = pos; i < Replace; i++)
             {
                 var cur = Store[i];
-                for (int j = 0; j < 4; j++)
+                for (var j = 0; j < 4; j++)
                 {
-                    LuziInfoUIMgr.Instance.SetLuziInfoUIDataEy(j, i - pos, ((cur >> j + 1) & 1) == 1);
+                    luziInfoMgr.SetLuziInfoUIDataEy(j, i - pos, ((cur >> j + 1) & 1) == 1);
                 }
             }
-
         }
         public void SetLuziInfoUIData(int index)
         {
@@ -99,7 +97,7 @@ namespace Assets.Scripts.Game.brnn3d
 
         public void InstancePai(int paiIndex, int iArea,/* int paiPoint,*/ int pai25Indxe)
         {
-            int[] cards = App.GetGameData<GlobalData>().Cards.GetIntArray(iArea);
+            int[] cards = App.GetGameData<Brnn3dGameData>().Cards.GetIntArray(iArea);
             Transform areaTf = null;
             switch (iArea)
             {
@@ -121,7 +119,8 @@ namespace Assets.Scripts.Game.brnn3d
             }
             if (areaTf == null) YxDebug.LogError("No Such Object" + iArea);
 
-            var go = ResourceManager.LoadAsset("Pai_0" + cards[paiIndex].ToString("X"), "brnnpai");
+            var paiPrefabName = "Pai_0" + cards[paiIndex].ToString("X");
+            var go = ResourceManager.LoadAsset(paiPrefabName, string.Format("brnnpai/{0}", paiPrefabName));
             var go1 = Instantiate(go);
             Transform obj = go1.transform;
             obj.gameObject.SetActive(true);
@@ -130,13 +129,13 @@ namespace Assets.Scripts.Game.brnn3d
             if (paiIndex == 3)
             {
                 obj.localEulerAngles = new Vector3(0, PaiFirstTf.localEulerAngles.y, 180);
-                if (App.GetGameData<GlobalData>().PaiAllShow.ContainsKey(iArea))
+                if (App.GetGameData<Brnn3dGameData>().PaiAllShow.ContainsKey(iArea))
                 {
                     YxDebug.LogError("Error Here");
                 }
                 else
                 {
-                    App.GetGameData<GlobalData>().PaiAllShow.Add(iArea, obj);
+                    App.GetGameData<Brnn3dGameData>().PaiAllShow.Add(iArea, obj);
                 }
             }
             else
@@ -144,9 +143,15 @@ namespace Assets.Scripts.Game.brnn3d
 
             if (areaTf != null) obj.localPosition = areaTf.localPosition;
 
-            Pai pai = obj.GetComponent<Pai>();
-            if (pai == null) YxDebug.LogError("No Such Component");
-            if (pai != null) pai.Show(pai25Indxe, iArea, paiIndex);
+            var pai = obj.GetComponent<Pai>();
+            if (pai == null)
+            {
+                YxDebug.LogError("No Such Component");
+            }
+            else
+            {
+                pai.Show(pai25Indxe, iArea, paiIndex); 
+            }
         }
 
         public struct Pp
@@ -158,14 +163,16 @@ namespace Assets.Scripts.Game.brnn3d
         //翻牌阶段显示中奖区域
         public void FanPaiFun()
         {
-            int tmp = App.GetGameData<GlobalData>().SendCardPosition;
+            var tmp = App.GetGameData<Brnn3dGameData>().SendCardPosition;
             StartCoroutine("ToShwoZhongJiangArea", 7.5f);
             for (int i = 0; i < 5; i++)
             {
-                var pP = new Pp();
-                pP.AreaId = tmp;
-                pP.Tf = App.GetGameData<GlobalData>().PaiAllShow[tmp];
-                pP.S = i * 1.2f;
+                var pP = new Pp
+                {
+                    AreaId = tmp,
+                    Tf = App.GetGameData<Brnn3dGameData>().PaiAllShow[tmp],
+                    S = i * 1.2f
+                };
 
                 StartCoroutine("ToFanPai", pP);
                 tmp += 1;
@@ -181,18 +188,20 @@ namespace Assets.Scripts.Game.brnn3d
             Pai pai = p.Tf.GetComponent<Pai>();
             if (pai != null) pai.PlayFanPaiAni();
             yield return new WaitForSeconds(1.2f);
-            NiuNumberUI.Instance.ShowNumberUI(niuNum);
 
-            NiuNumberUI.Instance.ShowAreaNiu(p.AreaId);
-            NiuNumberUI.Instance.PlayAudioNiuJi(p.AreaId, niuNum);
+            var niuNumberUI = App.GetGameManager<Brnn3DGameManager>().TheMidUICtrl.TheNiuNumberUI;
+            niuNumberUI.ShowNumberUI(niuNum);
+            niuNumberUI.ShowAreaNiu(p.AreaId);
+            niuNumberUI.PlayAudioNiuJi(p.AreaId, niuNum);
         }
 
         private IEnumerator ToShwoZhongJiangArea(float s)
         {
             yield return new WaitForSeconds(s);
-            for (int i = 0; i < 4; i++)
+            var zhongJiangMode = App.GetGameManager<Brnn3DGameManager>().TheZhongJiangMode;
+            for (var i = 0; i < 4; i++)
             {
-                ZhongJiangMode.Instance.ShowZhongJiangEffect(i, Result);
+                zhongJiangMode.ShowZhongJiangEffect(i, Result);
             }
         }
         //删除牌的列表

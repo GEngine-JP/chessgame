@@ -1,15 +1,14 @@
-﻿using Assets.Scripts.Game.bjl3d.Scripts;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
 using YxFramwork.Manager;
 using com.yxixia.utile.YxDebug;
+using YxFramwork.Framework.Core;
 
 namespace Assets.Scripts.Game.bjl3d
 {
     public class LuziInfoUI : MonoBehaviour//G 11.15
     {
-        public static LuziInfoUI Instance;
         private Image[] LuziBrankListUIs = new Image[12];
         private Image[] LuziFreeListUIs = new Image[12];
         private Image[] LuziFlatListUIs = new Image[12];
@@ -30,7 +29,6 @@ namespace Assets.Scripts.Game.bjl3d
         /// </summary>
         protected void Awake()
         {
-            Instance = this;
             Transform tf;
             for (int i = 0; i < 12; i++)
             {
@@ -106,11 +104,11 @@ namespace Assets.Scripts.Game.bjl3d
                     if (_rightBtnClickEff.gameObject.activeSelf)
                         _rightBtnClickEff.gameObject.SetActive(false);
                     _rightBtnClickEff.gameObject.SetActive(true);//特效
-                    MusicManager.Instance.Play("pageOver");
+                    Facade.Instance<MusicManager>().Play("pageOver");
                 }
                 else
                 {
-                    MusicManager.Instance.Play("pagebtn");
+                    Facade.Instance<MusicManager>().Play("pagebtn");
                 }
             }
         }
@@ -136,11 +134,11 @@ namespace Assets.Scripts.Game.bjl3d
                 if (_leftBtnClickEff.gameObject.activeSelf)
                     _leftBtnClickEff.gameObject.SetActive(false);
                 _leftBtnClickEff.gameObject.SetActive(true);//特效
-                MusicManager.Instance.Play("pageOver");
+                Facade.Instance<MusicManager>().Play("pageOver");
             }
             else
             {
-                MusicManager.Instance.Play("pagebtn");
+                Facade.Instance<MusicManager>().Play("pagebtn");
             }
             
         }
@@ -156,17 +154,18 @@ namespace Assets.Scripts.Game.bjl3d
             IndexTemp2++;
             IndexTemp = IndexTemp2;
             int zTotal = 0, xTotal = 0, fTotal = 0;
-            for (int i = 0; i < UserInfoUI.Instance.GameConfig.LuziInfo.Count; i++)
+            var gameCfg = App.GetGameData<Bjl3DGameData>().GameConfig;
+            for (var i = 0; i < gameCfg.LuziInfo.Count; i++)
             {
-                if (UserInfoUI.Instance.GameConfig.LuziInfo[i] == 1)
+                if (gameCfg.LuziInfo[i] == 1)
                 {
                     xTotal += 1;
                 }
-                if (UserInfoUI.Instance.GameConfig.LuziInfo[i] == 2)
+                if (gameCfg.LuziInfo[i] == 2)
                 {
                     zTotal += 1;
                 }
-                if (UserInfoUI.Instance.GameConfig.LuziInfo[i] == 3)
+                if (gameCfg.LuziInfo[i] == 3)
                 {
                     fTotal += 1;
                 }
@@ -179,29 +178,21 @@ namespace Assets.Scripts.Game.bjl3d
 
         public void ShowLuziEx(int index)
         {
-            for (int i = 1; i < App.GetGameData<GlobalData>().History.Length; i++)
+            var gdata = App.GetGameData<Bjl3DGameData>();
+            var gameCfg = gdata.GameConfig;
+            var len = gdata.History.Length;
+            for (var i = 1; i < len; i++)
             {
-                if (UserInfoUI.Instance.GameConfig.LuziInfo[index + i] == 1)
-                {
-                    LuziBrankListUIs[i].transform.FindChild("gou").gameObject.SetActive(false);
-                    LuziFreeListUIs[i].transform.FindChild("gou").gameObject.SetActive(true);
-                    LuziFlatListUIs[i].transform.FindChild("gou").gameObject.SetActive(false);
-
-                }
-                if (UserInfoUI.Instance.GameConfig.LuziInfo[index + i] == 2)
-                {
-                    LuziBrankListUIs[i].transform.FindChild("gou").gameObject.SetActive(true);
-                    LuziFreeListUIs[i].transform.FindChild("gou").gameObject.SetActive(false);
-                    LuziFlatListUIs[i].transform.FindChild("gou").gameObject.SetActive(false);
-                }
-                if (UserInfoUI.Instance.GameConfig.LuziInfo[index + i] == 3)
-                {
-                    LuziBrankListUIs[i].transform.FindChild("gou").gameObject.SetActive(false);
-                    LuziFreeListUIs[i].transform.FindChild("gou").gameObject.SetActive(false);
-                    LuziFlatListUIs[i].transform.FindChild("gou").gameObject.SetActive(true);
-                }
+                var luziBrank = LuziBrankListUIs[i].transform.FindChild("gou").gameObject;
+                var luziFree = LuziFreeListUIs[i].transform.FindChild("gou").gameObject;
+                var luziFlat = LuziFlatListUIs[i].transform.FindChild("gou").gameObject;
+                var luziInfos = gameCfg.LuziInfo;
+                var curIndex = index + i;
+                var luziInfo = curIndex < luziInfos.Count ? luziInfos[curIndex] : -1;
+                luziFree.SetActive(luziInfo == 1);
+                luziBrank.SetActive(luziInfo == 2);
+                luziFlat.SetActive(luziInfo == 3);
             }
         }
-
     }
 }

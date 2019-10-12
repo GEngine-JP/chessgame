@@ -1,0 +1,44 @@
+{"frames": {
+
+"sk41_roombg_0.png":
+{
+	"frame": {"x":0,"y":248,"w":214,"h":210},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":40,"y":44,"w":214,"h":210},
+	"sourceSize": {"w":300,"h":300}
+},
+"sk41_roombg_1.png":
+{
+	"frame": {"x":234,"y":220,"w":238,"h":214},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":37,"y":40,"w":238,"h":214},
+	"sourceSize": {"w":300,"h":300}
+},
+"sk41_roombg_2.png":
+{
+	"frame": {"x":234,"y":0,"w":246,"h":218},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":20,"y":36,"w":246,"h":218},
+	"sourceSize": {"w":300,"h":300}
+},
+"sk41_roombg_3.png":
+{
+	"frame": {"x":0,"y":0,"w":232,"h":246},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":38,"y":8,"w":232,"h":246},
+	"sourceSize": {"w":300,"h":300}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "sk41_room.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:b54d604e7681f988e157cadcc2cb7a32$"
+}
+}

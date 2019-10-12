@@ -1,0 +1,292 @@
+{"frames": {
+
+"hall_commonbtn_0005 #1234.png":
+{
+	"frame": {"x":479,"y":476,"w":180,"h":92},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":180,"h":92},
+	"sourceSize": {"w":180,"h":92}
+},
+"hallqmtg_Help_0002.png":
+{
+	"frame": {"x":646,"y":703,"w":291,"h":70},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":291,"h":70},
+	"sourceSize": {"w":291,"h":70}
+},
+"hallqmtg_MingXi_0001.png":
+{
+	"frame": {"x":2,"y":315,"w":477,"h":62},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":477,"h":62},
+	"sourceSize": {"w":477,"h":62}
+},
+"hallqmtg_MingXi_0002.png":
+{
+	"frame": {"x":2,"y":2,"w":1020,"h":73},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1020,"h":73},
+	"sourceSize": {"w":1020,"h":73}
+},
+"hallqmtg_MingXi_0003.png":
+{
+	"frame": {"x":604,"y":300,"w":51,"h":90},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":51,"h":90},
+	"sourceSize": {"w":51,"h":90}
+},
+"hallqmtg_MingXi_0004.png":
+{
+	"frame": {"x":639,"y":392,"w":20,"h":30},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":30},
+	"sourceSize": {"w":20,"h":30}
+},
+"hallqmtg_MingXi_0005.png":
+{
+	"frame": {"x":688,"y":77,"w":318,"h":78},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":318,"h":78},
+	"sourceSize": {"w":318,"h":78}
+},
+"hallqmtg_MingXi_0007.png":
+{
+	"frame": {"x":924,"y":775,"w":93,"h":61},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":93,"h":61},
+	"sourceSize": {"w":93,"h":61}
+},
+"hallqmtg_MyTG_0001.png":
+{
+	"frame": {"x":2,"y":293,"w":600,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":600,"h":20},
+	"sourceSize": {"w":600,"h":20}
+},
+"hallqmtg_MyTG_0003.png":
+{
+	"frame": {"x":2,"y":77,"w":684,"h":70},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":684,"h":70},
+	"sourceSize": {"w":684,"h":70}
+},
+"hallqmtg_MyTG_0004.png":
+{
+	"frame": {"x":604,"y":241,"w":57,"h":57},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":57,"h":57},
+	"sourceSize": {"w":57,"h":57}
+},
+"hallqmtg_MyTG_0005.png":
+{
+	"frame": {"x":317,"y":414,"w":160,"h":171},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":160,"h":171},
+	"sourceSize": {"w":160,"h":171}
+},
+"hallqmtg_MyTG_0006.png":
+{
+	"frame": {"x":463,"y":800,"w":158,"h":183},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":158,"h":183},
+	"sourceSize": {"w":158,"h":183}
+},
+"hallqmtg_MyTG_0007.png":
+{
+	"frame": {"x":661,"y":418,"w":313,"h":283},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":313,"h":283},
+	"sourceSize": {"w":313,"h":283}
+},
+"hallqmtg_MyTG_0008.png":
+{
+	"frame": {"x":2,"y":417,"w":309,"h":280},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":309,"h":280},
+	"sourceSize": {"w":309,"h":280}
+},
+"hallqmtg_MyTG_0009.png":
+{
+	"frame": {"x":239,"y":846,"w":152,"h":151},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":152,"h":151},
+	"sourceSize": {"w":152,"h":151}
+},
+"hallqmtg_MyTG_0010.png":
+{
+	"frame": {"x":313,"y":587,"w":295,"h":101},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":295,"h":101},
+	"sourceSize": {"w":295,"h":101}
+},
+"hallqmtg_MyTG_0011.png":
+{
+	"frame": {"x":670,"y":157,"w":341,"h":133},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":341,"h":133},
+	"sourceSize": {"w":341,"h":133}
+},
+"hallqmtg_MyTG_0012.png":
+{
+	"frame": {"x":663,"y":292,"w":341,"h":124},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":341,"h":124},
+	"sourceSize": {"w":341,"h":124}
+},
+"hallqmtg_MyTG_0013.png":
+{
+	"frame": {"x":2,"y":754,"w":235,"h":235},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":235,"h":235},
+	"sourceSize": {"w":235,"h":235}
+},
+"hallqmtg_MyTG_0014.png":
+{
+	"frame": {"x":976,"y":418,"w":28,"h":334},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":334},
+	"sourceSize": {"w":28,"h":334}
+},
+"hallqmtg_TiQuJiLu_0001.png":
+{
+	"frame": {"x":2,"y":241,"w":600,"h":50},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":600,"h":50},
+	"sourceSize": {"w":600,"h":50}
+},
+"hallqmtg_TiQuJiLu_0002.png":
+{
+	"frame": {"x":348,"y":690,"w":296,"h":67},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":296,"h":67},
+	"sourceSize": {"w":296,"h":67}
+},
+"hallqmtg_Title_0001.png":
+{
+	"frame": {"x":336,"y":759,"w":125,"h":84},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":125,"h":84},
+	"sourceSize": {"w":125,"h":84}
+},
+"hallqmtg_Title_0002.png":
+{
+	"frame": {"x":587,"y":392,"w":50,"h":82},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":82},
+	"sourceSize": {"w":50,"h":82}
+},
+"hallqmtg_Title_0003.png":
+{
+	"frame": {"x":481,"y":315,"w":104,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":104,"h":100},
+	"sourceSize": {"w":104,"h":100}
+},
+"hallqmtg_Title_0004.png":
+{
+	"frame": {"x":239,"y":744,"w":95,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":95,"h":100},
+	"sourceSize": {"w":95,"h":100}
+},
+"hallqmtg_Title_0005.png":
+{
+	"frame": {"x":2,"y":699,"w":313,"h":2},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":313,"h":2},
+	"sourceSize": {"w":313,"h":2}
+},
+"hallqmtg_Title_0007.png":
+{
+	"frame": {"x":2,"y":379,"w":457,"h":33},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":457,"h":33},
+	"sourceSize": {"w":457,"h":33}
+},
+"hallqmtg_Title_0008.png":
+{
+	"frame": {"x":2,"y":149,"w":666,"h":90},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":666,"h":90},
+	"sourceSize": {"w":666,"h":90}
+},
+"hallqmtg_Title_0009.png":
+{
+	"frame": {"x":175,"y":703,"w":171,"h":39},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":171,"h":39},
+	"sourceSize": {"w":171,"h":39}
+},
+"hallqmtg_Title_0010.png":
+{
+	"frame": {"x":463,"y":759,"w":170,"h":39},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":170,"h":39},
+	"sourceSize": {"w":170,"h":39}
+},
+"hallqmtg_Title_0011.png":
+{
+	"frame": {"x":2,"y":703,"w":171,"h":39},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":171,"h":39},
+	"sourceSize": {"w":171,"h":39}
+},
+"hallqmtg_Title_0012.png":
+{
+	"frame": {"x":635,"y":775,"w":287,"h":68},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":287,"h":68},
+	"sourceSize": {"w":287,"h":68}
+},
+"hallqmtghelp.png":
+{
+	"frame": {"x":623,"y":845,"w":252,"h":80},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":252,"h":80},
+	"sourceSize": {"w":252,"h":80}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "skin36_Promote.png",
+	"format": "RGBA8888",
+	"size": {"w":1024,"h":1024},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:65bf1533f911bf7d33eaa5af280d3369$"
+}
+}

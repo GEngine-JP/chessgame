@@ -1,13 +1,12 @@
 ﻿using UnityEngine;
+using YxFramwork.Common;
+
 namespace Assets.Scripts.Game.brnn3d
 {
     public class LuziInfoUIMgr : MonoBehaviour
     {
-        public static LuziInfoUIMgr Instance;
-        protected void Awake()
-        {
-            Instance = this;
-        }
+        public LuziInfoUI TheLuziInfoUI;
+       
         private bool[] luzi_info;
         private int luziSize = -1;
 
@@ -48,7 +47,8 @@ namespace Assets.Scripts.Game.brnn3d
             {
                 return;
             }
-            PaiMode.Instance.History();
+            var gameMgr = App.GetGameManager<Brnn3DGameManager>();
+            gameMgr.ThePaiMode.History();
         }
 
 
@@ -58,22 +58,22 @@ namespace Assets.Scripts.Game.brnn3d
             {
                 case 0:
                     {
-                        LuziInfoUI.Instance.SetEastImg(index, data);
+                        TheLuziInfoUI.SetEastImg(index, data);
                     }
                     break;
                 case 1:
                     {
-                        LuziInfoUI.Instance.SetSouthImg(index, data);
+                        TheLuziInfoUI.SetSouthImg(index, data);
                     }
                     break;
                 case 2:
                     {
-                        LuziInfoUI.Instance.SetWestImg(index, data);
+                        TheLuziInfoUI.SetWestImg(index, data);
                     }
                     break;
                 case 3:
                     {
-                        LuziInfoUI.Instance.SetNorthImg(index, data);
+                        TheLuziInfoUI.SetNorthImg(index, data);
                     }
                     break;
             }

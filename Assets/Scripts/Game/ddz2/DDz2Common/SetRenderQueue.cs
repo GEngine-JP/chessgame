@@ -20,11 +20,7 @@ namespace Assets.Scripts.Game.ddz2.DDz2Common
 
           
         }
-
-        void Update()
-        {
-
-        }
+   
 
         public void SetQueue()
         {

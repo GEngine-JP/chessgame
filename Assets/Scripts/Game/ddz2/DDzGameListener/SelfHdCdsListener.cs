@@ -1,9 +1,10 @@
-﻿using System.Linq;
-using Assets.Scripts.Game.ddz2.DdzEventArgs;
+﻿using Assets.Scripts.Game.ddz2.DdzEventArgs;
 using Assets.Scripts.Game.ddz2.InheritCommon;
 using YxFramwork.Common;
 using YxFramwork.ConstDefine;
 using System.Collections.Generic;
+using com.yxixia.utile.YxDebug;
+using YxFramwork.Framework.Core;
 
 namespace Assets.Scripts.Game.ddz2.DDzGameListener
 {
@@ -13,16 +14,14 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener
 
         protected override void OnAwake()
         {
-            Ddz2RemoteServer.AddOnGetRejoinDataEvt(OnRejoinGame);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeAllocate, OnAllocateCds);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeFirstOut, OnFirstOut);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeOutCard, OnTypeOutCard);
-
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeFirstOut, OnFirstOut);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeOutCard, OnTypeOutCard);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyOnRejoin, OnRejoinGame);
         }
 
         public override void RefreshUiInfo()
         {
-            //throw new System.NotImplementedException();
+            
         }
 
         /// <summary>
@@ -35,10 +34,10 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener
         /// 重置手牌
         /// </summary>
         /// <param name="cards"></param>
-        protected virtual void ResetHdCds(int[] cards)
+        protected virtual void InitHdCdsArray(int[] cards)
         {
+            if (cards == null || cards.Length < 1) return;
             HdCdsListTemp.Clear();
-            if(cards==null) return;
             HdCdsListTemp.AddRange(cards);
         }
 
@@ -48,8 +47,10 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener
         /// <param name="extrcds"></param>
         protected virtual void AddHdCds(int[] extrcds)
         {
-            foreach (var extrcd in extrcds.Where(extrcd => !HdCdsListTemp.Contains(extrcd)))
+            foreach (var extrcd in extrcds)
             {
+                if (HdCdsListTemp.Contains(extrcd))
+                    continue;
                 HdCdsListTemp.Add(extrcd);
             }
         }
@@ -62,74 +63,80 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener
         {
             var len = rmoveCds.Length;
             for (int i = 0; i < len; i++)
-                HdCdsListTemp.Remove(rmoveCds[i]);
+            {
+                if(HdCdsListTemp.Contains(rmoveCds[i]))
+                    HdCdsListTemp.Remove(rmoveCds[i]);
+            }
         }
 
 
         /// <summary>
         /// 重连游戏
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        protected virtual void OnRejoinGame(object sender,DdzbaseEventArgs args)
+        protected virtual void OnRejoinGame(DdzbaseEventArgs args)
         {
             var data = args.IsfObjData;
-            if (!data.ContainsKey(RequestKey.KeyUser)) return ;
+            if (!data.ContainsKey(RequestKey.KeyUser))
+            {
+                YxDebug.LogEvent("服务器没有发送本人信息");
+                return;
+            }
 
             var userSelf = data.GetSFSObject(RequestKey.KeyUser);
-            if (!userSelf.ContainsKey(GlobalConstKey.C_Cards)) return;
+            if (!userSelf.ContainsKey(GlobalConstKey.C_Cards))
+            {
+                if (App.GameData.IsGameStart)
+                {
+                    YxDebug.LogEvent("服务器没有发送手牌信息");
+                }
+                return;
+            }
 
             var cards = userSelf.GetIntArray(GlobalConstKey.C_Cards);
-            if (cards == null || cards.Length<0) return;
+            if (cards == null || cards.Length < 1)
+            {
+                YxDebug.LogEvent("服务器发送手牌信息错误");
+                return;
+            }
 
-            ResetHdCds(cards);
+            InitHdCdsArray(cards);
             RefreshUiInfo();
         }
 
-        /// <summary>
-        /// 游戏开局，服务器给玩家自己发牌时
-        /// </summary>
-        private void OnAllocateCds(object sender, DdzbaseEventArgs args)
-        {
-            var data = args.IsfObjData;
-            var seat = data.GetInt(GlobalConstKey.C_Sit);
-            if (App.GetGameData<GlobalData>().GetSelfSeat != seat || !data.ContainsKey(GlobalConstKey.C_Cards)) return;
-            var cards = data.GetIntArray(GlobalConstKey.C_Cards);
-
-            ResetHdCds(cards);
-            RefreshUiInfo();        
-        }
+       
 
         /// <summary>
         /// 如果是地主，则获得底牌
         /// </summary>
-        protected virtual void OnFirstOut(object sender, DdzbaseEventArgs args)
+        protected virtual void OnFirstOut(DdzbaseEventArgs args)
         {
             var data = args.IsfObjData;
 
             //地主座位
-            if(data.GetInt(RequestKey.KeySeat) != App.GetGameData<GlobalData>().GetSelfSeat) return;
+            if (data.GetInt(RequestKey.KeySeat) != App.GetGameData<DdzGameData>().SelfSeat)
+            {
+                return;
+            }
             var extrcds  = data.GetIntArray(RequestKey.KeyCards);
             AddHdCds(extrcds);
             RefreshUiInfo();   
         }
 
 
-
         /// <summary>
-        /// 如果是自己出牌则出牌
+        /// 出牌阶段
         /// </summary>
-        protected virtual void OnTypeOutCard(object sender, DdzbaseEventArgs args)
+        protected virtual void OnTypeOutCard(DdzbaseEventArgs args)
         {
             var data = args.IsfObjData;
-
+            
             var seat = data.GetInt(RequestKey.KeySeat);
-            if (seat == App.GetGameData<GlobalData>().GetSelfSeat)
+            if (seat == App.GetGameData<DdzGameData>().SelfSeat)
             {
                 RemoveHdCds(data.GetIntArray(RequestKey.KeyCards));
                 RefreshUiInfo();
             }
-
         }
     }
 }

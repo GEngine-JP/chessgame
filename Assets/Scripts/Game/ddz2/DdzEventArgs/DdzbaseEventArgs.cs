@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using Assets.Scripts.Game.ddz2.InheritCommon;
 using Sfs2X.Entities.Data;
 
 namespace Assets.Scripts.Game.ddz2.DdzEventArgs
@@ -13,7 +11,5 @@ namespace Assets.Scripts.Game.ddz2.DdzEventArgs
         {
             IsfObjData = isfData;
         }
-
-
     }
 }

@@ -1,7 +1,4 @@
-﻿using Assets.Scripts.Game.ddz2.DdzEventArgs;
-using Assets.Scripts.Game.ddz2.InheritCommon;
-using UnityEngine;
-using YxFramwork.Common;
+﻿using UnityEngine;
 
 namespace Assets.Scripts.Game.ddz2.DDzGameListener
 {

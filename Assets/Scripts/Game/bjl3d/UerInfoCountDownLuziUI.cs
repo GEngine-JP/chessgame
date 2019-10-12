@@ -2,13 +2,13 @@
 using System.Collections;
 using YxFramwork.Manager;
 using com.yxixia.utile.YxDebug;
+using YxFramwork.Framework.Core;
 
 namespace Assets.Scripts.Game.bjl3d
 {//打开和关闭Down菜单
     public class UerInfoCountDownLuziUI : MonoBehaviour//G 11.15
     {
-
-        public static UerInfoCountDownLuziUI Intance;
+        public DownUI TheDownUI;
 
         private Transform _buttonImgtf;//隐藏和显示开关
         private bool _isShowing = true;
@@ -17,7 +17,6 @@ namespace Assets.Scripts.Game.bjl3d
 
         protected void Awake()
         {
-            Intance = this;
             _ani = transform.GetComponent<Animator>();
             if (_ani == null)
                 YxDebug.LogError("No such Component");
@@ -53,20 +52,16 @@ namespace Assets.Scripts.Game.bjl3d
                 return;
             _ani.Play("xialuo");
             _buttonImgtf.localEulerAngles = new Vector3(180, 0, 0);
-            MusicManager.Instance.Play("ShakeUI");
-            //            AudioClip clip = ResourcesLoader.instance.LoadAudio("ShakeUI");..........
-            //            AudioManager.Instance.Play(clip, false, .8f);.............
+            Facade.Instance<MusicManager>().Play("ShakeUI"); 
             StartCoroutine("DownUIAudio");
-            DownUI.Intance.ShowYanEff();   //闪动图片     
+            TheDownUI.ShowYanEff();   //闪动图片     
             _isShowing = false;
         }
 
         IEnumerator DownUIAudio()
         {
             yield return new WaitForSeconds(0.5f);
-            MusicManager.Instance.Play("UIDown");
-            //            AudioClip clip = ResourcesLoader.instance.LoadAudio("UIDown");..............
-            //            AudioManager.Instance.Play(clip, false, .8f);.............
+            Facade.Instance<MusicManager>().Play("UIDown"); 
         }
 
         public void ClickeUIFun()

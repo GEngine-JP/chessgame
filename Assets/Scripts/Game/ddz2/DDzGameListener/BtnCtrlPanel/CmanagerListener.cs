@@ -6,11 +6,11 @@ using Assets.Scripts.Game.ddz2.DdzEventArgs;
 using Assets.Scripts.Game.ddz2.InheritCommon;
 using Assets.Scripts.Game.ddz2.PokerCdCtrl;
 using Assets.Scripts.Game.ddz2.PokerRule;
-using com.yxixia.utile.YxDebug;
 using Sfs2X.Entities.Data;
 using UnityEngine;
 using YxFramwork.Common;
 using YxFramwork.ConstDefine;
+using YxFramwork.Framework.Core;
 
 namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
 {
@@ -23,20 +23,21 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
         protected GameObject TiShiBtn;
         [SerializeField]
         protected GameObject ChuPaiBtn;
+        [SerializeField]
+        protected UIGrid BtnsGrid;
 
-        [SerializeField]
-        protected GameObject DisBuYaoBtn;
-        [SerializeField]
-        protected GameObject DisTiShiBtn;
-        [SerializeField]
-        protected GameObject DisChuPaiBtn;
+        protected bool AutoState;
 
+        /// <summary>
+        /// 复位所有选中牌按钮
+        /// </summary>
         [SerializeField]
-        protected GameObject OnlyBuYaoBtn;
+        protected UIButton RepositionAllHdCardsBtn;
+
         /// <summary>
         /// 处理牌判断，出牌，提示等各种处理的工具类
         /// </summary>
-        private CardManager _cardManager;
+        private readonly CardManager _cardManager = new CardManager();
 
         /// <summary>
         /// 用于只能选牌的脚本
@@ -48,16 +49,15 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
         /// </summary>
         private ISFSObject _lastOutData = new SFSObject();
 
-/*        /// <summary>
-        /// 智能选牌信息缓存，要及时清理，用于比较上次智能选牌的结果是不是和下次一样
-        /// </summary>
-        private int[] _mayoutCdsTemp;*/
-
+        /*        /// <summary>
+                /// 智能选牌信息缓存，要及时清理，用于比较上次智能选牌的结果是不是和下次一样
+                /// </summary>
+                private int[] _mayoutCdsTemp;*/
 
         /// <summary>
-        /// 标记地主座位
+        /// 是否轮到我出牌
         /// </summary>
-        private int _landSeat;
+        private bool _isMyTurn;
 
         /// <summary>
         /// 手牌控制脚本
@@ -65,68 +65,137 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
         [SerializeField]
         protected HdCdsCtrl HdCdctrlInstance;
 
+
         protected override void OnAwake()
-        {   //监听手牌操作事件
-            HdCdsCtrl.AddHdSelCdsEvt(OnHdCdsCtrlEvent);
-            //获得cardmanager
-            _cardManager = new CardManager();
+        {
+            //监听手牌操作事件
+            Facade.EventCenter.AddEventListeners<string, HdCdCtrlEvtArgs>(GlobalConstKey.KeyHdCds, OnHdCdsCtrlEvent);
+
             base.OnAwake();
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypePass, OnTypePass);
 
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeGameOver, OnTypeGameOver);
+            InitRepositionAllHdCardsBtn();
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeAllocate, OnAllocateCds);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypePass, OnTypePass);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeOneRoundOver, OnTypeOneRoundOver);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeDoubleOver, OnDoubleOver);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeOutCard, OnTypeOutCard);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyGetGameInfo, OnGetGameInfo);
 
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeDoubleOver, OnDoubleOver);
+            Facade.EventCenter.AddEventListeners<string, bool>(GlobalConstKey.KeySelfAuto, OnSelfAuto);
+
+            Facade.EventCenter.AddEventListeners<string, bool>(GlobalConstKey.CheckLuckyCards, OnCheckLuckyCards);
         }
+
+        private bool _autoLastOut = true;
+
+        private void OnGetGameInfo(DdzbaseEventArgs args)
+        {
+            var sfsObj = args.IsfObjData;
+            if (!sfsObj.ContainsKey("cargs2")) return;
+            var cargsObj = sfsObj.GetSFSObject("cargs2");
+            if (!cargsObj.ContainsKey("-alo")) return;
+            string alo = cargsObj.GetUtfString("-alo");
+            _autoLastOut = int.Parse(alo) > 0;
+        }
+
+
+        private void OnSelfAuto(bool state)
+        {
+            AutoState = state;
+        }
+
+
+        void InitRepositionAllHdCardsBtn()
+        {
+            if (RepositionAllHdCardsBtn == null) return;
+
+            RepositionAllHdCardsBtn.onClick.Add(new EventDelegate(this, "RepositionAllHdCds"));
+        }
+
 
         /// <summary>
         ///  根据手牌数据缓存刷新相关ui
         /// </summary>
         public override void RefreshUiInfo()
         {
-            if (HdCdctrlInstance != null) HdCdctrlInstance.ReSetHandCds(HdCdsListTemp.ToArray());
+
+        }
+
+
+        /// <summary>
+        /// 游戏发牌
+        /// </summary>
+        private void OnAllocateCds(DdzbaseEventArgs args)
+        {
+            var data = args.IsfObjData;
+            var seat = data.GetInt(GlobalConstKey.C_Sit);
+
+            if (App.GetGameData<DdzGameData>().SelfSeat != seat || !data.ContainsKey(GlobalConstKey.C_Cards))
+            {
+                string error = !data.ContainsKey(GlobalConstKey.C_Cards)
+                    ? "There is no cards info in type one !!"
+                    : string.Format("Info seat : {0} != self seat : {1}", seat, App.GameData.SelfSeat);
+                Debug.LogError(error);
+                return;
+            }
+            var cards = data.GetIntArray(GlobalConstKey.C_Cards);
+            if (cards == null || cards.Length <= 0)
+            {
+                Debug.LogError("Cards is null or empty !!");
+                return;
+            }
+
+            InitHdCdsArray(cards);      //手牌加入手牌数组数组
+            HdCdctrlInstance.ResetHandCdsWithAnim(cards);
         }
 
         /// <summary>
-        /// 只能选牌开关
+        /// 智能选牌开关
         /// </summary>
-        private bool _onoffIchosecCds = false;
+        private bool _onoffIchosecCds;
 
         /// <summary>
         /// 当玩家有对手牌进行点击操作时
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        private void OnHdCdsCtrlEvent(object sender, HdCdCtrlEvtArgs args)
+        private void OnHdCdsCtrlEvent(HdCdCtrlEvtArgs args)
         {
             //如果不该自己行动
-            if (!ChuPaiBtn.activeSelf && !DisChuPaiBtn.activeSelf ) return;
+            if (!_isMyTurn)
+            {
+                return;
+            }
 
             //如果没有选牌
             if (args.SelectedCds.Length == 0)
             {
-                DDzUtil.DisableBtn(ChuPaiBtn,DisChuPaiBtn);
+                if (ChuPaiBtn.activeSelf)
+                {
+                    SetBtnState(ChuPaiBtn, false);
+                }
+
                 _onoffIchosecCds = true;
                 return;
             }
 
             var selectedCds = args.SelectedCds;
+
             var lastOutCds = _lastOutData.GetIntArray(RequestKey.KeyCards);
 
-
             //-----------------------start 智能选牌过程-------有赖子，或者开关关闭则不用智能选牌----------------------------
-            bool isgetcdsWithoutCompare = false;//标记是不是在自己出动出牌时做出的智能选牌
-            int[] mayOutCds=null;
+            bool isgetcdsWithoutCompare = false;    //标记是不是在自己出动出牌时做出的智能选牌
+            int[] mayOutCds = null;
             bool selCdshasLaizi = PokerRuleUtil.CheckHaslz(selectedCds);
             if (!selCdshasLaizi && _onoffIchosecCds)
             {
-                if (_lastOutData.GetInt(RequestKey.KeySeat) == App.GetGameData<GlobalData>().GetSelfSeat)
+                if (_lastOutData.GetInt(RequestKey.KeySeat) == App.GetGameData<DdzGameData>().SelfSeat)
                 {
                     mayOutCds = _checkCardTool.GetcdsWithOutCompare(selectedCds, HdCdsListTemp.ToArray());
                     isgetcdsWithoutCompare = true;
                 }
                 else
                 {
-                    DDzUtil.ActiveBtn(BuYaoBtn, DisBuYaoBtn);
+                    SetBtnActive(BuYaoBtn, true);
                     mayOutCds = _checkCardTool.ChkCanoutCdListWithLastCdList(selectedCds,
                                                                              _cardManager.GetTishiGroupDic, lastOutCds);
                 }
@@ -134,15 +203,15 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
             //---------------------------------------------------------------------------------------end
 
 
-/*            //---start---------------使智能选牌出了相同的牌型，不重复执行-----------------------
-            var haschosemayOutCds = DDzUtil.IsTwoArrayEqual(HdCdsCtrl.SortCds(_mayoutCdsTemp), HdCdsCtrl.SortCds(mayOutCds));
-            _mayoutCdsTemp = mayOutCds;
-            //如果上次智能选牌和本次相同，则直接取消一次智能选牌
-            if (haschosemayOutCds)
-            {
-                mayOutCds = null;
-            }
-            //----------------------------------------------------------------------------------end*/
+            /*            //---start---------------使智能选牌出了相同的牌型，不重复执行-----------------------
+                        var haschosemayOutCds = DDzUtil.IsTwoArrayEqual(HdCdsCtrl.SortCds(_mayoutCdsTemp), HdCdsCtrl.SortCds(mayOutCds));
+                        _mayoutCdsTemp = mayOutCds;
+                        //如果上次智能选牌和本次相同，则直接取消一次智能选牌
+                        if (haschosemayOutCds)
+                        {
+                            mayOutCds = null;
+                        }
+                        //----------------------------------------------------------------------------------end*/
 
 
 
@@ -151,35 +220,46 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
                 bool isMatch;
 
                 //如果_lastOutData不是自己出牌
-                if (_lastOutData.GetInt(RequestKey.KeySeat) != App.GetGameData<GlobalData>().GetSelfSeat)
+                if (_lastOutData.GetInt(RequestKey.KeySeat) != App.GetGameData<DdzGameData>().SelfSeat)
                 {
                     var lastoutcds = new List<int>();
-                    lastoutcds.AddRange(lastOutCds);
-                    var cardTypeDic = _cardManager.CheckCanGuanCds(selectedCds, selCdshasLaizi, lastoutcds.ToArray());
-                    isMatch = cardTypeDic != null && cardTypeDic.Count>0;
+
+                    if (lastOutCds != null)
+                    {
+                        lastoutcds.AddRange(lastOutCds);
+                    }
+
+                    var cardTypeDic = _cardManager.GetAutoCardsList(selectedCds, selCdshasLaizi, lastoutcds.ToArray());
+                    isMatch = cardTypeDic != null && cardTypeDic.Count > 0;
                 }
                 else
                 {
-                    var cardTypeDic = _cardManager.CheckCanGuanCds(selectedCds, selCdshasLaizi, null);
-                    isMatch = cardTypeDic != null && cardTypeDic.Count>0;
+                    var cardTypeDic = _cardManager.GetAutoCardsList(selectedCds, selCdshasLaizi, null);
+                    isMatch = cardTypeDic != null && cardTypeDic.Count > 0;
                 }
 
-                YxDebug.LogError("isMatch: " + isMatch);
                 if (isMatch)
                 {
                     HdCdctrlInstance.UpCdList(selectedCds);
                 }
                 else
                 {
-                    DDzUtil.DisableBtn(ChuPaiBtn, DisChuPaiBtn);
+                    if (ChuPaiBtn.activeSelf)
+                    {
+                        SetBtnState(ChuPaiBtn, false);
+                    }
+                    //DDzUtil.DisableBtn(ChuPaiBtn, DisChuPaiBtn);
                     return;
                 }
             }
             else
             {
-                if (!ChooseMayOutCards(mayOutCds, selectedCds))
+                if (!ChooseMayOutCards(mayOutCds, selectedCds)) //如果选中的牌不能出
                 {
-                    DDzUtil.DisableBtn(ChuPaiBtn, DisChuPaiBtn);
+                    if (ChuPaiBtn.activeSelf)
+                    {
+                        SetBtnState(ChuPaiBtn, false);
+                    }
                     return;
                 }
             }
@@ -187,185 +267,233 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
 
             //经过智能检索后最后检查一遍抬出的牌是否合法----start---
 
-            var finalType =  PokerRuleUtil.GetCdsType(HdCdctrlInstance.GetUpCdList().ToArray());
+            var finalType = PokerRuleUtil.GetCdsType(HdCdctrlInstance.GetUpCdList().ToArray());
+
+            SetBtnState(ChuPaiBtn, true);
+            //DDzUtil.ActiveBtn(ChuPaiBtn, DisChuPaiBtn);
+
             if (finalType != CardType.None && finalType != CardType.Exception)
             {
                 //如果选出的牌型不是那种单牌，或者对子的小牌型，就先关闭智能选牌
-                if (isgetcdsWithoutCompare && finalType != CardType.C1 && finalType != CardType.C2)_onoffIchosecCds = false;
+                if (isgetcdsWithoutCompare && finalType != CardType.C1 && finalType != CardType.C2) _onoffIchosecCds = false;
                 else if (!isgetcdsWithoutCompare) _onoffIchosecCds = false;
-               
-                DDzUtil.ActiveBtn(ChuPaiBtn, DisChuPaiBtn);
             }
-            else
-            {
-                DDzUtil.DisableBtn(ChuPaiBtn, DisChuPaiBtn);
-            }
+
 
             //------------end
         }
 
 
-
-/*
-        /// <summary>
-        /// 重置手牌
-        /// </summary>
-        /// <param name="cards"></param>
-        protected override void ResetHdCds(int[] cards)
-        {
-            base.ResetHdCds(cards);
-
-            //_cardManager.UpdateCardList(HdCdsListTemp.ToArray());
-        }
-
-        /// <summary>
-        /// 添加手牌
-        /// </summary>
-        /// <param name="extrcds"></param>
-        protected override void AddHdCds(int[] extrcds)
-        {
-            base.AddHdCds(extrcds);
-            //_cardManager.UpdateCardList(HdCdsListTemp.ToArray());
-        }
-
-        /// <summary>
-        /// 移除手牌
-        /// </summary>
-        /// <param name="rmoveCds">要移除的手牌</param>
-        protected override void RemoveHdCds(int[] rmoveCds)
-        {
-            base.RemoveHdCds(rmoveCds);
-            //_cardManager.UpdateCardList(HdCdsListTemp.ToArray());
-        }*/
-
-        protected override void OnRejoinGame(object sender, DdzbaseEventArgs args)
+        protected override void OnRejoinGame(DdzbaseEventArgs args)
         {
             StopAllCoroutines();
             //与ResetHdCds，AddHdCds，RemoveHdCds相关
-            base.OnRejoinGame(sender, args);
+            base.OnRejoinGame(args);
+            //显示手牌
+            HdCdctrlInstance.ReSetHandCds(HdCdsListTemp.ToArray());
 
             var data = args.IsfObjData;
+            int selfSeat = App.GetGameData<DdzGameData>().SelfSeat;
+            _isMyTurn = data.ContainsKey(NewRequestKey.KeyCurrp) && data.GetInt(NewRequestKey.KeyCurrp) == selfSeat;
 
-            //标记地主座位
-            if (data.ContainsKey(NewRequestKey.KeyLandLord)) _landSeat = data.GetInt(NewRequestKey.KeyLandLord);
 
             //如果是选庄阶段则不显示出牌操作相关按钮
             if (data.ContainsKey(NewRequestKey.KeyGameStatus))
             {
                 switch (data.GetInt(NewRequestKey.KeyGameStatus))
                 {
-                    case  GlobalConstKey.StatusChoseBanker:
-                        {
-                            HideAllBtns();
-                            return;
-                        }
+                    case GlobalConstKey.StatusChoseBanker:
                     case GlobalConstKey.StatusDouble:
-                        {
-                            HideAllBtns();
-                            return;
-                        }
+                        HideAllBtns();
+                        return;
                 }
             }
-
 
             //如果存在最后一次出牌的信息
             if (data.ContainsKey(NewRequestKey.KeyLastOut))
             {
                 _lastOutData = data.GetSFSObject(NewRequestKey.KeyLastOut);
-
             }
             else
             {
                 //是自己第一手出牌，你是地主
-                _lastOutData.PutInt(RequestKey.KeySeat, App.GetGameData<GlobalData>().GetSelfSeat);
+                _lastOutData.PutInt(RequestKey.KeySeat, selfSeat);
             }
 
 
+
             //没人行动，或者，不是自己行动
-            if (!data.ContainsKey(NewRequestKey.KeyCurrp) ||
-                data.GetInt(NewRequestKey.KeyCurrp) != App.GetGameData<GlobalData>().GetSelfSeat)
+            if (!_isMyTurn)
             {
                 HideAllBtns();
                 return;
             }
 
-            if (_lastOutData.GetInt(RequestKey.KeySeat) != App.GetGameData<GlobalData>().GetSelfSeat)
+
+            if (_lastOutData.GetInt(RequestKey.KeySeat) != selfSeat)
             {
-                OnNotSelfOutCds(_lastOutData);
+                GetPromptCardsGroup(_lastOutData);
+                if (AutoState)
+                {
+                    AutoFollow();
+                }
+                else
+                {
+                    OnOthersOutCds();
+                }
             }
             else
             {
+                HideAllBtns();
+                SetBtnActive(ChuPaiBtn, true);
+                SetBtnState(ChuPaiBtn, false);
                 //如果自己准备出手牌
-                DisableAllBtns();
+                SetAllBtnState();
+                CheckCanOutOneTime();   //最后一手,如果可以全出,则全出
             }
+        }
 
+
+        /// <summary>
+        /// 当前面有玩家出牌时,自动跟牌
+        /// </summary>
+        private void AutoFollow()
+        {
+            RepositionAllHdCds();
+            if (_cardManager.GetTishiGroupList.Count > 0)
+            {
+                JumpUpCd(_cardManager.GetOneTishiGroup());
+                OutCard();
+            }
+            else
+            {
+                Pass();
+            }
+        }
+
+        /// <summary>
+        /// 当前面玩家都不要时,自动出牌
+        /// </summary>
+        void AutoOutCard()
+        {
+            var cdsList = HdCdsCtrl.SortCds(HdCdsListTemp);
+            SelectCards(cdsList[cdsList.Length - 1]);
+            OutCard();
+        }
+
+
+        /// <summary>
+        /// 点击背景,重置手牌的位置和出牌按钮的状态
+        /// </summary>
+        void RepositionAllHdCds()
+        {
+            HdCdctrlInstance.RepositionAllHdCds();
+            SetBtnState(ChuPaiBtn, false);
         }
 
         /// <summary>
         /// 当确定地主后，看自己是不是地主，来判断是否显示按钮
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        protected override void OnFirstOut(object sender, DdzbaseEventArgs args)
+        protected override void OnFirstOut(DdzbaseEventArgs args)
         {
-            base.OnFirstOut(sender,args);
+            base.OnFirstOut(args);   //底牌加入到手中
 
             var data = args.IsfObjData;
 
-            _landSeat = data.GetInt(RequestKey.KeySeat);
-            if (_landSeat != App.GetGameData<GlobalData>().GetSelfSeat)
+            var gdata = App.GetGameData<DdzGameData>();
+
+            int speakerSeat = data.GetInt(RequestKey.KeySeat);      //地主座位号
+
+            _isMyTurn = speakerSeat == gdata.SelfSeat;          //因为注册委托先后顺序的问题,不能用gdata.ImBanker判断
+
+            if (!_isMyTurn)
             {
                 HideAllBtns();
                 return;
             }
 
-            _lastOutData.PutInt(RequestKey.KeySeat, _landSeat);
-
-            //如果没有加倍设置
-            if (!data.GetBool(NewRequestKey.KeyJiaBei))
-            {
-                DisableAllBtns();
-            }
-            else
+            if (data.ContainsKey(NewRequestKey.JiaBeiSeat))
             {
                 HideAllBtns();
             }
+            else
+            {
+                SetBtnActive(ChuPaiBtn, true);
+                SetBtnState(ChuPaiBtn, false);
+            }
 
-
+            _lastOutData.PutInt(RequestKey.KeySeat, speakerSeat);       //地主位置存入缓存
+            HdCdctrlInstance.ReSetHandCds(HdCdsListTemp.ToArray());
         }
 
         /// <summary>
         /// 当收到加倍已经结束的信息
         /// </summary>
-        private void OnDoubleOver(object sender, DdzbaseEventArgs args)
+        private void OnDoubleOver(DdzbaseEventArgs args)
         {
             //判断是不是该自己操作出牌了
-            if (_landSeat == App.GetGameData<GlobalData>().GetSelfSeat) StartCoroutine(ShowCtrlBtnLater(4f));
+            if (_isMyTurn) StartCoroutine(ShowCtrlBtnLater(3f));
         }
 
         private IEnumerator ShowCtrlBtnLater(float time)
         {
             yield return new WaitForSeconds(time);
 
-            DisableAllBtns();
+            HideAllBtns();
+            if (_isMyTurn)
+            {
+                SetBtnState(ChuPaiBtn, false);
+                SetBtnActive(ChuPaiBtn, true);
+                if (AutoState)
+                {
+                    AutoOutCard();
+                }
+            }
+
+            SetAllBtnState();
+            CheckCanOutOneTime();   //最后一手,如果可以全出,则全出
         }
 
         /// <summary>
         /// 如果有人出牌
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        protected override void OnTypeOutCard(object sender, DdzbaseEventArgs args)
+        protected override void OnTypeOutCard(DdzbaseEventArgs args)
         {
             //_mayoutCdsTemp = null;
             //与ResetHdCds，AddHdCds，RemoveHdCds相关
-            base.OnTypeOutCard(sender, args);
+            base.OnTypeOutCard(args);
 
             _lastOutData = args.IsfObjData;
+            _isMyTurn = CheckMyTurn(_lastOutData);
 
-            if (_lastOutData.GetInt(RequestKey.KeySeat) == App.GetGameData<GlobalData>().GetLeftPlayerSeat)
+            //自己出牌,移除手中的牌
+            if (_lastOutData.ContainsKey(RequestKey.KeySeat) &&
+                _lastOutData.GetInt(RequestKey.KeySeat) == App.GameData.SelfSeat)
             {
-                OnNotSelfOutCds(_lastOutData);
+                if (_lastOutData.ContainsKey(RequestKey.KeyCards))
+                {
+                    var cards = _lastOutData.GetIntArray(RequestKey.KeyCards);
+                    if (cards != null && cards.Length > 0)
+                    {
+                        HdCdctrlInstance.RemoveHdCds(cards);
+                    }
+                }
+                RepositionAllHdCds();
+            }
+
+            if (_isMyTurn)
+            {
+                GetPromptCardsGroup(_lastOutData);
+                if (AutoState)
+                {
+                    AutoFollow();
+                }
+                else
+                {
+                    OnOthersOutCds();
+                }
                 return;
             }
 
@@ -376,46 +504,78 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
         /// <summary>
         /// 有人pass的时候
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-       void OnTypePass(object sender, DdzbaseEventArgs args)
+        void OnTypePass(DdzbaseEventArgs args)
         {
-            //_mayoutCdsTemp = null;
+            var gdata = App.GetGameData<DdzGameData>();
+
+            var data = args.IsfObjData;
+
+            _isMyTurn = CheckMyTurn(data);      //查看是轮到自己说话
 
             //如果发送pass的玩家不是上家，则隐藏所有按钮
-            if (args.IsfObjData.GetInt(RequestKey.KeySeat) != App.GetGameData<GlobalData>().GetLeftPlayerSeat)
+            if (!_isMyTurn)
             {
                 HideAllBtns();
                 return;
             }
 
             //如果最后一次出牌的玩家不是自己，则检测能不能管的上，来决定按钮状态
-            if (_lastOutData.GetInt(RequestKey.KeySeat) != App.GetGameData<GlobalData>().GetSelfSeat)
+            if (_lastOutData.GetInt(RequestKey.KeySeat) != gdata.SelfSeat)
             {
-                OnNotSelfOutCds(_lastOutData);
+                GetPromptCardsGroup(_lastOutData);
+                if (AutoState)
+                {
+                    AutoFollow();
+                }
+                else
+                {
+                    OnOthersOutCds();
+                }
             }
-            //如果其他人都不出了（上家不出，说明是其他人都不出了），且最后一次出牌是自己
+            //如果上家不出了，且最后一次出牌是自己
             else
             {
-               DisableAllBtns();
+                HideAllBtns();
+                SetBtnState(ChuPaiBtn, false);
+                SetBtnActive(ChuPaiBtn, true);
+                SetAllBtnState();
+                if (!CheckCanOutOneTime() && AutoState)
+                {
+                    AutoOutCard();
+                }
+                SelectCards(HdCdctrlInstance.GetUpCdList().ToArray());
+                _onoffIchosecCds = true;
             }
         }
 
+        /// <summary>
+        /// 是否是自己说话
+        /// </summary>
+        /// <param name="data"></param>
+        bool CheckMyTurn(ISFSObject data)
+        {
+            //查看上次讲话的是不是自己上家
+            int earlyHand = App.GetGameData<DdzGameData>().GetEarlyHand();
+            return data.ContainsKey(RequestKey.KeySeat) && data.GetInt(RequestKey.KeySeat) == earlyHand;
+        }
 
-       /// <summary>
-       /// 当游戏结算时
-       /// </summary>
-       /// <param name="sender"></param>
-       /// <param name="args"></param>
-       void OnTypeGameOver(object sender, DdzbaseEventArgs args)
-       {
-           //隐藏所有出牌操作按钮
-           HideAllBtns();
-           //清空手牌
-           ResetHdCds(new int[]{});
-           RefreshUiInfo();   
-       }
-       
+
+        /// <summary>
+        /// 当一局游戏结算时
+        /// </summary>
+        /// <param name="args"></param>
+        void OnTypeOneRoundOver(DdzbaseEventArgs args)
+        {
+            //隐藏所有出牌操作按钮
+            HideAllBtns();
+            //清空手牌
+            HdCdsListTemp.Clear();
+            _lastOutData = new SFSObject();  //重置
+            if (HdCdctrlInstance != null) HdCdctrlInstance.ReSetHandCds(HdCdsListTemp.ToArray());
+            RepositionAllHdCds();
+        }
+
         /// <summary>
         /// 根据智能选牌结果，抬起手牌与之对应的牌，并过滤掉不应该抬起来的牌
         /// </summary>
@@ -476,45 +636,61 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
 
 
         //------------------------------------------------------------------------------------------------
+
         /// <summary>
-        /// 当上一次玩家出牌不是自己时
+        /// 获取提示手牌信息
         /// </summary>
-        /// <param name="lastOutData">最后一次出牌的信息</param>
-        private void OnNotSelfOutCds(ISFSObject lastOutData)
+        /// <param name="lastOutData"></param>
+        private void GetPromptCardsGroup(ISFSObject lastOutData)
         {
-            _cardManager.FindCds(HdCdsListTemp.ToArray(), lastOutData);
-            if (_cardManager.GetTishiGroupList.Count > 0)
-            {
-                DDzUtil.ActiveBtn(BuYaoBtn, DisBuYaoBtn);
-                DDzUtil.ActiveBtn(TiShiBtn, DisTiShiBtn);
-                DDzUtil.DisableBtn(ChuPaiBtn, DisChuPaiBtn);
-            }
-            else
-            {
-                HideAllBtns();
-                OnlyBuYaoBtn.SetActive(true);
-            }
-            var args = new HdCdCtrlEvtArgs(HdCdctrlInstance.GetUpCdList().ToArray());
-         
-            OnHdCdsCtrlEvent(null,args);
-           _onoffIchosecCds = true;
+            _cardManager.GetPromptGroup(HdCdsListTemp.ToArray(), lastOutData);
         }
 
         /// <summary>
-        /// 显示按钮，并disable所有按钮
+        /// 当上一次玩家出牌不是自己时
         /// </summary>
-        private void DisableAllBtns()
+        private void OnOthersOutCds()
         {
-            DDzUtil.DisableBtn(BuYaoBtn, DisBuYaoBtn);
-            DDzUtil.DisableBtn(TiShiBtn, DisTiShiBtn);
-            DDzUtil.DisableBtn(ChuPaiBtn, DisChuPaiBtn);
-
-            var args = new HdCdCtrlEvtArgs(HdCdctrlInstance.GetUpCdList().ToArray());
-
-            OnHdCdsCtrlEvent(null, args);
+            if (_cardManager.GetTishiGroupList.Count > 0)   //当自己手牌能大过当前牌
+            {
+                SetBtnActive(BuYaoBtn, true);
+                SetBtnActive(TiShiBtn, true);
+                SetBtnActive(ChuPaiBtn, true);
+                SetBtnState(ChuPaiBtn, false);
+            }
+            else            //当自己手牌无法大过当前牌
+            {
+                HideAllBtns();
+                SetBtnActive(BuYaoBtn, true);
+                return;
+            }
+            SelectCards(HdCdctrlInstance.GetUpCdList().ToArray());
             _onoffIchosecCds = true;
+        }
 
-            CheckCanOutOneTime();
+        /// <summary>
+        /// 出牌
+        /// </summary>
+        /// <param name="cards"></param>
+        void SelectCards(int[] cards)
+        {
+            var args = new HdCdCtrlEvtArgs(cards);
+            Facade.EventCenter.DispatchEvent(GlobalConstKey.KeyHdCds, args);
+        }
+
+        void SelectCards(int card)
+        {
+            int[] array = { card };
+            SelectCards(array);
+        }
+
+        /// <summary>
+        /// 设置所有出牌按钮的状态
+        /// </summary>
+        private void SetAllBtnState()
+        {
+            SelectCards(HdCdctrlInstance.GetUpCdList().ToArray());
+            _onoffIchosecCds = true;
         }
 
         /// <summary>
@@ -525,17 +701,34 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
             //终止ShowCtrlBtnLater方法，防止暂停回来异常显示出来
             StopAllCoroutines();
 
-            BuYaoBtn.SetActive(false);
-            TiShiBtn.SetActive(false);
-            ChuPaiBtn.SetActive(false);
-
-            DisBuYaoBtn.SetActive(false);
-            DisTiShiBtn.SetActive(false);
-            DisChuPaiBtn.SetActive(false);
-
-            OnlyBuYaoBtn.SetActive(false);
+            SetBtnActive(BuYaoBtn, false);
+            SetBtnActive(TiShiBtn, false);
+            SetBtnActive(ChuPaiBtn, false);
         }
 
+        void SetBtnActive(GameObject btn, bool active)
+        {
+            if (btn == null) return;
+
+            btn.SetActive(active);
+
+            BtnsGrid.repositionNow = true;
+            BtnsGrid.Reposition();
+        }
+
+
+        /// <summary>
+        /// 显示按钮,并设置按钮的状态
+        /// </summary>
+        /// <param name="btnObj"></param>
+        /// <param name="couldClick"></param>
+        void SetBtnState(GameObject btnObj, bool couldClick)
+        {
+            var btn = btnObj.GetComponent<UIButton>();
+            if (btn == null) return;
+            btn.GetComponent<BoxCollider>().enabled = couldClick;
+            btn.state = couldClick ? UIButtonColor.State.Normal : UIButtonColor.State.Disabled;
+        }
 
         //---------以下按钮相关方法----start---------
 
@@ -544,7 +737,16 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
         /// </summary>
         public void OnBuChuClick()
         {
-            GlobalData.ServInstance.TurnPass();
+            Pass();
+        }
+
+
+        /// <summary>
+        /// 不要
+        /// </summary>
+        void Pass()
+        {
+            App.GetRServer<DdzGameServer>().TurnPass();
             HdCdctrlInstance.RepositionAllHdCds();
         }
 
@@ -556,17 +758,26 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
             HdCdctrlInstance.RepositionAllHdCds();
             var oneTishiGroup = _cardManager.GetOneTishiGroup();
             if (oneTishiGroup == null || oneTishiGroup.Length < 1) return;
-            foreach (var purecdvalue in oneTishiGroup)
-            {
-                HdCdctrlInstance.JustUpCd(purecdvalue);
-            }
+            JumpUpCd(oneTishiGroup);
 
             //如果提示成功，把智能选牌关闭
             _onoffIchosecCds = false;
 
-            //_mayoutCdsTemp = (int[]) oneTishiGroup.Clone();
             //有提示牌组，点亮出牌按钮
-            DDzUtil.ActiveBtn(ChuPaiBtn, DisChuPaiBtn);
+            SetBtnState(ChuPaiBtn, true);
+        }
+
+        void JumpUpCd(int[] cardsVal)
+        {
+            foreach (var val in cardsVal)
+            {
+                JumpUpCd(val);
+            }
+        }
+
+        void JumpUpCd(int cardVal)
+        {
+            HdCdctrlInstance.JustUpCd(cardVal);
         }
 
         /// <summary>
@@ -574,16 +785,21 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
         /// </summary>
         public void OnChuPaiClick()
         {
+            OutCard();
+        }
+
+        void OutCard()
+        {
             int[] cardArr = HdCdctrlInstance.GetUpCdList().ToArray();
 
             //赖子代表的牌
-            var laiziRepCds = new int[] {-1};
+            var laiziRepCds = new[] { -1 };
 
             //类型
             int curRule = -1;
             var type = PokerRuleUtil.GetCdsType(cardArr);
-            if (type != CardType.None && type != CardType.Exception) curRule = (int) type;
-            GlobalData.ServInstance.ThrowOutCard(cardArr, laiziRepCds, curRule);
+            if (type != CardType.None && type != CardType.Exception) curRule = (int)type;
+            App.GetRServer<DdzGameServer>().ThrowOutCard(cardArr, laiziRepCds, curRule);
         }
 
         //---------------end--
@@ -591,11 +807,13 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
         /// <summary>
         /// 检测是否可以一手全出所有手牌，如果可以自动全出。
         /// </summary>
-        private void CheckCanOutOneTime()
+        private bool CheckCanOutOneTime()
         {
+            if (!_autoLastOut) return false;
+
             var hdCds = HdCdsListTemp.ToArray();
             var cdsType = PokerRuleUtil.GetCdsType(hdCds);
-            if (cdsType==CardType.None|| cdsType == CardType.Exception|| cdsType == CardType.C411) return;
+            if (cdsType == CardType.None || cdsType == CardType.Exception || cdsType == CardType.C411) return false;
             //如果是飞机带单牌，查找是否含有炸弹，有则不自动出了   
             if (cdsType == CardType.C11122234)
             {
@@ -604,25 +822,26 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
                 var curCd = -1;
                 if (ExistC42(sotedCds))
                 {
-                    return;
+                    return false;
                 }
                 foreach (var cd in sotedCds)
                 {
                     if (curCd != cd)
                     {
                         curCd = cd;
-                        if (cdNum >= 4) return;
+                        if (cdNum >= 4) return false;
                         cdNum = 1;
                         continue;
                     }
                     cdNum++;
                 }
-                if (cdNum >= 4) return;
+                if (cdNum >= 4) return false;
             }
 
             //赖子代表的牌
-            var laiziRepCds = new int[] { -1 };
-            GlobalData.ServInstance.ThrowOutCard(hdCds, laiziRepCds, (int)cdsType);
+            var laiziRepCds = new[] { -1 };
+            App.GetRServer<DdzGameServer>().ThrowOutCard(hdCds, laiziRepCds, (int)cdsType);
+            return true;
         }
         /// <summary>
         /// 小王
@@ -640,7 +859,13 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
         private bool ExistC42(int[] arr)
         {
             List<int> data = arr.ToList();
-            return data.Contains(_bigJoker)&&data.Contains(_smallJoker);           
+            return data.Contains(_bigJoker) && data.Contains(_smallJoker);
+        }
+
+        private void OnCheckLuckyCards(bool flag)
+        {
+            var result = HdCdctrlInstance.CheckLuckyCards();
+            Facade.EventCenter.DispatchEvent<string, bool>(GlobalConstKey.CheckLuckyResult, result);
         }
     }
 }

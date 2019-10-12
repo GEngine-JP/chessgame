@@ -11,16 +11,25 @@ namespace Assets.Scripts.Game.lswc.Item
         public  LSColorType CurColor;
 
         private MeshRenderer _curRender;
-
-        private void Start()
+         
+        protected MeshRenderer GetRender
         {
-            _curRender =transform.GetChild(0).GetComponent<MeshRenderer>();
+            get
+            {
+                if (_curRender == null)
+                {
+                    _curRender = transform.GetChild(0).GetComponent<MeshRenderer>();
+                }
+                return _curRender;
+            }
         }
 
         public void SetColorType(LSColorType type)
         {
             CurColor = type;
-            _curRender.material =App.GetGameData<GlobalData>().GetColorMaterial(CurColor);
+            var curRender = GetRender;
+            if (curRender == null) { return;}
+            curRender.material =App.GetGameData<LswcGameData>().GetColorMaterial(CurColor);
         }
 
         public bool IsRightColor(LSColorType type)

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using YxFramwork.Common;
 
 namespace Assets.Scripts.Game.jsys
 {
@@ -20,10 +21,11 @@ namespace Assets.Scripts.Game.jsys
 
         public void StartMove()
         {
+            if (_animation == null) { return;}
             _animation.Play("move");
-            Hashtable args = new Hashtable();
-            int num = Random.Range(0, 17);
-            _currTransform = ModelManager.Instance.AnimalPointsTransforms[num].transform;
+            var args = new Hashtable();
+            var num = Random.Range(0, 17);
+            _currTransform = App.GetGameManager<JsysGameManager>().ModelMgr.AnimalPointsTransforms[num].transform;
             _isSky = _currTransform.GetComponent<BirdPointManager>().PointKind;
             // Debug.LogError("isSky!!!!!!!!!!!!!!" + isSky);
             args.Add("position", _currTransform.position);
@@ -54,7 +56,7 @@ namespace Assets.Scripts.Game.jsys
             if (_isSky != 0)
             {
                 _animation.Play("rest");
-                transform.LookAt(ModelManager.Instance.BirdCamera.transform);
+                transform.LookAt(App.GetGameManager<JsysGameManager>().ModelMgr.BirdCamera.transform);
             }
             yield return new WaitForSeconds(1.5f);
             CanMove = true;

@@ -3,6 +3,7 @@ using Assets.Scripts.Game.lswc.Data;
 using DG.Tweening;
 using UnityEngine;
 using com.yxixia.utile.YxDebug;
+using YxFramwork.Common;
 
 namespace Assets.Scripts.Game.lswc.Item
 {
@@ -203,7 +204,7 @@ namespace Assets.Scripts.Game.lswc.Item
 
         private void OnMovefinished()
         {
-            LSCameraManager.Instance.transform.LookAt(this.transform);
+           App.GetGameManager<LswcGamemanager>().CameraManager.transform.LookAt(transform);
         }
 
         private void ResetPosition()

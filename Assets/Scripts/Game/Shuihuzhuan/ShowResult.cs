@@ -1,10 +1,11 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
 
-namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
+namespace Assets.Scripts.Game.Shuihuzhuan
 {
     public class ShowResult : MonoBehaviour {
 
@@ -29,7 +30,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         {
             for (int i = 0; i < TurnControl.instance.resultItems.Length; i++)
             {
-                resultImages[i].sprite = TurnControl.instance.cardSprites[App.GetGameData<GlobalData>().iTypeImgid[i]];
+                resultImages[i].sprite = TurnControl.instance.cardSprites[App.GetGameData<WmarginGameData>().iTypeImgid[i]];
             }
          
         }
@@ -51,35 +52,37 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         }
         public void OnClick()
         {
+            var gdata = App.GetGameData<WmarginGameData>();
             GameStateUiControl.instance.TiShi.interactable = false;
-            Game.instance.ClearData();//清楚数据
-            TurnControl.instance.canMove = true;
-            for (int i = 0; i < 15; i++)
+            App.GetGameManager<WmarginGameManager>().ClearData();//清楚数据
+            var turnCtr = TurnControl.instance;
+            turnCtr.canMove = true;
+            for (var i = 0; i < 15; i++)
             {
-                TurnControl.instance.resultImages[i].GetComponent<Animator>().enabled = false;
-                App.GetGameData<GlobalData>().iTypeImgid[i] = 0;
-                resultImages[i].sprite = TurnControl.instance.cardSprites[0];
+                turnCtr.resultImages[i].GetComponent<Animator>().enabled = false;
+                gdata.iTypeImgid[i] = 0;
+                resultImages[i].sprite = turnCtr.cardSprites[0];
             }
-            for (int i = 0; i < TurnControl.instance.turnItems.Length; i++)
+            var turnItems = turnCtr.turnItems;
+            var turnItemCount = turnCtr.turnItems.Length;
+            for (var i = 0; i < turnItemCount; i++)
             {
-                TurnControl.instance.turnItems[i].SetActive(true);
-                TurnControl.instance.turnItems[i].GetComponent<Image>().sprite = TurnControl.instance.graySprites[0];
+                var turnItem = turnItems[i];
+                turnItem.SetActive(true);
+                turnItem.GetComponent<Image>().sprite = turnCtr.graySprites[0];
             }
 
-           
-            App.GetGameData<GlobalData>().changeState = false;
-            for (int i = 0; i < 18; i++)
+            gdata.changeState = false;
+            for (var i = 0; i < 18; i++)
             {
-                App.GetGameData<GlobalData>().iLineImgid[i] = 0;
+                gdata.iLineImgid[i] = 0;
             }
             
-            for (int i = 0; i < 9; i++)
+            for (var i = 0; i < 9; i++)
             {
-                App.GetGameData<GlobalData>().m_LineType[i] = 0;
+                gdata.m_LineType[i] = 0;
             }
             StartCoroutine(ShowAwardEffect());
-            
-                
         }
 
         /// <summary>
@@ -87,73 +90,70 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public void GoBackHome()
         {
-           
-            for (int i = 0; i < TurnControl.instance.resultItems.Length; i++)
+            var gdata = App.GetGameData<WmarginGameData>();
+            var gMgr = App.GetGameManager<WmarginGameManager>();
+            for (var i = 0; i < TurnControl.instance.resultItems.Length; i++)
             {
-                int ccc = App.GetGameData<GlobalData>().iTypeImgid[i];
+                var ccc = gdata.iTypeImgid[i];
 
                 TurnControl.instance.resultImages[i].sprite = TurnControl.instance.graySprites[ccc];
             }
-            for (int i = 0; i < TurnControl.instance.resultItems.Length; i++)
+            for (var i = 0; i < TurnControl.instance.resultItems.Length; i++)
             {
                 TurnControl.instance.resultItems[i].transform.localPosition =
-                    TurnControl.instance.bornTransforms[i/3].localPosition;
+                    TurnControl.instance.bornTransforms[i / 3].localPosition;
             }
-            for (int i = 0; i < TurnControl.instance.turnItems.Length; i++)
+            for (var i = 0; i < TurnControl.instance.turnItems.Length; i++)
             {
                 TurnControl.instance.turnItems[i].SetActive(true);
 
             }
-            if (App.GetGameData<GlobalData>().show)//开场动画运行一次
+            if (gdata.NeedShowAnim && !BottomUIControl.instance.skip_bool)//开场动画运行一次
             {
                 GameStateUiControl.instance.TiShi.interactable = false;
-                App.GetGameData<GlobalData>().changeState = false;
-                App.GetGameData<GlobalData>().show = false;
+                gdata.changeState = false;
                 StartCoroutine(ShowAwardEffect());
             }
             else
-            {
+            { 
                 GameStateUiControl.instance.TiShi.interactable = true;
-                MusicManager.Instance.Play("winsound");
                 BottomUIControl.instance.SetMoney();//开始显示金钱和线数
-                App.GetGameData<GlobalData>().IsAotozhuangtai = true;
+                gdata.IsAotozhuangtai = true;
                 GameStateUiControl.instance.LostWait();
-                Game.instance.ClearData();//清楚数据
+                gMgr.ClearData();//清楚数据
             }
+            gdata.NeedShowAnim = false;
             //切换开始结束状态按钮
             TurnControl.instance.SetStop(true);
             //切换到赢了或输了状态
-            if (App.GetGameData<GlobalData>().iWinMoney > 0)//赢了
+            if (gdata.iWinMoney > 0)//赢了
             {
-                App.GetGameData<GlobalData>().ZhuanState = 3;
-                Game.instance.LotteryJudge(); //计算
-                Game.instance.Theincome();//当前所赢的钱数
+                App.GetGameData<WmarginGameData>().ZhuanState = 3;
+                gMgr.LotteryJudge(); //计算
+                gMgr.Theincome();//当前所赢的钱数
                 GameStateUiControl.instance.ChangeToWait();//按钮全部关闭
-               
-
             }
 
-            if ( App.GetGameData<GlobalData>().iWinMoney == 0)//输了
+            if (gdata.iWinMoney == 0)//输了
             {
-                App.GetGameData<GlobalData>().IsAotozhuangtai = true;
-                   
-                    App.GetGameData<GlobalData>().ZhuanState = 2;
-                    Game.instance.ClearData();//清楚数据
-                    if (App.GetGameData<GlobalData>().IsAuto)
-                    {
-                        Invoke("IsAutoFun", 2f);
-                        GameStateUiControl.instance.BeginButton .interactable  = false;
-                    }
-                    else
-                    {
+                gdata.IsAotozhuangtai = true;
 
-                        GameStateUiControl.instance.LostWait();//输了的按钮
-                        GameStateUiControl.instance.TiShi.interactable = true;
-                    }
+                gdata.ZhuanState = 2;
+                gMgr.ClearData();//清楚数据
+                if (gdata.IsAuto)
+                {
+                    Invoke("IsAutoFun", 2f);
+                    GameStateUiControl.instance.BeginButton.interactable = false;
                 }
-           
+                else
+                {
+                    GameStateUiControl.instance.LostWait();//输了的按钮
+                    GameStateUiControl.instance.TiShi.interactable = true;
+                }
             }
-           
+
+        }
+
         public void IsAutoFun()
         {
             GameStateUiControl.instance.Isaudt();
@@ -164,60 +164,61 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         //显示开奖动画
         public IEnumerator ShowAwardEffect()
         {
-            
+            var gdata = App.GetGameData<WmarginGameData>();
             CheckLine();
-            for (int i = 0; i < App.GetGameData<GlobalData>().m_LineType.Length; i++)
+            var lineTypes = gdata.m_LineType;
+            var lineTypeCount = lineTypes.Length;
+            var typeArray = gdata.m_TypeArray;
+            var turnCtrl = TurnControl.instance;
+            var resultImageArray = turnCtrl.resultImages;
+            var secAnimaates = gdata.m_ShowSecAnimate;
+            var typeImgIds = gdata.iTypeImgid;
+            for (var i = 0; i < lineTypeCount; i++)
             {
-                if (App.GetGameData<GlobalData>().m_LineType[i] == 1)
+                if (lineTypes[i] != 1) { continue;}
+                for (var j = 0; j < 5; j++)
                 {
-                    
-                    //                WaterMarginAudioManager.instance.PlayBeginWinAudio();
-                    for (int j = 0; j < 5; j++)
+                    var type = typeArray[i, j]; 
+                    var resultImage = resultImageArray[type];
+                    var animator = resultImage.GetComponent<Animator>();
+                    if (gdata.m_ResultArray[i, j] == 1)
                     {
-                        if (App.GetGameData<GlobalData>().m_ResultArray[i, j] == 1)
-                        {
-                            App.GetGameData<GlobalData>().m_ShowSecAnimate[App.GetGameData<GlobalData>().m_TypeArray[i, j]] = 1;
-                            TurnControl.instance.resultImages[App.GetGameData<GlobalData>().m_TypeArray[i, j]].gameObject
-                                                                                                    .SetActive(false);
-
-                            string aniStr = App.GetGameData<GlobalData>().iTypeImgid[App.GetGameData<GlobalData>().m_TypeArray[i, j]] + "_" +
-                                            "0";
-                            TurnControl.instance.resultImages[App.GetGameData<GlobalData>().m_TypeArray[i, j]]
-                                .GetComponent<Animator>().enabled = true;
-                            TurnControl.instance.resultImages[App.GetGameData<GlobalData>().m_TypeArray[i, j]].gameObject
-                                                                                                    .SetActive(true);
-                            TurnControl.instance.resultImages[App.GetGameData<GlobalData>().m_TypeArray[i, j]]
-                                .GetComponent<Animator>().Play(aniStr);
-
-                        }
-                        else { App.GetGameData<GlobalData>().m_ShowSecAnimate[App.GetGameData<GlobalData>().m_TypeArray[i, j]] = 0; }
+                        secAnimaates[type] = 1;
+                        var aniStr = typeImgIds[type] + "_" + "0";
+                        animator.enabled = true;
+                        resultImage.gameObject.SetActive(true);
+                        animator.Play(aniStr);
                     }
-                   yield return new WaitForSeconds(1f);
+                    else
+                    {
+                        secAnimaates[type] = 0;
+                    }
                 }
+                yield return new WaitForSeconds(1f);
             }
-            for (int i = 0; i < 15; i++)
+
+            for (var i = 0; i < 15; i++)
             {
-                if (App.GetGameData<GlobalData>().m_ShowSecAnimate[i] == 1)
-                {
-                    TurnControl.instance.resultImages[i].gameObject.SetActive(false);
-                    TurnControl.instance.resultImages[i].sprite =
-                        TurnControl.instance.cardSprites[App.GetGameData<GlobalData>().iTypeImgid[i]];
-                    //                    string aniStr = App.GetGameData<GlobalData>().iTypeImgid[i] + "_" + "1";
-                    TurnControl.instance.resultImages[i].GetComponent<Animator>().enabled = false;
-                    TurnControl.instance.resultImages[i].gameObject.SetActive(true);
-                    //                    TurnControl.instance.resultImages[i].GetComponent<Animator>().Play(aniStr);
-                }
+                if (secAnimaates[i] != 1) { continue;}
+                var resultImage = resultImageArray[i];
+                resultImage.gameObject.SetActive(false);
+                resultImage.sprite = turnCtrl.cardSprites[typeImgIds[i]];
+                resultImage.GetComponent<Animator>().enabled = false;
+                resultImage.gameObject.SetActive(true);
             }
-            MusicManager.Instance.Play("winsound");
+            Facade.Instance<MusicManager>().Play("winsound");
             BottomUIControl.instance.SetMoney();//开始显示金钱和线数
-            App.GetGameData<GlobalData>().IsAotozhuangtai = true;
+            gdata.IsAotozhuangtai = true;
             GameStateUiControl.instance.LostWait();
-            Game.instance.ClearData();//清楚数据
-            
-            for (int i = 0; i < TurnControl.instance.turnItems.Length; i++)
+            App.GetGameManager<WmarginGameManager>().ClearData();//清楚数据
+
+            var turnItems = turnCtrl.turnItems;
+            var turnItemCount = turnItems.Length;
+            for (var i = 0; i < turnItemCount; i++)
             {
-                TurnControl.instance.turnItems[i].SetActive(true);
-                TurnControl.instance.turnItems[i].GetComponent<Image>().sprite = TurnControl.instance.graySprites[0];
+                var item = turnItems[i];
+                item.SetActive(true);
+                item.GetComponent<Image>().sprite = turnCtrl.graySprites[0];
             }
             GameStateUiControl.instance.TiShi.interactable = true;
         }
@@ -232,7 +233,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
 
                 for (int i = 0; i < 5; i++)
                 {
-                    tempint[i] = App.GetGameData<GlobalData>().iTypeImgid[App.GetGameData<GlobalData>().m_TypeArray[j, i]];
+                    tempint[i] = App.GetGameData<WmarginGameData>().iTypeImgid[App.GetGameData<WmarginGameData>().m_TypeArray[j, i]];
                 }
 
                 tempint[5] = 100;
@@ -262,10 +263,10 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
                 //5连线
                 if (CountSame == 4)
                 {
-                    App.GetGameData<GlobalData>().m_LineType[j] = 1;
+                    App.GetGameData<WmarginGameData>().m_LineType[j] = 1;
                     for (int i = 0; i < 5; i++)
                     {
-                        App.GetGameData<GlobalData>().m_ResultArray[j, i] = 1;
+                        App.GetGameData<WmarginGameData>().m_ResultArray[j, i] = 1;
                     }
 
                 }
@@ -273,25 +274,25 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
                 //4连线
                 if (CountSame == 3)
                 {
-                    App.GetGameData<GlobalData>().m_LineType[j] = 1;
+                    App.GetGameData<WmarginGameData>().m_LineType[j] = 1;
                     for (int i = 0; i < 4; i++)
                     {
-                        App.GetGameData<GlobalData>().m_ResultArray[j, i] = 1;
+                        App.GetGameData<WmarginGameData>().m_ResultArray[j, i] = 1;
                     }
                 }
                 //3连线
                 if (CountSame == 2)
                 {
-                    App.GetGameData<GlobalData>().m_LineType[j] = 1;
+                    App.GetGameData<WmarginGameData>().m_LineType[j] = 1;
                     for (int i = 0; i < 3; i++)
                     {
-                        App.GetGameData<GlobalData>().m_ResultArray[j, i] = 1;
+                        App.GetGameData<WmarginGameData>().m_ResultArray[j, i] = 1;
                     }
                 }
                 CountSame = 0;
                 for (int i = 1; i < 6; i++)
                 {
-                    tempint[i] = App.GetGameData<GlobalData>().iTypeImgid[App.GetGameData<GlobalData>().m_TypeArray[j, i - 1]];
+                    tempint[i] = App.GetGameData<WmarginGameData>().iTypeImgid[App.GetGameData<WmarginGameData>().m_TypeArray[j, i - 1]];
                 }
                 tempint[0] = 100;
                 for (int i = 5; i >= 1; i--)
@@ -320,19 +321,19 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
                 //4连线
                 if (CountSame == 3)
                 {
-                    App.GetGameData<GlobalData>().m_LineType[j] = 1;
+                    App.GetGameData<WmarginGameData>().m_LineType[j] = 1;
                     for (int i = 4; i > 0; i--)
                     {
-                        App.GetGameData<GlobalData>().m_ResultArray[j, i] = 1;
+                        App.GetGameData<WmarginGameData>().m_ResultArray[j, i] = 1;
                     }
                 }
                 //3连线
                 if (CountSame == 2)
                 {
-                    App.GetGameData<GlobalData>().m_LineType[j] = 1;
+                    App.GetGameData<WmarginGameData>().m_LineType[j] = 1;
                     for (int i = 4; i > 1; i--)
                     {
-                        App.GetGameData<GlobalData>().m_ResultArray[j, i] = 1;
+                        App.GetGameData<WmarginGameData>().m_ResultArray[j, i] = 1;
                     }
                 }
 

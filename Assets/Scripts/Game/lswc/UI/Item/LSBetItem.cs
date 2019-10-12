@@ -1,9 +1,9 @@
-﻿using Assets.Scripts.Game.lswc.Control.System;
-using Assets.Scripts.Game.lswc.Data;
+﻿using Assets.Scripts.Game.lswc.Data;
 using Assets.Scripts.Game.lswc.Windows;
 using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.lswc.UI.Item
 {
@@ -53,9 +53,9 @@ namespace Assets.Scripts.Game.lswc.UI.Item
 
         public void OnAddBet()
         {
-            bool success = App.GetGameData<GlobalData>().AddBet(SelfIndex);
+            bool success = App.GetGameData<LswcGameData>().AddBet(SelfIndex);
 
-            LSSystemControl.Instance.PlaySuccess(success);
+            App.GetGameManager<LswcGamemanager>().SystemControl.PlaySuccess(success);
             if (!success)
             {
                 return;
@@ -87,17 +87,17 @@ namespace Assets.Scripts.Game.lswc.UI.Item
 
         private void SetPeiLV()
         {
-            _peiLv.text = App.GetGameData<GlobalData>().PeiLvs[SelfIndex].ToString();
+            _peiLv.text = App.GetGameData<LswcGameData>().PeiLvs[SelfIndex].ToString();
         }
 
         private void SetBetNumber()
         {
-            _betNumT.text = App.GetGameData<GlobalData>().Bets[SelfIndex].ToString();
+            _betNumT.text = YxUtiles.GetShowNumberToString(App.GetGameData<LswcGameData>().Bets[SelfIndex]);
         }
 
         private void SetSelectState()
         {
-            if (App.GetGameData<GlobalData>().Bets[SelfIndex] > 0)
+            if (App.GetGameData<LswcGameData>().Bets[SelfIndex] > 0)
             {
                 _isSlelect = true;
             }

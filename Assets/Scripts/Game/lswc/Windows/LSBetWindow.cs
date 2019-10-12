@@ -1,10 +1,10 @@
 ﻿using Assets.Scripts.Game.lswc.Data;
-using Assets.Scripts.Game.lswc.Manager;
 using Assets.Scripts.Game.lswc.UI.Item;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using YxFramwork.Common;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.lswc.Windows
 {
@@ -61,12 +61,13 @@ namespace Assets.Scripts.Game.lswc.Windows
 
         public void SetTotalGold()
         {
-            TotalGold.text = (App.GetGameData<GlobalData>().TotalGold - App.GetGameData<GlobalData>().TotalBets).ToString();
+            var gold = App.GetGameData<LswcGameData>().TotalGold - App.GetGameData<LswcGameData>().TotalBets;
+            TotalGold.text = YxUtiles.GetShowNumberToString(gold);
         }
 
         public void SetTotalBets()
         {
-            TotalBet.text = App.GetGameData<GlobalData>().TotalBets.ToString();
+            TotalBet.text = YxUtiles.GetShowNumberToString(App.GetGameData<LswcGameData>().TotalBets);
         }
 
         public void Show()
@@ -74,6 +75,7 @@ namespace Assets.Scripts.Game.lswc.Windows
             _isShow = true;
             gameObject.SetActive(true);
             Tween.PlayForward();
+            ChangeAnte();
         }
 
         public void Hide()
@@ -100,9 +102,8 @@ namespace Assets.Scripts.Game.lswc.Windows
 
         public void ChangeAnte()
         {
-            ChangeAnteText.text = App.GetGameData<GlobalData>().GetNowAnte();
-
-            ChangeAnteBtnImage.overrideSprite = App.GetGameData<GlobalData>().GetNowAnteSprite();
+            ChangeAnteText.text = YxUtiles.ReduceNumber(App.GetGameData<LswcGameData>().GetNowAnte());
+            ChangeAnteBtnImage.overrideSprite = App.GetGameData<LswcGameData>().GetNowAnteSprite();
         }
     }
 }

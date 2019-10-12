@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
-using YxFramwork.Framework;
+using YxFramwork.Common.Adapters;
+using YxFramwork.Enums;
 
 namespace Assets.Scripts.Common.Adapters
 {
@@ -8,20 +9,31 @@ namespace Assets.Scripts.Common.Adapters
     public class NguiLabelAdapter : YxBaseLabelAdapter
     {
         private UILabel _label; 
-
-        public UILabel GetLabe()
+        public UILabel Label
         {
-            return _label?? (_label=GetComponent<UILabel>());
-        } 
+            get { return _label == null ? _label = GetComponent<UILabel>() : _label; }
+        }
+        /// <summary>
+        /// label效果用
+        /// </summary>
+        public UILabel EffectLabel;
 
         protected override void OnText(string content)
         {
-            var label = GetLabe();
-            if (label == null) return; 
+            var label = Label;
+            if (label == null) return;
             label.text = content;
             UpdateWidth(label);
+            UpdateEffectLabel();
         }
-         
+
+        private void UpdateEffectLabel()
+        {
+            if (EffectLabel == null) { return;}
+            EffectLabel.text = Content;
+            UpdateWidth(EffectLabel);
+        }
+
         private void UpdateWidth(UILabel label)
         {
             var minW = (int)MaxMin.x;
@@ -87,35 +99,116 @@ namespace Assets.Scripts.Common.Adapters
         public override void Font(Font font)
         {
             Mfont = font;
-            _label.trueTypeFont = font;
+            Label.trueTypeFont = font; 
+        }
+
+        public override void SetStyle(YxLabelStyle style)
+        {
+        }
+
+        public override void SetAlignment(YxEAlignment yxEAlignment)
+        {
+            var label = Label;
+            if (label == null) return;
+            label.alignment = (NGUIText.Alignment)(int)yxEAlignment;
+        }
+
+        public override YxEPivot Pivot
+        {
+            get { return Label == null ? YxEPivot.Center : (YxEPivot)(int)Label.pivot; }
+            set {
+                var label = Label;
+                if (label == null) return;
+                label.pivot = (UIWidget.Pivot) (int) value;
+            } 
+        }
+
+        public override void SetAnchor(GameObject go, int left, int bottom, int right, int top)
+        { 
         }
 
         public override int GetTextWidth(string content)
         {
-            var oldText = _label.text;
-            var oldFlow = _label.overflowMethod;
-            _label.text = content;
-            _label.overflowMethod = UILabel.Overflow.ResizeFreely;
-            _label.UpdateNGUIText();
-            var w = _label.width;
-            _label.text = oldText;
-            _label.overflowMethod = oldFlow;
+            var label = Label;
+            if (label == null) return 0;
+            var oldText = label.text;
+            var oldFlow = label.overflowMethod;
+            label.text = content;
+            label.overflowMethod = UILabel.Overflow.ResizeFreely;
+            label.UpdateNGUIText();
+            var w = label.width;
+            label.text = oldText;
+            label.overflowMethod = oldFlow;
             return w;
         }
 
+
+        public override void FreshStyle(YxBaseLabelAdapter labelGo)
+        {
+            var nlabelAdapter = labelGo as NguiLabelAdapter;
+            if (nlabelAdapter == null){return;}
+            var style = nlabelAdapter.Label;
+            Label.color = style.color;
+            Label.fontSize = style.fontSize;
+            Label.bitmapFont = style.bitmapFont;
+            Label.fontStyle = style.fontStyle;
+            Label.gradientTop = style.gradientTop;
+            Label.gradientBottom = style.gradientBottom;
+            Label.applyGradient = style.applyGradient;
+            Label.effectStyle= style.effectStyle;
+            Label.effectColor = style.effectColor;
+            Label.effectDistance = style.effectDistance;
+            Label.spacingX = style.spacingX;
+            Label.spacingY = style.spacingY;
+            Label.floatSpacingX = style.floatSpacingX;
+            Label.floatSpacingY = style.floatSpacingY;
+        }
+
+        public override string Value
+        {
+            get
+            {
+                return Label == null?"": Label.text;
+            }
+        }
+ 
         public override int Width {
-            get { return _label.width; }
-            set { _label.width = value; }
+            get
+            {
+                return Label == null ? 0 : Label.width;
+            }
+            set { Label.width = value; }
         }
         public override int Height
         {
-            get { return _label.height; }
-            set { _label.height = value; }
+            get
+            {
+                return Label == null ? 0 : Label.height;
+            }
+            set { Label.height = value; }
+        }
+
+        public override int Depth
+        {
+            get
+            {
+                return Label == null ? 0 : Label.depth;
+            }
+            set
+            {
+                if (Label != null)
+                {
+                    Label.depth = value;
+                }
+            }
         }
 
         public override Color Color {
-            get { return _label.color; }
-            set { _label.color = value; }
+            get
+            { 
+                return Label == null? Color.white : Label.color;
+            }
+            set { Label.color = value; }
         }
 
         [ContextMenu("Execute")]
@@ -123,6 +216,11 @@ namespace Assets.Scripts.Common.Adapters
         {
             Font(Mfont);
         }
-         
+
+        public override YxEUIType UIType
+        {
+            get { return YxEUIType.Nguid; }
+        }
+
     }
 }

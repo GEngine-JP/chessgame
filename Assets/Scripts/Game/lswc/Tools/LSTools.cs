@@ -149,25 +149,9 @@ namespace Assets.Scripts.Game.lswc.Tools
             {
                 position = 24+position;
             }
-            int opposite = 0;
+            var opposite = 0;
             switch (position)
-            {
-
-                case 0:
-
-                case 1:
-
-                case 2:
-
-                case 3:
-
-                case 4:
-
-                case 5:
-
-                case 6:
-                    opposite = position;
-                    break;
+            { 
                 case 7:
                     opposite = 19;
                     break;
@@ -204,21 +188,22 @@ namespace Assets.Scripts.Game.lswc.Tools
                 case 18:
                     opposite = 18;
                     break;
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
                 case 19:
-
                 case 20:
-
                 case 21:
-
                 case 22:
-
                 case 23:
                     opposite = position;
                     break;
-
                 default:
                     YxDebug.LogError("no find position:" + position);
-
                     break;
             }
             return opposite;

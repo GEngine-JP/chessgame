@@ -299,44 +299,9 @@ namespace Assets.Scripts.Game.lswc.Data
         #region 游戏中音效的名称
 
         /// <summary>
-        /// 正常模式
-        /// </summary>
-        public const string BackgroundMusci_Normal = "normal";
-
-        /// <summary>
-        /// 闪电
-        /// </summary>
-        public const string BackgroundMusic_Lighting = "shandian";
-
-        /// <summary>
-        /// 大三元
-        /// </summary>
-        public const string BackgroundMusic_BigThree = "dsydsx";
-
-        /// <summary>
-        /// 大四喜
-        /// </summary>
-        public const string BackgroundMusic_BigFour = "dsydsx";
-
-        /// <summary>
-        /// 送灯
-        /// </summary>
-        public const string BackgroundMusic_SendLamp = "songdeng";
-
-        /// <summary>
-        /// 彩金
-        /// </summary>
-        public const string BackgroundMusic_Handsel = "Win_1";
-
-        /// <summary>
         /// 大三元与大四喜的单独提示音
         /// </summary>
         public const string ThreeOrFourWaring = "dsydsxwaring";
-
-        /// <summary>
-        /// 下注阶段的等待音效
-        /// </summary>
-        public const string BackgroundMusic_WaitBet = "Wait";
 
         /// <summary>
         /// 按钮选中音效
@@ -357,11 +322,6 @@ namespace Assets.Scripts.Game.lswc.Data
         /// 文字飞出声音
         /// </summary>
         public const string LabelOut = "wenzifeichu";
-
-        /// <summary>
-        /// 游戏结束时候的音效
-        /// </summary>
-        public const string GameEnd = "End";
 
         /// <summary>
         /// 播放等待动物出场音效
@@ -404,13 +364,24 @@ namespace Assets.Scripts.Game.lswc.Data
     /// <summary>
     /// 游戏中的状态
     /// </summary>
-    public enum GameState
-    {
-        InitState=0,//初始化状态
-        WaitState,  //等待游戏
-        BetState,   //押注
-        ResultState,//结果状态
-        Empyt,      //什么状态？
+    public enum ELswcGameState
+    { 
+        /// <summary>
+        /// 等待游戏
+        /// </summary>
+        WaitState = 1,
+        /// <summary>
+        /// 押注
+        /// </summary>
+        BetState,   
+        /// <summary>
+        /// 结果状态
+        /// </summary>
+        ResultState,
+        /// <summary>
+        /// 什么状态？
+        /// </summary>
+        GameOver = 4
     }
 
     /// <summary>
@@ -525,10 +496,22 @@ namespace Assets.Scripts.Game.lswc.Data
     /// </summary>
     public enum LSRequestMessageType
     {
-        ON_BEGIN_BET = 1,       //下注阶段开始时间
-        ON_COLLECT_BET,         //服务器收集下注阶段
-        ON_GET_RESULT,          //获得结果阶段
-        BET,                    //下注
+        /// <summary>
+        /// 下注阶段开始时间
+        /// </summary>
+        ON_BEGIN_BET = 1,       
+        /// <summary>
+        /// 服务器收集下注阶段
+        /// </summary>
+        ON_COLLECT_BET,      
+        /// <summary>
+        /// 获得结果阶段
+        /// </summary>
+        ON_GET_RESULT,         
+        /// <summary>
+        /// 下注
+        /// </summary>
+        BET,                   
     }
     #endregion
     /// <summary>

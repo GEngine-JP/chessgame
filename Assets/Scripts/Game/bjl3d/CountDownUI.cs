@@ -4,13 +4,13 @@ using UnityEngine.UI;
 using YxFramwork.Common;
 using YxFramwork.Manager;
 using com.yxixia.utile.YxDebug;
+using YxFramwork.Framework.Core;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.bjl3d
 {
     public class CountDownUI : MonoBehaviour// G  11  15
-    {
-        public static CountDownUI Instance;
-
+    { 
         public Sprite[] Numbers;
 
         private int _timecount;
@@ -30,7 +30,6 @@ namespace Assets.Scripts.Game.bjl3d
         /// </summary>
         protected void Awake()
         {
-            Instance = this;
             _szApplyRankerEff = transform.FindChild("Particle System_sz");
             if (_szApplyRankerEff == null)
                 YxDebug.LogError("No Such Object");//没有该物体 
@@ -69,12 +68,13 @@ namespace Assets.Scripts.Game.bjl3d
         public void NoticeXiaZhuFun()
         {
             YxDebug.Log("下注");
-
-            _timecount = UserInfoUI.Instance.GameConfig.XiaZhuTime;//下注时间 15
-            UserInfoUI.Instance.GameConfig.IsXiaZhuTime = true;//是否是下注时间
-            CameraMgr.Instance.CameraMoveByPath(0);
-            UerInfoCountDownLuziUI.Intance.HideUIFun();
-            BetMoneyUI.Intance.BetMoneyArea();
+            var gameCfg = App.GetGameData<Bjl3DGameData>().GameConfig;
+            var gameMgr = App.GetGameManager<Bjl3DGameManager>();
+            _timecount = gameCfg.XiaZhuTime;//下注时间 15
+            gameCfg.IsXiaZhuTime = true;//是否是下注时间
+            gameMgr.TheCameraMgr.CameraMoveByPath(0);
+            gameMgr.TheUerInfoCountDownLuziUI.HideUIFun();
+            gameMgr.TheBetMoneyUI.BetMoneyArea();
         }
         /// <summary>
         /// 发牌
@@ -82,45 +82,46 @@ namespace Assets.Scripts.Game.bjl3d
         public void SendCardFun()
         {
             YxDebug.Log("send card...");
-
-            _timecount = UserInfoUI.Instance.GameConfig.KaiPaiTime;
-            UserInfoUI.Instance.GameConfig.IsXiaZhuTime = false;
-            CameraMgr.Instance.CameraMoveByPath(1);
-            UerInfoCountDownLuziUI.Intance.HideUIFun(false);
-            BetMoneyUI.Intance.BetMoneyQingKongInfo();
+            var gameCfg = App.GetGameData<Bjl3DGameData>().GameConfig;
+            var gameMgr = App.GetGameManager<Bjl3DGameManager>();
+            _timecount = gameCfg.KaiPaiTime;
+            gameCfg.IsXiaZhuTime = false;
+            gameMgr.TheCameraMgr.CameraMoveByPath(1);
+            gameMgr.TheUerInfoCountDownLuziUI.HideUIFun(false);
+            gameMgr.TheBetMoneyUI.BetMoneyQingKongInfo();
             StartCoroutine("SendCardMoveCameraToDo", 3f);
         }
 
         IEnumerator SendCardMoveCameraToDo(float s)
         {
             yield return new WaitForSeconds(s);
-            PlanScene.Instance.QingKongChouma();
+            App.GetGameManager<Bjl3DGameManager>().ThePlanScene.QingKongChouma();
         }
         /// <summary>
         /// 中奖区域（赢得）
         /// </summary>
         public void ShowWinAreasFun()
         {
-            _timecount = UserInfoUI.Instance.GameConfig.ShowWinTime;
-            UserInfoUI.Instance.GameConfig.IsXiaZhuTime = false;
-            CameraMgr.Instance.CameraMoveByPath(4);
-
+            var gameCfg = App.GetGameData<Bjl3DGameData>().GameConfig;
+            var gameMgr = App.GetGameManager<Bjl3DGameManager>();
+            _timecount = gameCfg.ShowWinTime;
+            gameCfg.IsXiaZhuTime = false;
+            gameMgr.TheCameraMgr.CameraMoveByPath(4); 
             ShowArea();
-            MusicManager.Instance.Play("win");
-            //            AudioClip clip = ResourcesLoader.instance.LoadAudio("music/win");
-            //            AudioManager.Instance.Play(clip, false, .8f);
-            UerInfoCountDownLuziUI.Intance.HideUIFun();
+            Facade.Instance<MusicManager>().Play("win");
+            gameMgr.TheUerInfoCountDownLuziUI.HideUIFun();
         }
         /// <summary>
         /// 打开下拉菜单
         /// </summary>
         public void GameResultFun()
         {
-            Debug.Log("jie suans...");
-            _timecount = UserInfoUI.Instance.GameConfig.XiaZhuTime;
-            UserInfoUI.Instance.GameConfig.IsXiaZhuTime = false;
-            UerInfoCountDownLuziUI.Intance.ShowUIFun();//打开下拉菜单
-            UserInfoUI.Instance.GameConfig.XFapaiSpeedflag = 0;
+            YxDebug.Log("jie suans...","CountDownUI");
+            var gameCfg = App.GetGameData<Bjl3DGameData>().GameConfig;
+            _timecount = gameCfg.XiaZhuTime;
+            gameCfg.IsXiaZhuTime = false;
+            App.GetGameManager<Bjl3DGameManager>().TheUerInfoCountDownLuziUI.ShowUIFun();//打开下拉菜单
+            gameCfg.XFapaiSpeedflag = 0;
         }
 
 
@@ -129,13 +130,15 @@ namespace Assets.Scripts.Game.bjl3d
         /// </summary>
         void ShowArea()
         {
-            for (int i = 0; i < App.GetGameData<GlobalData>().BetJiesuan.Length; i++)
+            var gdata = App.GetGameData<Bjl3DGameData>();
+            var betJiesuan = gdata.BetJiesuan;
+            var len = betJiesuan.Length;
+            var winAreaEffs = App.GetGameManager<Bjl3DGameManager>().TheGameScene.WinAreaEffs;
+            for (var i = 0; i < len; i++)
             {
-                if (App.GetGameData<GlobalData>().BetJiesuan[i] != 0)
+                if (betJiesuan[i] != 0)
                 {
-                    if (GameScene.Instance.WinAreaEffs[i].gameObject.activeSelf)
-                        GameScene.Instance.WinAreaEffs[i].gameObject.SetActive(false);
-                    GameScene.Instance.WinAreaEffs[i].gameObject.SetActive(true);
+                    winAreaEffs[i].gameObject.SetActive(true);
                 }
             }
         }
@@ -149,11 +152,9 @@ namespace Assets.Scripts.Game.bjl3d
                 if (_timecount > 0)
                     _timecount = _timecount - 1;
                 GetTimeCountNumberToImg(_timecount);
-                if (UserInfoUI.Instance.GameConfig.IsXiaZhuTime && _timecount < 4)
+                if (App.GetGameData<Bjl3DGameData>().GameConfig.IsXiaZhuTime && _timecount < 4)
                 {
-                    MusicManager.Instance.Play("timeout");
-                    //AudioClip clip = ResourcesLoader.instance.LoadAudio("music/timeout");
-                    //AudioManager.Instance.Play(clip, false, .8f);
+                    Facade.Instance<MusicManager>().Play("timeout");
                 }
                 _time = 0f;
             }
@@ -164,9 +165,9 @@ namespace Assets.Scripts.Game.bjl3d
         /// <param name="count"></param>
         public void GetTimeCountNumberToImg(int count)
         {
-            int shiN = count / 10;
+            var shiN = count / 10;
             SiImage.sprite = Numbers[shiN];
-            int geN = count % 10;
+            var geN = count % 10;
             GeImage.sprite = Numbers[geN];
         }
 
@@ -174,30 +175,30 @@ namespace Assets.Scripts.Game.bjl3d
         //上下庄申请
         public void ApplyToRankerBtn()
         {
-            if (App.GetGameData<GlobalData>().CurrentUser.Gold < App.GetGameData<GlobalData>().BankLimit)
+            var gdata = App.GetGameData<Bjl3DGameData>();
+            var gameUI = App.GetGameManager<Bjl3DGameManager>().TheGameUI;
+            var selfInfo = gdata.GetPlayerInfo();
+            if (selfInfo.CoinA < gdata.BankLimit)
             {
-                GameUI.Instance.NoteText_Show("金币不足！！！");
+                var showInfo = string.Format("您至少需要 {0}才能上庄",YxUtiles.ReduceNumber(gdata.BankLimit));
+                gameUI.NoteText_Show(showInfo);
                 return;
             }
-            if (App.GetGameData<GlobalData>().CurrentUser.Seat== App.GetGameData<GlobalData>().CurrentBanker.Seat)
+            if (selfInfo.Seat== gdata.CurrentBanker.Seat)
             {
-                GameUI.Instance.NoteText_Show("这把游戏结束后自动下庄！！！");
+                gameUI.NoteText_Show("这把游戏结束后自动下庄！！！");
                 ShowS_X_Image(_isApply);
-                App.GetRServer<GameServer>().ApplyQuit();//向服务区器发送下庄请求
+                App.GetRServer<Bjl3DGameServer>().ApplyQuit();//向服务区器发送下庄请求
                 return;
             }
-
-            MusicManager.Instance.Play("UpAndDownRanker");
-            //            AudioClip clip = ResourcesLoader.instance.LoadAudio("UpAndDownRanker");
-            //            AudioManager.Instance.Play(clip, false, .8f);
-
-            if (WaitForRankerListUI.Instance.IsApplyRankerOrXiaRanker)//true 可以上庄  flase 不可以上庄
+            Facade.Instance<MusicManager>().Play("UpAndDownRanker"); 
+            if (App.GetGameManager<Bjl3DGameManager>().TheWaitForRankerListUI.IsApplyRankerOrXiaRanker)//true 可以上庄  flase 不可以上庄
             {
 
                 if (_szApplyRankerEff.gameObject.activeSelf)
                     _szApplyRankerEff.gameObject.SetActive(false);
                 _szApplyRankerEff.gameObject.SetActive(true);
-                App.GetRServer<GameServer>().ApplyBanker();//向服务区器发送上庄请求
+                App.GetRServer<Bjl3DGameServer>().ApplyBanker();//向服务区器发送上庄请求
                 _isApply = false;
             }
             else
@@ -205,7 +206,7 @@ namespace Assets.Scripts.Game.bjl3d
                 if (_xzApplyRankerEff.gameObject.activeSelf)
                     _xzApplyRankerEff.gameObject.SetActive(false);
                 _xzApplyRankerEff.gameObject.SetActive(true);
-                App.GetRServer<GameServer>().ApplyQuit();//向服务区器发送下庄请求
+                App.GetRServer<Bjl3DGameServer>().ApplyQuit();//向服务区器发送下庄请求
                 _isApply = true;
             }
             ShowS_X_Image(_isApply);
@@ -218,7 +219,7 @@ namespace Assets.Scripts.Game.bjl3d
         {
             if (isApply)
             {
-                WaitForRankerListUI.Instance.IsApplyRankerOrXiaRanker = true;
+                App.GetGameManager<Bjl3DGameManager>().TheWaitForRankerListUI.IsApplyRankerOrXiaRanker = true;
                 _xzApplyRankerBtn.gameObject.SetActive(false);
                 if (_szApplyRankerBtn.gameObject.activeSelf)
                     _szApplyRankerBtn.gameObject.SetActive(false);
@@ -226,7 +227,7 @@ namespace Assets.Scripts.Game.bjl3d
             }
             else
             {
-                WaitForRankerListUI.Instance.IsApplyRankerOrXiaRanker = false;
+                App.GetGameManager<Bjl3DGameManager>().TheWaitForRankerListUI.IsApplyRankerOrXiaRanker = false;
                 _szApplyRankerBtn.gameObject.SetActive(false);
                 if (_xzApplyRankerBtn.gameObject.activeSelf)
                     _xzApplyRankerBtn.gameObject.SetActive(false);

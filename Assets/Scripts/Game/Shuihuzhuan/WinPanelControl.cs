@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using com.yxixia.utile.Utiles;
+using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
+using YxFramwork.Tool;
 
-namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
+namespace Assets.Scripts.Game.Shuihuzhuan
 {
     public class WinPanelControl : MonoBehaviour
     {
@@ -31,9 +33,15 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         public void ShowWinPanel()
         {
             winPanel.SetActive(true);
-            winText.text = App.GetGameData<GlobalData>().iWinMoney.ToString();
+            SetWinText(App.GetGameData<WmarginGameData>().iWinMoney);
             Invoke("HideWinPanel", 10);
         }
+
+        public void SetWinText(int coin)
+        {
+            winText.text = YxUtiles.GetShowNumberToString(coin);
+        }
+
         public void HideWinPanel()
         {
             if (winPanel.activeSelf == true)

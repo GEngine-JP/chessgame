@@ -1,0 +1,68 @@
+{"frames": {
+
+"11100200.png":
+{
+	"frame": {"x":2,"y":2,"w":334,"h":500},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":334,"h":500},
+	"sourceSize": {"w":334,"h":500}
+},
+"p1.png":
+{
+	"frame": {"x":408,"y":127,"w":68,"h":78},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":68,"h":78},
+	"sourceSize": {"w":68,"h":78}
+},
+"p2.png":
+{
+	"frame": {"x":337,"y":206,"w":60,"h":74},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":74},
+	"sourceSize": {"w":60,"h":74}
+},
+"p3.png":
+{
+	"frame": {"x":458,"y":206,"w":50,"h":68},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":68},
+	"sourceSize": {"w":50,"h":68}
+},
+"p4.png":
+{
+	"frame": {"x":398,"y":206,"w":59,"h":73},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":59,"h":73},
+	"sourceSize": {"w":59,"h":73}
+},
+"p5.png":
+{
+	"frame": {"x":337,"y":127,"w":70,"h":78},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":70,"h":78},
+	"sourceSize": {"w":70,"h":78}
+},
+"screen.png":
+{
+	"frame": {"x":337,"y":2,"w":173,"h":124},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":173,"h":124},
+	"sourceSize": {"w":173,"h":124}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "gameitem_bjl3d.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:a5a05bc0d3aad4022e60d16de31cf6cc$"
+}
+}

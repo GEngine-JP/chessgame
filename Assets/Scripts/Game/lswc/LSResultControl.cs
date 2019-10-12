@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using DG.Tweening;
 using YxFramwork.Common;
 using com.yxixia.utile.YxDebug;
+using YxFramwork.Tool;
 
 public class LSResultControl : MonoBehaviour
 {
@@ -56,7 +57,7 @@ public class LSResultControl : MonoBehaviour
             _resultsParent.GetChild(i).gameObject.SetActive(true);
             //animal
             _resultsParent.GetChild(i).GetChild(0).GetComponent<Image>().sprite =
-                App.GetGameData<GlobalData>().GetSprite(((LSAnimalSpriteType)list[i]).ToString());
+                App.GetGameData<LswcGameData>().GetSprite(((LSAnimalSpriteType)list[i]).ToString());
             //倍率
             int peiNum = 1;
             if(multiple==0)
@@ -67,12 +68,12 @@ public class LSResultControl : MonoBehaviour
             {
                 peiNum = multiple;
             }
-            YxDebug.Log(list[i] + "号位的倍率是" + App.GetGameData<GlobalData>().PeiLvs[list[i]] + ",当前的倍数是：" + peiNum);
-            peiNum = App.GetGameData<GlobalData>().PeiLvs[list[i]] * peiNum;
+            YxDebug.Log(list[i] + "号位的倍率是" + App.GetGameData<LswcGameData>().PeiLvs[list[i]] + ",当前的倍数是：" + peiNum);
+            peiNum = App.GetGameData<LswcGameData>().PeiLvs[list[i]] * peiNum;
             _resultsParent.GetChild(i).GetChild(1).GetChild(0).GetComponent<Text>().text ="X"+peiNum.ToString();
         }
-        _betNum.text = betNum.ToString();
-        _winNum.text = winNum.ToString();
+        _betNum.text = YxUtiles.GetShowNumberToString(betNum);
+        _winNum.text = YxUtiles.GetShowNumberToString(winNum);
         PlayAnimation();
     }
 
@@ -100,7 +101,7 @@ public class LSResultControl : MonoBehaviour
 
     private void Show(bool isShow)
     {
-        for (int i = 0; i < App.GetGameData<GlobalData>().LastResult.ShowResults.Count; i++)
+        for (int i = 0; i < App.GetGameData<LswcGameData>().LastResult.ShowResults.Count; i++)
         {
             _resultsParent.GetChild(i).gameObject.SetActive(isShow);
         }

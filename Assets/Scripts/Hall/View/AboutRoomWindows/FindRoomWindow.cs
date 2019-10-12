@@ -160,15 +160,13 @@ namespace Assets.Scripts.Hall.View.AboutRoomWindows
         }
 
         private void OnFindRoom()
-        {
-            YxWindowManager.ShowWaitFor(); 
+        { 
             int roomType;
             var roomCId = GetCurRoomId();
             if (!int.TryParse(roomCId, out roomType)) return;
             RoomListController.Instance.FindRoom(roomType, obj =>
                 {
                     Clear();
-                    YxWindowManager.HideWaitFor();
                     var data = obj as  IDictionary<string, object>;
                     if (data == null)
                     {
@@ -181,14 +179,8 @@ namespace Assets.Scripts.Hall.View.AboutRoomWindows
                         YxMessageBox.Show(str.ToString());
                         return;
                     }
-                    var rid = data["roomId"];
-                    Debug.Log(rid);
-                    Debug.Log(rid.GetType());
-                    if (rid is string)
-                    {
-                        rid = int.Parse(rid.ToString());
-                    }
-                    int roomId = int.Parse(rid.ToString());
+                    var rid = data["roomId"]; 
+                    var roomId = int.Parse(rid.ToString());
                     YxDebug.LogError("加入房间的真实ID是" + roomId);
                     if (roomId < 1)
                     {
@@ -197,7 +189,7 @@ namespace Assets.Scripts.Hall.View.AboutRoomWindows
                     }
                     if (NeedRoomInfo && data.ContainsKey("users"))
                     {
-                        var win = RoominfoWindow ?? CreateOtherWindow("DefRoomInfoWindow");
+                        var win = RoominfoWindow ?? CreateOtherWindow("RoomInfoWindow");
                         data["_roomShowId"]= roomType;
                         win.UpdateView(data);
                         return;
@@ -210,7 +202,7 @@ namespace Assets.Scripts.Hall.View.AboutRoomWindows
 
         public void OnOpenCreateWindow()
         {
-            var win = YxWindowManager.OpenWindow("DefCreateRoomWindow", true);
+            var win = YxWindowManager.OpenWindow("CreateRoomWindow", true);
             var createWin = (CreateRoomWindow)win;
             if (createWin == null) return;
             createWin.TabDefaultIndex = TabDefaultIndex;

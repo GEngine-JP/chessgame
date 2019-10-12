@@ -6,7 +6,6 @@ namespace Assets.Scripts.Game.brnn3d
 {
     public class BetMode : MonoBehaviour
     {
-        public static BetMode Instance;
         public Transform[] CoinDemos = new Transform[15];
         public Transform[] EastCoins = new Transform[15];
         public Transform[] SouthCoins = new Transform[15];
@@ -16,12 +15,7 @@ namespace Assets.Scripts.Game.brnn3d
         public Transform[] CoinWeiZhis = new Transform[4];
         public Transform CoinFirstWeiZhi;
         public Transform[] OtherCoinFirstWeiZhi = new Transform[4];
-
-        protected void Awake()
-        {
-            Instance = this;
-        }
-
+         
         /// <summary>
         /// 实例化筹码
         /// </summary>
@@ -48,21 +42,18 @@ namespace Assets.Scripts.Game.brnn3d
                     break;
             }
 
-            Transform obj = Instantiate(CoinDemos[coinType]);
+            var obj = Instantiate(CoinDemos[coinType]);
             obj.gameObject.SetActive(true);
             obj.parent = CoinFirstWeiZhi.parent;
             obj.localEulerAngles = new Vector3(0, 0, 0);
-            if (byStation == App.GetGameData<GlobalData>().CurrentUser.Seat)
-                obj.localPosition = CoinFirstWeiZhi.localPosition;
-            else
-                obj.localPosition = OtherCoinFirstWeiZhi[Random.Range(0, 4)].localPosition;
-            Tweener tw = obj.DOLocalMove(CoinWeiZhis[iArea].localPosition, 0.5f);
+            obj.localPosition = byStation == App.GameData.SelfSeat ? CoinFirstWeiZhi.localPosition : OtherCoinFirstWeiZhi[Random.Range(0, 4)].localPosition;
+            var tw = obj.DOLocalMove(CoinWeiZhis[iArea].localPosition, 0.5f);
             tw.OnComplete(delegate
                 {
                     if (areaTf != null)
                     {
                         obj.parent = areaTf.parent;
-                        Tweener tww = obj.DOLocalMove(areaTf.localPosition, 0.3f);
+                        var tww = obj.DOLocalMove(areaTf.localPosition, 0.3f);
                         tww.OnComplete(delegate
                         {
                             obj.localPosition = areaTf.localPosition + new Vector3(Random.Range(-3, 4) / (1.0f * 10), 0f, Random.Range(-2, 2) / (1.0f * 10));

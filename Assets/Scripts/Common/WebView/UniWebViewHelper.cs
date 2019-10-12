@@ -21,7 +21,7 @@ namespace Assets.Scripts.Common.WebView
         {
             get
             {
-#if UNITY_IOS&&!UNITY_EDITOR
+#if UNITY_IOS && !UNITY_EDITOR
             return UniWebViewPlugin.ScreenHeight();
 #else
 

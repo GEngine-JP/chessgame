@@ -1,30 +1,13 @@
-﻿using System;
-using System.Collections;
-using Assets.Scripts.Game.lswc.Control.System;
+﻿using System.Collections;
 using Assets.Scripts.Game.lswc.Core;
-using Assets.Scripts.Game.lswc.Data;
 using System.Collections.Generic;
 using UnityEngine;
-using YxFramwork.Manager;
-using com.yxixia.utile.YxDebug;
-using Object = UnityEngine.Object;
+using com.yxixia.utile.YxDebug; 
 
 namespace Assets.Scripts.Game.lswc.Manager
 {
     public class LSResourseManager : InstanceControl
     {
-
-        private static LSResourseManager _instance;
-
-        public static LSResourseManager Instance
-        {
-            get
-            {
-                return _instance;
-            }
-            set { _instance = value; }
-        }
-
         private Dictionary<string, Sprite> _spriteCache;
 
         private Dictionary<string, Material> _materialCache;
@@ -52,16 +35,12 @@ namespace Assets.Scripts.Game.lswc.Manager
 
         private void Awake()
         {
-            _instance = this;
             InitReousrse();
         }
 
         public void InitReousrse()
         {
-            LoadBegin();
-            //MusicManager.Instance.LoadAudioBundle(LSConstant.GameKey, "AudioSource");
-            //MusicManager.Instance.MusicVolume = 0.1f;
-            //MusicManager.Instance.EffectVolume = 1;
+            LoadBegin(); 
             LoadResourse();
         }
 
@@ -120,11 +99,10 @@ namespace Assets.Scripts.Game.lswc.Manager
         {
             if (_state == LoadState.FinishLoad)
             {
-                //Debug.LogWarning("加载总时间是: " + (Time.realtimeSinceStartup - beginTime));
+                YxDebug.LogWarning("加载总时间是: " + (Time.realtimeSinceStartup - beginTime));
                 _state = LoadState.Null;
-                //Debug.LogWarning("图片文件数量是: " + _spriteCache.Count);
-                //Debug.LogWarning("材质文件数量是: " + _materialCache.Count);
-                //Debug.LogWarning("音频文件数量是: " + _audioCache.Count);
+                YxDebug.LogWarning("图片文件数量是: " + _spriteCache.Count);
+                YxDebug.LogWarning("材质文件数量是: " + _materialCache.Count);
                 if (OnLoadFinished != null)
                 {
                     OnLoadFinished();
@@ -132,46 +110,34 @@ namespace Assets.Scripts.Game.lswc.Manager
             }
         }
 
-        public Material GetMaterial(string name)
+        public Material GetMaterial(string materialName)
         {
-            if(_materialCache.ContainsKey(name))
+            if(_materialCache.ContainsKey(materialName))
             {
-                return _materialCache[name];
+                return _materialCache[materialName];
             }
             else
             {
-                YxDebug.LogError("Material " + name + " is not exist");
+                YxDebug.LogError("Material " + materialName + " is not exist");
                 return null;
             }
         }
-
-        public void  PlayBackgroundMusic(string name)
+          
+        public Sprite GetSprite(string spriteName)
         {
-//            MusicManager.Instance.PlayBacksound(name);
-        }
-
-        public void PlayVoice(string name)
-        {
-
-            MusicManager.Instance.Play(name);
-        }
-
-        public Sprite GetSprite(string name)
-        {
-            if (_spriteCache.ContainsKey(name))
+            if (_spriteCache.ContainsKey(spriteName))
             {
-                return _spriteCache[name];
+                return _spriteCache[spriteName];
             }
             else
             {
-                YxDebug.LogError("Sprite " + name + " is not exist");
+                YxDebug.LogError("Sprite " + spriteName + " is not exist");
                 return null;
             }
         }
 
         public override void OnExit()
         {
-            _instance = null;
         }
     }
 

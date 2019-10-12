@@ -1,0 +1,44 @@
+{"frames": {
+
+"alipay.png":
+{
+	"frame": {"x":175,"y":178,"w":171,"h":174},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":171,"h":174},
+	"sourceSize": {"w":171,"h":174}
+},
+"alipay_hover.png":
+{
+	"frame": {"x":175,"y":2,"w":171,"h":174},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":171,"h":174},
+	"sourceSize": {"w":171,"h":174}
+},
+"weixin.png":
+{
+	"frame": {"x":2,"y":178,"w":171,"h":174},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":171,"h":174},
+	"sourceSize": {"w":171,"h":174}
+},
+"weixin_hover.png":
+{
+	"frame": {"x":2,"y":2,"w":171,"h":174},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":171,"h":174},
+	"sourceSize": {"w":171,"h":174}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "window_payment.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:26364e8d84dfa830066aa21f2b698196$"
+}
+}

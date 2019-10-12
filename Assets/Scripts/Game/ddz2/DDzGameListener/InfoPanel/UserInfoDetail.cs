@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using YxFramwork.Common.Adapters;
+
 namespace Assets.Scripts.Game.ddz2.DDzGameListener.InfoPanel
 {
     public class UserInfoDetail : ServEvtListener
@@ -25,19 +27,21 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.InfoPanel
         {
             ShowParent.SetActive(false);
         }
+
         /// <summary>
         /// 显示信息
         /// </summary>
-        /// <param name="name">玩家名称</param>
+        /// <param name="username">玩家名称</param>
         /// <param name="userid">玩家id</param>
         /// <param name="ip">玩家ip</param>
-        public void ShowInfo(string name,string userid,string ip,UITexture head)
+        /// <param name="head"></param>
+        public void ShowInfo(string username,string userid,string ip,YxBaseTextureAdapter head)
         {
             ShowParent.SetActive(true);
-            UserName.text = name;
+            UserName.text = username;
             UserID.text = userid;
             UserIP.text = ip;
-            _userHead.mainTexture = head.mainTexture;
+            _userHead.mainTexture = head.GetTexture();
         }
         /// <summary>
         /// 

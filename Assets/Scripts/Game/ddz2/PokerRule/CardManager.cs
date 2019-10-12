@@ -2,7 +2,6 @@
 using System.Linq;
 using Assets.Scripts.Game.ddz2.PokerCdCtrl;
 using Sfs2X.Entities.Data;
-using UnityEngine;
 using YxFramwork.ConstDefine;
 
 namespace Assets.Scripts.Game.ddz2.PokerRule
@@ -39,7 +38,7 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
         /// <param name="upcdshasLz">抬起的手牌中是否有赖子</param>
         /// <param name="lastOutCds">如果不为空，表示有要比较的牌</param>
         /// <returns></returns>
-        public Dictionary<int[], CardType> CheckCanGuanCds(int[] upcdList, bool upcdshasLz,int[] lastOutCds)
+        public Dictionary<int[], CardType> GetAutoCardsList(int[] upcdList, bool upcdshasLz,int[] lastOutCds)
         {
             if (lastOutCds == null || lastOutCds.Length < 1)
             {
@@ -130,11 +129,11 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
 
 
         /// <summary>
-        ///  根据上一手其他玩家出的牌来，检索出所有可以关的牌，用于提示
+        ///  根据上一手其他玩家出的牌来，检索出所有可以管的牌，用于提示
         /// </summary>
         /// <param name="handcdsTemp"></param>
         /// <param name="lastoutData"></param>
-        public void FindCds(int[] handcdsTemp, ISFSObject lastoutData)
+        public void GetPromptGroup(int[] handcdsTemp, ISFSObject lastoutData)
         {
             //清除旧的提示列表
             _tishiGroupList.Clear();

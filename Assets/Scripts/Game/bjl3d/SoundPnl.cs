@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
 
 namespace Assets.Scripts.Game.bjl3d
@@ -7,7 +8,7 @@ namespace Assets.Scripts.Game.bjl3d
 
         public void SliderTest(float even)
         {
-            MusicManager.Instance.MusicVolume = even;
+            Facade.Instance<MusicManager>().MusicVolume = even;
         }
     }
 }

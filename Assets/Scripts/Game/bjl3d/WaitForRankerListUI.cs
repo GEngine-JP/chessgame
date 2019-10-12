@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using YxFramwork.Common;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.bjl3d
 {
 
     public class WaitForRankerListUI : MonoBehaviour
     {
-        public static WaitForRankerListUI Instance;
-
         public Transform RankerListDemo;
 
         /// <summary>
@@ -22,14 +22,6 @@ namespace Assets.Scripts.Game.bjl3d
 
         public Image buttonImage;
 
-        /// <summary>
-        /// 获取UI操作控件
-        /// </summary>
-        private void Awake()
-        {
-            Instance = this;
-        }
-
         //清理上下庄列表UI
         public void RankerListData()
         {
@@ -42,23 +34,22 @@ namespace Assets.Scripts.Game.bjl3d
         /// <summary>
         /// UI显示相关函数
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="nickName"></param>
         /// <param name="money"></param>
-        public void ShowRankerListUI(string name, string money)
+        public void ShowRankerListUI(string nickName, long money)
         {
-            GameObject item = Instantiate(RankerListDemo.gameObject);
-            item.transform.FindChild("Name").GetComponent<Text>().text = name;
-            item.transform.FindChild("Money").GetComponent<Text>().text = money;
+            var item = Instantiate(RankerListDemo.gameObject);
+            item.transform.FindChild("Name").GetComponent<Text>().text = nickName;
+            item.transform.FindChild("Money").GetComponent<Text>().text = YxUtiles.GetShowNumberToString(money);
             item.transform.parent = RankerListDemo.parent;
             item.transform.localPosition = new Vector3(item.transform.localPosition.x, item.transform.localPosition.y, 0);
             item.transform.localScale = Vector3.one;
-
             item.SetActive(true);
         }
 
         private void ShowApplyBtn(bool isShowApplyBtn)
         {
-            CountDownUI.Instance.ShowS_X_Image(isShowApplyBtn);
+            App.GetGameManager<Bjl3DGameManager>().TheCountDownUI.ShowS_X_Image(isShowApplyBtn);
         }
     }
 

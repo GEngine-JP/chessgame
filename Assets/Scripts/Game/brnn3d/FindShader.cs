@@ -5,14 +5,12 @@ namespace Assets.Scripts.Game.brnn3d
 {
     public class FindShader : MonoBehaviour
     {
-        public static FindShader Instance;
         public bool IsImage = true;
         public bool IsParticle = false;
         public string ShaderName;
 
         void Awake()
         {
-            Instance = this;
             if (IsImage)
             {
                 Image img = this.gameObject.GetComponent<Image>();

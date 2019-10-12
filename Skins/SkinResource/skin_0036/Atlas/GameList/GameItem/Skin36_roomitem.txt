@@ -1,0 +1,36 @@
+{"frames": {
+
+"skin35_game_0.png":
+{
+	"frame": {"x":2,"y":2,"w":645,"h":143},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":645,"h":143},
+	"sourceSize": {"w":645,"h":143}
+},
+"skin35_game_1.png":
+{
+	"frame": {"x":2,"y":294,"w":645,"h":146},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":645,"h":146},
+	"sourceSize": {"w":645,"h":146}
+},
+"skin35_game_2.png":
+{
+	"frame": {"x":2,"y":147,"w":645,"h":145},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":645,"h":145},
+	"sourceSize": {"w":645,"h":145}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "Skin36_roomitem.png",
+	"format": "RGBA8888",
+	"size": {"w":1024,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:f899077e0c0511bf99fc2773e614b1da$"
+}
+}

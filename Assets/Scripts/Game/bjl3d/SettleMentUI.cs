@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.bjl3d
 {
@@ -17,33 +19,37 @@ namespace Assets.Scripts.Game.bjl3d
         /// </summary>
         public void GameResultFun()
         {
-            MusicManager.Instance.Play("JieSuan");
-            //AudioClip clip = ResourcesLoader.instance.LoadAudio("music/JieSuan");
-            //            AudioManager.Instance.Play(clip, false, .8f);
-            var gdata = App.GetGameData<GlobalData>();
-            for (int i = 0; i < gdata.BetJiesuan.Length; i++)
+            Facade.Instance<MusicManager>().Play("JieSuan"); 
+            var gdata = App.GetGameData<Bjl3DGameData>();
+            var selfSeat = gdata.SelfSeat;
+            for (var i = 0; i < gdata.BetJiesuan.Length; i++)
             {
-                if (gdata.B == gdata.CurrentUser.Seat)
+                if (gdata.B == selfSeat)
                 {
-                    jiesuanTexts[i].text = gdata.BetMoney[i].ToString();
+                    SetText(jiesuanTexts[i],gdata.BetMoney[i]);
                 }
                 else
                 {
                     if (gdata.BetJiesuan[i] == 0)
                     {
-                        jiesuanTexts[i].text = -gdata.BetMoney[i] + "";
+                        SetText(jiesuanTexts[i], -gdata.BetMoney[i]);
                     }
                     else
                     {
-                        jiesuanTexts[i].text = gdata.BetJiesuan[i] * gdata.BetMoney[i] + "";
+                        SetText(jiesuanTexts[i], gdata.BetJiesuan[i] * gdata.BetMoney[i]);
                     }
                 }
             }
-            TotalText.text = gdata.Win + "";
+            TotalText.text = YxUtiles.GetShowNumberToString(gdata.Win);
             Xpoint.text = gdata.XianValue + "";
             Zpoint.text = gdata.ZhuangValue + "";
 
         }
 
+
+        protected void SetText(Text label,int coin)
+        {
+            label.text = YxUtiles.GetShowNumberToString(coin);
+        }
     }
 }

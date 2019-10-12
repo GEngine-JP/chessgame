@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Game.lswc.Control.System;
-using Assets.Scripts.Game.lswc.Core;
+﻿using Assets.Scripts.Game.lswc.Core;
 using Assets.Scripts.Game.lswc.Data;
 using UnityEngine.UI;
 using YxFramwork.Common;
@@ -11,13 +10,6 @@ namespace Assets.Scripts.Game.lswc.Manager
     /// </summary>
     public class LSOperationManager : InstanceControl
     {
-        private static LSOperationManager _instance;
-
-        public static LSOperationManager Instance
-        {
-            get { return _instance; }
-        }
-
         public Button BackBtn;
 
         public Button ExpandBtn;
@@ -34,11 +26,6 @@ namespace Assets.Scripts.Game.lswc.Manager
 
         public Button AllInBtn;
 
-        private void Awake()
-        {
-            _instance = this;
-        }
-
         public void InitListener()
         {
             BackBtn.onClick.AddListener(OnClickBackbtn);
@@ -53,75 +40,81 @@ namespace Assets.Scripts.Game.lswc.Manager
 
         private void OnClickBackbtn()
         {
-           LSSystemControl.Instance.QuitGame();
+            App.GetGameManager<LswcGamemanager>().SystemControl.QuitGame();
         }
 
         private void OnClickExpandBtn()
-        {
-            LSUIManager.Instance.ShowBetWindow();
+        { 
+            App.GetGameManager<LswcGamemanager>().UIManager.ShowBetWindow();
         }
 
         private void OnclickSharinkBtn()
         {
-            LSUIManager.Instance.HideBetWindow();
+            App.GetGameManager<LswcGamemanager>().UIManager.HideBetWindow();
         }
 
         private void OnClickSettingBtn()
         {
-            LSUIManager.Instance.ShowSettingWindow();
+            App.GetGameManager<LswcGamemanager>().UIManager.ShowSettingWindow();
         }
 
         private void OnClickChangeAnteBtn()
         {
-            App.GetGameData<GlobalData>().ChangeAnte();
-            LSUIManager.Instance.ChangeAnte();
-            LSSystemControl.Instance.PlaySuccess(true);
+            App.GetGameData<LswcGameData>().ChangeAnte();
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            gameMgr.UIManager.ChangeAnte();
+            gameMgr.SystemControl.PlaySuccess(true);
         }
 
         private void OnClickGoOnBtn()
         {
-            bool success = false;
-            if (App.GetGameData<GlobalData>().GlobalGameStatu == GameState.BetState)
+            var success = false;
+            var gdata = App.GetGameData<LswcGameData>();
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            if (gdata.GlobalELswcGameStatu == ELswcGameState.BetState)
             {
-                success = App.GetGameData<GlobalData>().BetAgain();
+                success = gdata.BetAgain();
                 if (success)
                 {
-                    LSUIManager.Instance.SetBetWindow();
+                    gameMgr.UIManager.SetBetWindow();
                 }
             }
-            LSSystemControl.Instance.PlaySuccess(success);
+            gameMgr.SystemControl.PlaySuccess(success);
         }
 
         private void OnClickClearBtn()
         {
-            bool success = false;
-            if (App.GetGameData<GlobalData>().GlobalGameStatu == GameState.BetState)
+            var success = false;
+            var gdata = App.GetGameData<LswcGameData>();
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            if (gdata.GlobalELswcGameStatu == ELswcGameState.BetState)
             {
-                App.GetGameData<GlobalData>().ClearBets();
-                LSUIManager.Instance.SetBetWindow();
+                gdata.ClearBets();
+                gameMgr.UIManager.SetBetWindow();
                 success = true;
             }
-            LSSystemControl.Instance.PlaySuccess(success);
+            gameMgr.SystemControl.PlaySuccess(success);
 
         }
 
         private void OnClickAllInBtn()
         {
-            bool success = false;
-            if (App.GetGameData<GlobalData>().GlobalGameStatu == GameState.BetState)
+            var success = false;
+            var gdata = App.GetGameData<LswcGameData>();
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            if (gdata.GlobalELswcGameStatu == ELswcGameState.BetState)
             {
-                if (App.GetGameData<GlobalData>().BetAll())
+                if (gdata.BetAll())
                 {
                     success = true;
-                }       
-                LSUIManager.Instance.SetBetWindow();
+                }
+                gameMgr.UIManager.SetBetWindow();
             }
-            LSSystemControl.Instance.PlaySuccess(success);
+            gameMgr.SystemControl.PlaySuccess(success);
         }
 
         public override void OnExit()
         {
-            _instance = null;
             BackBtn.onClick.RemoveAllListeners();
             ExpandBtn.onClick.RemoveAllListeners();
             SharinkBtn.onClick.RemoveAllListeners();

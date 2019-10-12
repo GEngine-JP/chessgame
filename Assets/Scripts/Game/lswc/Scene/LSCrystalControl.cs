@@ -1,23 +1,16 @@
 ﻿using System.Collections.Generic;
-using Assets.Scripts.Game.lswc.Control.Scene.Item;
 using Assets.Scripts.Game.lswc.Core;
+using Assets.Scripts.Game.lswc.Item;
 using UnityEngine;
 
-namespace Assets.Scripts.Game.lswc.Control.Scene.Manager
+namespace Assets.Scripts.Game.lswc.Scene
 {
     /// <summary>
     /// 晶体管理类，控制所有晶体的状态
     /// </summary>
     public class LSCrystalControl : InstanceControl
     {
-        private static LSCrystalControl _instance;
-
-        public static LSCrystalControl Instance
-        {
-            get { return _instance; }
-        }
-
-        private float _durTime = 0;
+        private float _durTime;
 
         [HideInInspector]
         public List<LSCrystalItemControl> _crystalList;
@@ -30,7 +23,6 @@ namespace Assets.Scripts.Game.lswc.Control.Scene.Manager
 
         private void Awake()
         {
-            _instance = this;
             _crystalList = new List<LSCrystalItemControl>();
         }
 
@@ -92,7 +84,6 @@ namespace Assets.Scripts.Game.lswc.Control.Scene.Manager
 
         public override void OnExit()
         {
-            _instance = null;
         }
     }
     public enum Type_Crystal

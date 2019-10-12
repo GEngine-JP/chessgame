@@ -7,23 +7,9 @@ namespace Assets.Scripts.Game.lswc.Item
 {
     public class LSAnimalItemControl:LSItemControlBase
     {
-        private static LSAnimalItemControl _instance;
-
-        public static LSAnimalItemControl Instance
-        {
-            get { return _instance; }
-        }
-
         private LSRotate _rotate;
 
         private int _nowPosition=0;
-
-        private void Awake()
-        {
-            _instance = this;
-            
-        }
-
         private void Start()
         {
             _rotate = GetComponent<LSRotate>();
@@ -43,30 +29,24 @@ namespace Assets.Scripts.Game.lswc.Item
         protected override void InitOther()
         {
             base.InitOther();
-            bool isChange = false;
-            for (int i = 0; i < Items.Count; i++)
+            for (var i = 0; i < Items.Count; i++)
             {
-                LSAnimalItem item = (LSAnimalItem) Items[i];
-                LSAnimalType type = App.GetGameData<GlobalData>().Animals[i];
+                var item = (LSAnimalItem) Items[i];
+                var type = App.GetGameData<LswcGameData>().Animals[i];
                 if(!item.IsRightAnimal(type))
                 {
                     ChangeItem(i,GetLastIndex(type));
-                    isChange = true;
                 }
                 Items[i].name = type.ToString();
                 Items[i].transform.SetSiblingIndex(i);
             }
-            //if (isChange)
-            //{
-            //    InitPosition();
-            //}
         }
 
         private int GetLastIndex(LSAnimalType type)
         {
-            int index = Items.FindLastIndex(delegate(LSItemBase obj)
+            var index = Items.FindLastIndex(delegate(LSItemBase obj)
                 {
-                    LSAnimalItem item = (LSAnimalItem) obj;
+                    var item = (LSAnimalItem) obj;
                     return item.IsRightAnimal(type);
                 });
             if(index<0||index>=Items.Count)
@@ -79,9 +59,6 @@ namespace Assets.Scripts.Game.lswc.Item
 
         public float GetTotalAngle(float angle)
         {
-            //LSAnimalItem item=(LSAnimalItem)Items[0];
-            //float singleAngle=360/item.GetItemsNumber();
-            //float totalAngle = singleAngle*index+360*LSConstant.Num_RotateNumber;
             angle += 360 * LSConstant.Num_AnimalRotateNumber;
             return angle;
         }
@@ -113,7 +90,7 @@ namespace Assets.Scripts.Game.lswc.Item
             
             foreach (var lsItemBase in Items)
             {
-                LSAnimalItem item = (LSAnimalItem) lsItemBase;
+                var item = (LSAnimalItem) lsItemBase;
                 StartCoroutine(item.PlayAnimalAnimation(times));
             }
         }

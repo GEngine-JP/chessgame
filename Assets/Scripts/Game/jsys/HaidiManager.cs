@@ -5,8 +5,6 @@ namespace Assets.Scripts.Game.jsys
 {
     public class HaidiManager : MonoBehaviour
     {
-
-        public static HaidiManager Instance;
         public Camera CameraLand;
         public Camera CameraSky;
         public Sprite[] Sprites;
@@ -16,11 +14,6 @@ namespace Assets.Scripts.Game.jsys
         public GameObject Senlinbg;
         public GameObject Senlin;
         public GameObject Banjiangtai;
-
-        public void Awake()
-        {
-            Instance = this;
-        }
 
         public void SetBgSprite(int no)
         {

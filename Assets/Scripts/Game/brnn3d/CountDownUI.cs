@@ -1,24 +1,18 @@
-﻿using System;
-using UnityEngine.UI;
+﻿using UnityEngine.UI;
 using UnityEngine;
 using YxFramwork.Common;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
 
 namespace Assets.Scripts.Game.brnn3d
 {
     public class CountDownUI : MonoBehaviour
     {
-        public static CountDownUI Instance;
         public Image SiImg;
         public Image GeImg;
         public Sprite[] NumberSprites;
         public Sprite[] TesuNuSprites;
-
-        protected void Awake()
-        {
-            Instance = this;
-        }
-
+         
         private int _timeCount;
         private float _time;
         protected void Update()
@@ -27,12 +21,14 @@ namespace Assets.Scripts.Game.brnn3d
             if (_time > 1)
             {
                 if (_timeCount > 0)
+                {
                     _timeCount--;
+                }
                 GetTimeCountNumberToImg(_timeCount);
                 _time = 0f;
-                if (_timeCount < 4 && App.GetGameData<GlobalData>().IsBet)
+                if (_timeCount < 4 && App.GetGameData<Brnn3dGameData>().IsBet)
                 {
-                    MusicManager.Instance.Play("Warning");
+                    Facade.Instance<MusicManager>().Play("Warning");
                 }
             }
         }

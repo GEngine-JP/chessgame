@@ -1,17 +1,17 @@
-﻿using DG.Tweening;
+﻿using com.yxixia.utile.YxDebug;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
-using YxFramwork.Common.Utils;
+using YxFramwork.Enums;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.jsys
 {
     public class BetPanelManager : MonoBehaviour
     {
-
-        public static BetPanelManager Instance;
-
         //我的金币
 
         public Text MyMoneyText;
@@ -49,7 +49,6 @@ namespace Assets.Scripts.Game.jsys
 
         protected void Start()
         {
-            Instance = this;
             _bb = new int[12];
             ChipText.transform.parent.GetComponent<Button>().onClick.AddListener(OnClickBtn);
         }
@@ -59,18 +58,25 @@ namespace Assets.Scripts.Game.jsys
             ClickBtn();
         }
 
+        public void FreshBtn()
+        {
+            ClickBtn();
+        }
+
         private bool ClickBtn()
         {
-            bool panDuan = false;
-            if (App.GetGameData<GlobalData>().StartBet)
+            var panDuan = false;
+            var gdata = App.GetGameData<JsysGameData>();
+            if (gdata.StartBet)
             {
-                if (Num[BetIndex] > App.GetGameData<GlobalData>().UserMoney)
+                var anteRate = gdata.AnteRate;
+                if (anteRate[BetIndex] > gdata.UserMoney)
                 {
-                    Instance.ShowBetButton(false);
+                    ShowBetButton(false);
                 }
                 else
                 {
-                    Instance.ShowBetButton(true);
+                    ShowBetButton(true);
                     panDuan = true;
                 }
             }
@@ -81,57 +87,65 @@ namespace Assets.Scripts.Game.jsys
         public void GameBeginXizhu()
         {
             //Debug.Log("所有游戏状态回到最初");
-            MusicManager.Instance.Stop();
-//            MusicManager.Instance.PlayBacksound("Beijing");
+            var gdata = App.GetGameData<JsysGameData>();
+            var gameMgr = App.GetGameManager<JsysGameManager>();
+            var musicMgr = Facade.Instance<MusicManager>();
+            musicMgr.Stop();
             //隐藏结算UI
             //TurnGroupsManager.Instance.GameConfig.TurnTableState = (int)GameConfig.GoldSharkState.Bet;  
-            ResultUIManager.Instance.HideJieSuanUI();
-            AnimationManager.Instance.HideBetPanel();
+            gameMgr.ResultUIMgr.HideJieSuanUI();
+            gameMgr.AnimationMgr.HideBetPanel();
             //倍率显示
-            TurnGroupsManager.Instance.GameConfig.Imultiplying = App.GetGameData<GlobalData>().Multiplying;
-
+            gameMgr.TurnGroupsMgr.GameConfig.Imultiplying = gdata.Multiplying;
             //筹码显示归零
             //ShowChipTextUI(Chip);自己注释的
             ButtonUIInit();
-            SetMoney(App.GetGameData<GlobalData>().UserMoney);
+            SetMoney(gdata.UserMoney);
             //总筹码显示           
-            Instance.ShowIgetMoney(0);
-            Instance.ShowiWiningText(0);
-            ModelManager.Instance.ChangeToHaidi();
+            gdata.Gold = 0;
+            gameMgr.ModelMgr.ChangeToHaidi();
         }
         //新一把游戏下注界面清零
         public void ButtonUIInit()
         {
-            for (int i = 0; i < 12; i++)
+            for (var i = 0; i < 12; i++)
             {
                 _bb[i] = 0;
-                BetTexts[i].text = "0";
+                SetBetText(0, BetTexts[i]);
             }
+        }
+
+        private void SetBetText(int bet,Text label)
+        {
+            label.text = YxUtiles.GetShowNumberToString(bet);
         }
 
         //显示彩金Text
         public void ShowiWiningText(int iwining)
         {
-            WiningText.text = iwining + "";
+            WiningText.text = YxUtiles.GetShowNumberToString(iwining);
         }
         //显示得分切换Text
         public void ShowIgetMoney(long igetmoney)
         {
-            GetMoneyText.text = igetmoney + "";
+            GetMoneyText.text = YxUtiles.GetShowNumberToString(igetmoney);
         }
 
         //游戏等待状态
         public void Gamewaitshow()
         {
-            MusicManager.Instance.Stop();
-            AudioPlay.Instance.PlaySounds("Xiazhu");
-            TurnGroupsManager.Instance.GameConfig.TurnTableState = (int)GameConfig.GoldSharkState.Bet;
-            Instance.ShowBetButton(false);
+            var musicMgr = Facade.Instance<MusicManager>();
+            musicMgr.Stop();
+            musicMgr.Play("Xiazhu");
+            var turnGroupMgr = App.GetGameManager<JsysGameManager>().TurnGroupsMgr;
+            turnGroupMgr.GameConfig.TurnTableState = (int)GameConfig.GoldSharkState.Bet;
+            ShowBetButton(false);
             //显示押注面板
-            if (!TurnGroupsManager.Instance.GameConfig.IsBetPanelOnShow)
+            if (!turnGroupMgr.GameConfig.IsBetPanelOnShow)
             {
                 ShowUI();
             }
+            InitChips();
         }
         //倍率显示
         public void ShowImultiply(int[] imultiplying)
@@ -148,7 +162,7 @@ namespace Assets.Scripts.Game.jsys
         /// <param name="isCanBet"></param>
         public void ShowBetButton(bool isCanBet)
         {
-            for (int i = 0; i < BetButtons.Length; i++)
+            for (var i = 0; i < BetButtons.Length; i++)
             {
                 BetButtons[i].interactable = isCanBet;
             }
@@ -158,20 +172,21 @@ namespace Assets.Scripts.Game.jsys
         //显示金币
         public void SetMoney(long money)
         {
-            MyMoneyText.text = money + "";
+            if (money < 0) money = 0;
+            MyMoneyText.text = YxUtiles.GetShowNumberToString(money);
         }
 
         //显示下注面板
         public void ShowUI()
         {
             transform.DOMove(Uitf.position, 1f).SetEase(Ease.OutBounce);
-            TurnGroupsManager.Instance.GameConfig.IsBetPanelOnShow = true;
+            App.GetGameManager<JsysGameManager>().TurnGroupsMgr.GameConfig.IsBetPanelOnShow = true;
         }
         //隐藏下注面板
         public void HideUI()
         {
             transform.DOMove(Hidetf.position, 0.5f);
-            TurnGroupsManager.Instance.GameConfig.IsBetPanelOnShow = false;
+            App.GetGameManager<JsysGameManager>().TurnGroupsMgr.GameConfig.IsBetPanelOnShow = false;
         }
 
         /// <summary>
@@ -194,7 +209,7 @@ namespace Assets.Scripts.Game.jsys
                     _xuYa[i] = _bb[i];
                 }
                 App.GetRServer<GameServer>().ClickedToSend(_bb);
-                App.GameData.GStatus = GameStatus.PlayAndConfine;
+                App.GameData.GStatus = YxEGameStatus.PlayAndConfine;
             }
             for (int index = 0; index < _bb.Length; index++)
             {
@@ -210,6 +225,7 @@ namespace Assets.Scripts.Game.jsys
         //押注数据显示
         public void ShowBetData(int num)
         {
+            var anteRate = App.GameData.AnteRate;
             if (_isClear)
             {
                 for (int i = 0; i < _bb.Length; i++)
@@ -218,70 +234,84 @@ namespace Assets.Scripts.Game.jsys
                 }
                 _isClear = false;
             }
-            _bb[num] += Num[BetIndex];
+            _bb[num] += anteRate[BetIndex];
 
-            BetTexts[num].text = _bb[num] + "";
-            MyMoneyText.text = (App.GetGameData<GlobalData>().UserMoney - Num[BetIndex]) + "";
+            SetBetText(_bb[num], BetTexts[num]);
+            SetMoney(App.GetGameData<JsysGameData>().UserMoney - anteRate[BetIndex]);
         }
         //下注控件
         private bool _isXuya = true;
         public void Beting(int num)
         {
+            var anteRate = App.GameData.AnteRate;
+            var gdata = App.GetGameData<JsysGameData>();
+            var musicMgr = Facade.Instance<MusicManager>();
             if (num <= 11)
             {
-                AudioPlay.Instance.PlaySounds("Xiazhu");
-                Debug.Log("num" + num);
+                musicMgr.Play("Xiazhu");
+                YxDebug.Log("num" + num);
                 if (ClickBtn())
                 {
-                    ShowBetData(num);
-                    App.GetGameData<GlobalData>().UserMoney -= Num[BetIndex];
+                    var bet = anteRate[BetIndex];
+                    if (gdata.UserMoney >= bet)
+                    {
+                        ShowBetData(num);
+                        gdata.UserMoney -= bet;
+                    }
                 }
                 _isXuya = true;
             }
             else if (num == 12)
             {
-                AudioPlay.Instance.PlaySounds("Xuya");
+                musicMgr.Play("Xuya");
 
-                for (int i = 0; i < _bb.Length; i++)
+                for (var i = 0; i < _bb.Length; i++)
                 {
-                    BetTexts[i].text = _xuYa[i] + "";
-                    App.GetGameData<GlobalData>().UserMoney -= _xuYa[i];
-                    _bb[i] = _xuYa[i];
+                    var xuya = _xuYa[i];
+                    if(gdata.UserMoney < xuya) { break;}
+                    SetBetText(xuya, BetTexts[i]);
+                    gdata.UserMoney -= xuya;
+                    _bb[i] = xuya;
                     _isClear = true;
                 }
                 if (_isXuya)
                 {
-                    MyMoneyText.text = App.GetGameData<GlobalData>().UserMoney + "";
+                    SetMoney(gdata.UserMoney);
                     _isXuya = false;
                 }
             }
             else if (num == 13)
             {
-                AudioPlay.Instance.PlaySounds("Xiazhu");
+                musicMgr.Play("Xiazhu");
                 for (int index = 0; index < _bb.Length; index++)
                 {
-                    App.GetGameData<GlobalData>().UserMoney += _bb[index];
+                    gdata.UserMoney += _bb[index];
                 }
                 ButtonUIInit();
                 _isClear = false;
-                MyMoneyText.text = App.GetGameData<GlobalData>().UserMoney + "";
+                SetMoney(gdata.UserMoney);
                 _isXuya = true;
             }
         }
-        //筹码的数值
-        public int[] Num;
         //筹码数值的索引
         public int BetIndex;
         //切换筹码
         public void ChangeChips()
         {
             BetIndex++;
-            if (BetIndex >= Num.Length)
+            var anteRate = App.GameData.AnteRate;
+            if (BetIndex >= anteRate.Count)
             {
                 BetIndex = 0;
             }
-            ChipText.text = Num[BetIndex] + "";
-            AudioPlay.Instance.PlaySounds("Qiehuan");
+            ChipText.text = YxUtiles.GetShowNumberToString(anteRate[BetIndex]);
+            Facade.Instance<MusicManager>().Play("Qiehuan");
+        }
+
+        public void InitChips()
+        {
+            BetIndex = -1;
+            ChangeChips();
         }
     }
 }

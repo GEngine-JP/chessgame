@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using YxFramwork.Common;
 
-namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
+namespace Assets.Scripts.Game.Shuihuzhuan
 {
     public class TurnItemControl : MonoBehaviour
     {   /// <summary>
@@ -71,6 +72,9 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
 
         void Update()
         {
+            var server = App.RServer;
+            if (server == null) return;
+            if (!server.HasGetGameInfo) return;
             if (this.transform.localPosition.y <= TurnControl.instance.endTransforms[1].localPosition.y)
             {
                 transform.localPosition = TurnControl.instance.bornTransforms[kind].localPosition;

@@ -1,22 +1,20 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
-using YxFramwork.Manager;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.jsys
 {
     public class ResultUIManager : MonoBehaviour
     {
-        public static ResultUIManager Instance;
-
         public Text TotalInText;
         public Text WinText;
         public Image ResultPanel;
 
         public void Awake()
         {
-            Instance = this;
-            TotalInText.text = "0";
+            SetTotalInLabel(0);
+            SetWinLabel(0);
         }
 
         public bool isTrue = true;
@@ -25,24 +23,26 @@ namespace Assets.Scripts.Game.jsys
         /// </summary>
         public void GameFinish()
         {
-            App.GetGameData<GlobalData>().isOut = true;
+            var gdata = App.GetGameData<JsysGameData>();
+            var gameMgr = App.GetGameManager<JsysGameManager>();
+            gdata.isOut = true;
             //隐藏开奖动画
-            AnimationManager.Instance.HideAnimation();
-            AnimationManager.Instance.HideBetPanel();
+            gameMgr.AnimationMgr.HideAnimation();
+            gameMgr.AnimationMgr.HideBetPanel();
             //结算板
-            if (App.GetGameData<GlobalData>().IsShark == false)
+            if (gdata.IsShark == false)
             {
                 ShowJieSuan();
             }
-            TotalInText.text = -App.GetGameData<GlobalData>().Ante + "";
-            WinText.text = App.GetGameData<GlobalData>().Gold + "";
-            BetPanelManager.Instance.ShowIgetMoney(App.GetGameData<GlobalData>().Gold);
+            SetTotalInLabel(-gdata.Ante);
+            SetWinLabel(gdata.Gold);
+            gameMgr.BetPanelMgr.ShowIgetMoney(gdata.WinGold);
             //更新路子显示
-            HistoryManager.Instance.ShowNewHistory(App.GetGameData<GlobalData>().EndAnimal);
-            if (App.GetGameData<GlobalData>().IsShark)
+            gameMgr.HistoryMgr.ShowNewHistory(gdata.EndAnimal);
+            if (gdata.IsShark)
             {
-                App.GetGameData<GlobalData>().IsShark = false;
-                TurnGroupsManager.Instance.PlayGame();
+                gdata.IsShark = false;
+                gameMgr.TurnGroupsMgr.PlayGame();
                 isTrue = false;
             }
             if (isTrue)
@@ -50,12 +50,21 @@ namespace Assets.Scripts.Game.jsys
                 Invoke("ChuXian", 4f);
             }
             isTrue = true;
-            App.GetGameData<GlobalData>().IsShark = false;
-            App.GetGameData<GlobalData>().FishIdx = 1;
+            gdata.IsShark = false;
+            gdata.FishIdx = 1;
+        }
+
+        protected void SetWinLabel(int gold)
+        {
+            WinText.text = YxUtiles.GetShowNumberToString(gold);
+        }
+        protected void SetTotalInLabel(int gold)
+        {
+            TotalInText.text = YxUtiles.GetShowNumberToString(gold);
         }
         public void ChuXian()
         {
-            BetPanelManager.Instance.GameBeginXizhu();
+            App.GetGameManager<JsysGameManager>().BetPanelMgr.GameBeginXizhu();
         }
 
         //显示开奖结算页面

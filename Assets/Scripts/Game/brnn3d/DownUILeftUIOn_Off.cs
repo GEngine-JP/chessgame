@@ -6,15 +6,9 @@ namespace Assets.Scripts.Game.brnn3d
 {
     public class DownUILeftUIOn_Off : MonoBehaviour
     {
-        public static DownUILeftUIOn_Off Instance;
         public Transform Kaitf;
         public Transform Guantf;
-
-        protected void Awake()
-        {
-            Instance = this;
-        }
-
+         
         public void ShowKaiBtn()
         {
             if (Guantf.gameObject.activeSelf)

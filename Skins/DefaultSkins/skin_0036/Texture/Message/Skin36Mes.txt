@@ -1,0 +1,60 @@
+{"frames": {
+
+"btn_cancel.png":
+{
+	"frame": {"x":374,"y":155,"w":237,"h":90},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":237,"h":90},
+	"sourceSize": {"w":237,"h":90}
+},
+"btn_cancel_hover.png":
+{
+	"frame": {"x":613,"y":94,"w":237,"h":90},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":237,"h":90},
+	"sourceSize": {"w":237,"h":90}
+},
+"btn_ok.png":
+{
+	"frame": {"x":374,"y":63,"w":237,"h":90},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":237,"h":90},
+	"sourceSize": {"w":237,"h":90}
+},
+"btn_ok_hover.png":
+{
+	"frame": {"x":637,"y":2,"w":237,"h":90},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":237,"h":90},
+	"sourceSize": {"w":237,"h":90}
+},
+"skin35_box01.png":
+{
+	"frame": {"x":374,"y":2,"w":261,"h":59},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":261,"h":59},
+	"sourceSize": {"w":261,"h":59}
+},
+"skin35_box06.png":
+{
+	"frame": {"x":2,"y":2,"w":370,"h":487},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":370,"h":487},
+	"sourceSize": {"w":370,"h":487}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "Skin36Mes.png",
+	"format": "RGBA8888",
+	"size": {"w":1024,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:98baf344776022caa8cc986c4d4a95df$"
+}
+}

@@ -1,34 +1,20 @@
 ﻿using System.Collections.Generic;
-using Assets.Scripts.Game.lswc.Control.Scene.Item;
-using Assets.Scripts.Game.lswc.Control.Scene.Manager;
 using Assets.Scripts.Game.lswc.Core;
 using Assets.Scripts.Game.lswc.Data;
-using Assets.Scripts.Game.lswc.Item;
 using Assets.Scripts.Game.lswc.Manager;
-using Assets.Scripts.Game.lswc.States;
 using Assets.Scripts.Game.lswc.Tools;
-using Sfs2X.Entities.Data;
-using UnityEngine;
-using YxFramwork.Common;
-using YxFramwork.ConstDefine;
-using YxFramwork.View;
 using com.yxixia.utile.YxDebug;
-using YxFramwork.Common.Utils;
+using YxFramwork.Common;
+using YxFramwork.Framework.Core;
+using YxFramwork.Manager;
 
-namespace Assets.Scripts.Game.lswc.Control.System
+namespace Assets.Scripts.Game.lswc
 {
     /// <summary>
     /// 系统控制
     /// </summary>
     public class LSSystemControl : InstanceControl
-    {
-        private static LSSystemControl _instance;
-
-        public static LSSystemControl Instance
-        {
-            get { return _instance; }
-        }
-
+    { 
         /// <summary>
         /// 是否加载完毕资源
         /// </summary>
@@ -47,15 +33,16 @@ namespace Assets.Scripts.Game.lswc.Control.System
 
         private void Awake()
         {
-            _instance = this;
             spans = new List<LSTimeSpan>();
+            PlayeGameStateMusic(0);
         }
         
 
         private void Start()
         {
-            LSResourseManager.Instance.OnLoadFinished = OnLoadResourseFinshed;
-            LSOperationManager.Instance.InitListener();
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            gameMgr.ResourseManager.OnLoadFinished = OnLoadResourseFinshed;
+            gameMgr.OperationManager.InitListener();
         }
 
         #region 测试区域
@@ -130,11 +117,12 @@ namespace Assets.Scripts.Game.lswc.Control.System
 
         public void InitState()
         {
-            YxDebug.Log("当前游戏阶段是： " + App.GetGameData<GlobalData>().GlobalGameStatu + "剩余时间是 ：" + App.GetGameData<GlobalData>().ShowTime);
+            var gdata = App.GetGameData<LswcGameData>();
+            YxDebug.Log("当前游戏阶段是： " + gdata.GlobalELswcGameStatu + "剩余时间是 ：" + App.GetGameData<LswcGameData>().ShowTime);
 
             if (_loadFinished)
             {
-                _curState = LSInitState.Instance;
+                _curState = gdata.GameStates.InitState;//LSInitState.Instance;
                 _curState.Enter();
             }
             else
@@ -191,12 +179,10 @@ namespace Assets.Scripts.Game.lswc.Control.System
 
         public override void OnExit()
         {
-            _instance = null;
         }
 
         void OnDestroy()
         {
-            _instance = null;
             _curState = null;   
         }
 
@@ -226,18 +212,18 @@ namespace Assets.Scripts.Game.lswc.Control.System
         /// </summary>
         public void InitEachRound()
         {
-
-            App.GetGameData<GlobalData>().ISGetResult = false; 
-            LSColorItemControl.Instance.ResetLayout();
-            LSAnimalItemControl.Instance.ResetLayout();      
-            LSTurnTableControl.Instance.SetPointPosition(0);
-            LSUIManager.Instance.InitUImanager();
-            LSCameraManager.Instance.Reset();
+            App.GetGameData<LswcGameData>().ISGetResult = false; 
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            gameMgr.ColorItemControl.ResetLayout();
+            gameMgr.AnimalItemCtrl.ResetLayout();
+            gameMgr.TurnTableControl.SetPointPosition(0);
+            gameMgr.UIManager.InitUImanager();
+            gameMgr.CameraManager.Reset();
         }
 
         public void SetBonus()
         {
-            LSUIManager.Instance.SetBonus(App.GetGameData<GlobalData>().GetRandomNum().ToString());
+            App.GetGameManager<LswcGamemanager>().UIManager.SetBonus(App.GetGameData<LswcGameData>().GetRandomNum());
         }
 
         /// <summary>
@@ -246,37 +232,25 @@ namespace Assets.Scripts.Game.lswc.Control.System
         /// <param name="type"></param>
         public void  PlayeGameStateMusic(LSRewardType type)
         {
-            string musicName;
-
+            var musicIndex = (int) type;
             switch (type)
             {
-                case LSRewardType.NORMAL:
-                    musicName = LSConstant.BackgroundMusci_Normal;
-                    break;
-                case LSRewardType.LIGHTING:
-                    musicName = LSConstant.BackgroundMusic_Lighting;
-                    break;
-                case LSRewardType.BIG_THREE:
-                    musicName = LSConstant.BackgroundMusic_BigThree;
+                case LSRewardType.BIG_THREE://LSConstant.BackgroundMusic_BigThree;
+                case LSRewardType.BIG_FOUR://LSConstant.BackgroundMusic_BigFour;
                     PlayVoice(LSConstant.ThreeOrFourWaring);
                     break;
-                case LSRewardType.BIG_FOUR:
-                    musicName = LSConstant.BackgroundMusic_BigFour;
-                    PlayVoice(LSConstant.ThreeOrFourWaring);
-                    break;
-                case LSRewardType.SENDLAMP:
-                    musicName = LSConstant.BackgroundMusic_SendLamp;
-                    break;
-                case LSRewardType.HANDSEL:
-                   musicName = LSConstant.BackgroundMusic_Handsel;
+                case LSRewardType.NORMAL://LSConstant.BackgroundMusci_Normal;
+                case LSRewardType.LIGHTING://LSConstant.BackgroundMusic_SendLamp;
+                case LSRewardType.SENDLAMP://LSConstant.BackgroundMusic_SendLamp;
+                case LSRewardType.HANDSEL://LSConstant.BackgroundMusic_Handsel;
                     break;
                 default:
-                    musicName = LSConstant.BackgroundMusic_WaitBet;
+                    //LSConstant.BackgroundMusic_WaitBet; 
+                    musicIndex = 6;
                     YxDebug.LogError("Not exist such type music");
                     break;
             }
-
-            PlayeGameStateMusic(musicName);
+            PlayeGameStateMusic(musicIndex);
         }
 
         /// <summary>
@@ -292,15 +266,14 @@ namespace Assets.Scripts.Game.lswc.Control.System
                 case LSRewardType.HANDSEL:
                 case LSRewardType.SENDLAMP:
                     return true;
-                    break;
                 default:
                     return false;
             }
         }
 
-        public void PlayeGameStateMusic(string bgMusic)
+        public void PlayeGameStateMusic(int bgMusicIndex)
         {
-            LSResourseManager.Instance.PlayBackgroundMusic(bgMusic);
+            Facade.Instance<MusicManager>().ChangeBackSound(bgMusicIndex);
         }
 
         /// <summary>
@@ -309,7 +282,7 @@ namespace Assets.Scripts.Game.lswc.Control.System
         /// <param name="voice"></param>
         public void PlayVoice(string voice)
         {
-            LSResourseManager.Instance.PlayVoice(voice);
+            Facade.Instance<MusicManager>().Play(voice);
         }
     }
 }

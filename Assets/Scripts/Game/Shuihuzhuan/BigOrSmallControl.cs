@@ -1,10 +1,12 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections; 
+using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
+using YxFramwork.Tool;
 
-namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
+namespace Assets.Scripts.Game.Shuihuzhuan
 {
     public class BigOrSmallControl : MonoBehaviour
     {
@@ -27,13 +29,13 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public Sprite[] history_Sprite;
         /// <summary>
-        /// 当前所得
-        /// </summary>
-        public Text winText;
-        /// <summary>
         /// 我的钱数
         /// </summary>
-        public Text myMoneyText;
+        public Text MyMoneyText;
+        /// <summary>
+        /// 当前所得
+        /// </summary>
+        public Text winText; 
         /// <summary>
         /// 下注倍数
         /// </summary>
@@ -87,7 +89,6 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         public GameObject leftjinbi;
         public GameObject bossjinbi;
 
-        private int winMoney = 0;
         private int Lishi = 0;
         private int Shaizi = 0;
         private void Awake()
@@ -99,6 +100,13 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
             {
                 history_img[i].enabled = false;
             }
+            Facade.EventCenter.AddEventListeners<EWmarginEventType, long>(EWmarginEventType.RefreshTotalMoney,OnReshTotalMoney);
+        }
+
+        private void OnReshTotalMoney(long obj)
+        {
+            if (MyMoneyText == null) { return; }
+            MyMoneyText.text = YxUtiles.GetShowNumberToString(obj);
         }
 
         /// <summary>
@@ -112,43 +120,14 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         private void Chushihua()
         {
             HideBetButtons();
-            iSone = App.GetGameData<GlobalData>().iDice1;
-            iSsec = App.GetGameData<GlobalData>().iDice2;
-            bossImage.GetComponent<Animator>().Play("boss_3");
-            AnimateFun();
-
+            var gdata = App.GetGameData<WmarginGameData>();
+            iSone = gdata.iDice1;
+            iSsec = gdata.iDice2;
+            var animator = bossImage.GetComponent<Animator>(); 
+            animator.Play("boss_3");
+            AnimatorFun();
         }
-
-        //public void Lishijilu()
-        //{
-        //    if ((iSone + iSsec) > 7)
-        //    {
-        //        Shaizi = 0;
-        //    }
-        //    else if ((iSone + iSsec) < 7)
-        //    {
-        //        Shaizi = 2;
-        //    }
-        //    else
-        //    {
-        //        Shaizi = 1;
-        //    }         
-        //    //if (Lishi >= 10)
-        //    //{
-        //    //    Lishi = 0;
-        //    //}
-        //    //for (int i = 0; i < 10; i++)
-        //    //{
-        //    //    if (i > 10)
-        //    //    {
-        //    //        historyImages[i + 1].sprite = historyImages[i].sprite;
-        //    //    }
-        //    //    else historyImages[0].sprite = historySprites[Lishi];
-
-        //    //}
-        //}
-
-
+         
         public void History()
         {
             int index;
@@ -194,35 +173,39 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
                     history_img[i].sprite = history_Sprite[2];
                     history_img[i].enabled = true;
                 }
-            }
-            for (int i = 0; i < 10; i++)
-            {
-
-            }
+            } 
         }
 
         public void bibeiFun()
         {
-            if (App.GetGameData<GlobalData>().Malizhuantai)
+            var gdata = App.GetGameData<WmarginGameData>();
+            if (gdata.Malizhuantai)
             {
-                App.GetGameData<GlobalData>().Malizhuantai = false;
+                gdata.Malizhuantai = false;
                 //                YxDebug.LogError(App.GetGameData<GlobalData>().MaliWinMony );
-                winText.text = App.GetGameData<GlobalData>().MaliWinMony.ToString();
-                App.GetGameData<GlobalData>().iWinMoney = App.GetGameData<GlobalData>().MaliWinMony;
-                myMoneyText.text = App.GetGameData<GlobalData>().MainMoney.ToString();
+                SetWinText(gdata.MaliWinMony);
+                gdata.iWinMoney = gdata.MaliWinMony;
             }
             else
             {
-                winText.text = App.GetGameData<GlobalData>().iWinMoney.ToString();
-                myMoneyText.text = App.GetGameData<GlobalData>().MainMoney.ToString();
+                SetWinText(gdata.iWinMoney);
             }
-            betText.text = App.GetGameData<GlobalData>().BetNum.ToString();
-
+//            MyMoneyText.text = gdata.GetPlayerInfo().CoinA.ToString();
+            SetBetText(gdata.BetNum);
             bossImage.GetComponent<Animator>().Play("boss_1");
             Invoke("ShowBetButtons", 2);
-            Invoke("ShowBigSmallBtnFun", 2);
-            MusicManager.Instance.Play("yaosaizi");
+            Invoke("ShowBigSmallBtnFun", 2);//19
+            Facade.Instance<MusicManager>().Play("yaosaizi");
 
+        }
+
+        protected void SetWinText(int coin)
+        {
+            winText.text = YxUtiles.GetShowNumberToString(coin);
+        }
+        protected void SetBetText(int coin)
+        {
+            betText.text = YxUtiles.GetShowNumberToString(coin);
         }
 
         /// <summary>
@@ -237,7 +220,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         }
         public void ShowBigSmallBtnFun()
         {
-            MusicManager.Instance.Play("xia");
+            Facade.Instance<MusicManager>().Play("xia");
             smallBtn.gameObject.SetActive(true);
             bigBtn.gameObject.SetActive(true);
             middleBtn.gameObject.SetActive(true);
@@ -247,7 +230,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public void BiBeiBtnFun()
         {
-            MusicManager.Instance.Play("yaosaizi");
+            Facade.Instance<MusicManager>().Play("yaosaizi");
             bossImage.GetComponent<Animator>().Play("boss_1");
             leftImage.GetComponent<Animator>().Play("left_1");
             rightImage.GetComponent<Animator>().Play("right_1");
@@ -261,98 +244,75 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// 得分
         /// </summary>
         public void GetMoneyBtnFun()
-        {
-            // Lishijilu();
-            if (App.GetGameData<GlobalData>().isMary == false)
-            {
-
-                BottomUIControl.instance.DaxiaoheFun();
-                CloseSelf();
-            }
-            else
-            {
-                //                GameServer.Instance.MaLiFun();//服务器发送数据
-                LittleMaryControl.Instance.OpenMaryPanel();
-                App.GetGameData<GlobalData>().MainMoney = App.GetGameData<GlobalData>().iMainMoney;
-                StartCoroutine(LittleMaryControl.Instance.TestFun());
-                BottomUIControl.instance.Theincome();
-                App.GetGameData<GlobalData>().IsAuto = false;
-                CloseSelf();
-            }
-
+        { 
+            CloseSelf();
         }
         /// <summary>
         /// 小
         /// </summary>
         public void SmallBtnFun()
         {
-            leftjinbi.SetActive(true);
-            rightjinbi.SetActive(false);
-            bossjinbi.SetActive(false);
-            GameServer.Instance.MyDaXiaoHe(App.GetGameData<GlobalData>().iWinMoney,
-                                           App.GetGameData<GlobalData>().Yazhu1);
-            HideBetButtons();
+            BigBtnFun(App.GetGameData<WmarginGameData>().Yazhu1);
         }
         /// <summary>
         /// 和
         /// </summary>
         public void MiddleBtnFun()
         {
-            bossjinbi.SetActive(true);
-            leftjinbi.SetActive(false);
-            rightjinbi.SetActive(false);
-            GameServer.Instance.MyDaXiaoHe(App.GetGameData<GlobalData>().iWinMoney,
-                                             App.GetGameData<GlobalData>().Yazhu3);
-            HideBetButtons();
-
+            BigBtnFun(App.GetGameData<WmarginGameData>().Yazhu3);
         }
         /// <summary>
         /// 大
         /// </summary>
         public void BigBtnFun()
         {
-            rightjinbi.SetActive(true);
-            leftjinbi.SetActive(false);
-            bossjinbi.SetActive(false);
-            GameServer.Instance.MyDaXiaoHe(App.GetGameData<GlobalData>().iWinMoney,
-                                             App.GetGameData<GlobalData>().Yazhu2);
-            HideBetButtons();
-
+            BigBtnFun(App.GetGameData<WmarginGameData>().Yazhu2);
         }
-        public void AnimateFun()
+
+        private void BigBtnFun(int type)
+        {
+            var gdata = App.GetGameData<WmarginGameData>(); 
+            Facade.Instance<MusicManager>().Play("xia1");
+            leftjinbi.SetActive(type == gdata.Yazhu1);
+            bossjinbi.SetActive(type == gdata.Yazhu3);
+            rightjinbi.SetActive(type == gdata.Yazhu2);
+            App.GetRServer<WmarginGameServer>().SendMyDaXiaoHe(App.GetGameData<WmarginGameData>().iWinMoney, type);
+            HideBetButtons();
+        }
+
+        public void AnimatorFun()
         {
             StartCoroutine(ShowCard());
-
         }
 
         public IEnumerator ShowCard()
         {
+            var musicMgr = Facade.Instance<MusicManager>();
             yield return new WaitForSeconds(0.5f);
             resultImage1.gameObject.SetActive(true);//骰子打开
             resultImage2.gameObject.SetActive(true);
             resultImage1.sprite = resultSprites[iSone - 1];//骰子的图片
             resultImage2.sprite = resultSprites[iSsec - 1];//骰子的图片
-            winText.text = App.GetGameData<GlobalData>().iWinMoney.ToString();
+            SetWinText(App.GetGameData<WmarginGameData>().iWinMoney);
             //            ShowHistory(App.GetGameData<GlobalData>().iHistory);
-            if (App.GetGameData<GlobalData>().iWinMoney == 0)//输了
+            if (App.GetGameData<WmarginGameData>().iWinMoney == 0)//输了
             {
-                MusicManager.Instance.Play(iSone + iSsec + "dian");
+                musicMgr.Play(iSone + iSsec + "dian");
                 leftImage.GetComponent<Animator>().Play("left_3");
                 rightImage.GetComponent<Animator>().Play("right_3");
                 yield return new WaitForSeconds(2);
-                MusicManager.Instance.Play("shu");
+                musicMgr.Play("shu");
                 Invoke("CloseSelf", 3);
                 BottomUIControl.instance.Theincome();
 
             }
             else
             {
-                MusicManager.Instance.Play(iSone + iSsec + "dian");
+                musicMgr.Play(iSone + iSsec + "dian");
                 leftImage.GetComponent<Animator>().Play("left_2");
                 rightImage.GetComponent<Animator>().Play("right_2");
                 HideBetButtons();
-
-                MusicManager.Instance.Play("ying");
+                musicMgr.Play("ying");
                 Invoke("ReShowSelf", 3);
             }
             History();
@@ -360,6 +320,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         public void CloseSelf()//输了
         {
             //Lishijilu();
+            Facade.Instance<MusicManager>().ChangeBackSound(0);
             ReHideBetButtons();
             resultImage1.gameObject.SetActive(false);//骰子关闭
             resultImage2.gameObject.SetActive(false);
@@ -371,17 +332,19 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
             leftjinbi.SetActive(false);
             rightjinbi.SetActive(false);
             bossjinbi.SetActive(false);
-            if (App.GetGameData<GlobalData>().isMary)//玛丽
+            BottomUIControl.instance.DaxiaoheFun();
+            var gdata = App.GetGameData<WmarginGameData>();
+            // Lishijilu();
+            if (gdata.isMary)//玛丽
             {
-                App.GetGameData<GlobalData>().iWinMoney = 0;
-                App.GetGameData<GlobalData>().MaliWinMony = 0;
-                GameServer.Instance.MaLiFun();//服务器发送数据
+                gdata.iWinMoney = 0;
+                gdata.MaliWinMony = 0;
                 LittleMaryControl.Instance.OpenMaryPanel();
-                StartCoroutine(LittleMaryControl.Instance.TestFun());
-                App.GetGameData<GlobalData>().IsAuto = false;
-                CloseSelf();
+                LittleMaryControl.Instance.StartMali();
+                gdata.IsAuto = false;
             }
         }
+
         public void ReShowSelf()
         {
             ReHideBetButtons();
@@ -404,6 +367,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         public void ThisPlaneFun()
         {
             thisPanel.SetActive(true);
+            Facade.Instance<MusicManager>().ChangeBackSound(1);
         }
     }
 

@@ -11,12 +11,6 @@ namespace Assets.Scripts.Game.lswc
     /// </summary>
     public class LSBigThreeReward :InstanceControl
     {
-        private static LSBigThreeReward _instance;
-
-        public static LSBigThreeReward Instance
-        {
-            get { return _instance; }
-        }
         private Animation _curAnimation;
 
         private Transform _lion;
@@ -30,11 +24,6 @@ namespace Assets.Scripts.Game.lswc
         private string _playeAnimationState = "3";
 
         private Transform _curTrans;
-
-        private void Awake()
-        {
-            _instance = this;
-        }
 
         private void Start()
         {

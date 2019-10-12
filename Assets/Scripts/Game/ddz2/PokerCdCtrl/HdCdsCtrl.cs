@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using Assets.Scripts.Game.ddz2.InheritCommon;
 using JetBrains.Annotations;
 using UnityEngine;
+using YxFramwork.Framework.Core;
 
 namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
 {
@@ -11,24 +12,6 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
     /// </summary>
     public class HdCdsCtrl : MonoBehaviour
     {
-
-        /// <summary>
-        /// 对外发送的事件
-        /// </summary>
-        private static EventHandler<HdCdCtrlEvtArgs> _hdSelCdsEvt;
-        public  static void AddHdSelCdsEvt(EventHandler<HdCdCtrlEvtArgs> eventHandler)
-        {
-            _hdSelCdsEvt += eventHandler;
-        }
-
-        /// <summary>
-        /// 场景销毁后，重置静态变量
-        /// </summary>
-        void OnDestroy()
-        {
-            _hdSelCdsEvt = null;
-        }
-
         /// <summary>
         /// 标记没有任何牌值
         /// </summary>
@@ -62,11 +45,12 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
         [HideInInspector]
         public int DragOverCdValue;
 
+
         /// <summary>
         /// 当dragover某个牌
         /// </summary>
-         /// <param name="isFinishSelect">是否已经阔选完毕</param>
-        public void OnDargOverCd(bool isFinishSelect=false)
+        /// <param name="isFinishSelect">是否已经阔选完毕</param>
+        public void OnDargOverCd(bool isFinishSelect = false)
         {
             var totalLen = _handCdsGobList.Count;
             for (int i = 0; i < totalLen; i++)
@@ -134,11 +118,7 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
                 }
             }
 
-            //触发相应事件
-            if (_hdSelCdsEvt != null)
-            {
-                _hdSelCdsEvt(this, new HdCdCtrlEvtArgs(_intList.ToArray()));
-            }
+            Facade.EventCenter.DispatchEvent(GlobalConstKey.KeyHdCds, new HdCdCtrlEvtArgs(_intList.ToArray()));
         }
 
         /// <summary>
@@ -147,7 +127,7 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
         /// <param name="cdValue">被选择的牌的牌值</param>
         private void ClickOnCd(int cdValue)
         {
-            var cdItemGob = _handCdsGobList.Find((x) => x.GetComponent<PokerCardItem>().CdValue == cdValue);
+            var cdItemGob = _handCdsGobList.Find(x => x.GetComponent<PokerCardItem>().CdValue == cdValue);
             cdItemGob.GetComponent<PokerCardItem>().IsCdUp = !cdItemGob.GetComponent<PokerCardItem>().IsCdUp;
         }
 
@@ -156,15 +136,13 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
         /// </summary>
         /// <param name="cdStart">选牌开始点的牌</param>
         /// <param name="cdEnd">选牌结束点的牌</param>
-        private GameObject[] GetSelcedSomeCds(int cdStart,int cdEnd)
+        private GameObject[] GetSelcedSomeCds(int cdStart, int cdEnd)
         {
-       
-
             //只扩选了一张牌
             if (cdStart == cdEnd)
             {
-                var cdItemGob = _handCdsGobList.Find((x) => x.GetComponent<PokerCardItem>().CdValue == cdStart);
-                return new[] {cdItemGob};
+                var cdItemGob = _handCdsGobList.Find(x => x.GetComponent<PokerCardItem>().CdValue == cdStart);
+                return new[] { cdItemGob };
             }
 
             //一下是扩选了多张牌的情况
@@ -174,9 +152,7 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
             //当起始点牌值小于结束点牌大小
             if (pureSt < pureEd)
             {
-
                 return ChoseCds(cdStart, cdEnd);
-
             }
 
             //当起始点牌值大于结束点牌大小
@@ -195,7 +171,7 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
         /// <param name="cdSmall">小牌起始点,但这个牌值是有花色信息的</param>
         /// <param name="cdBig">大牌终止点，但这个牌值是有花色信息的</param>
         /// <returns></returns>
-        private GameObject[] ChoseCds(int cdSmall,int cdBig)
+        private GameObject[] ChoseCds(int cdSmall, int cdBig)
         {
             var handCdsLen = _handCdsGobList.Count;
             var goblistTemp = new List<GameObject>();
@@ -215,7 +191,6 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
                     break;
                 }
             }
-
             return null;
         }
 
@@ -235,14 +210,19 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
         [SerializeField, UsedImplicitly]
         private UIGrid _hdGrid;
 
-
-/*        // Use this for initialization
-        void Start ()
+        public bool HaveHandCard
         {
+            get { return _hdGrid.transform.childCount > 0; }
+        }
 
-            var cds = new int[] { 0x13, BigJoker, 0x34, 0x35, 0x15, SmallJoker, 0x36, 0x37, 0x18, };
-            AllocateCds(cds);
-        }*/
+
+        /*        // Use this for initialization
+                void Start ()
+                {
+
+                    var cds = new int[] { 0x13, BigJoker, 0x34, 0x35, 0x15, SmallJoker, 0x36, 0x37, 0x18, };
+                    AllocateCds(cds);
+                }*/
 
         /// <summary>
         /// 当需要重置手牌时，删除之前grid中牌，同时按照实际手牌数据重新发牌
@@ -250,15 +230,32 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
         /// <param name="newhdCds"></param>
         public void ReSetHandCds(int[] newhdCds)
         {
-            var oldHdCds = _handCdsGobList.ToArray();
-            var len = oldHdCds.Length;
-            for (int i = 0; i < len; i++)
-            {
-                DestroyImmediate(oldHdCds[i]);
-            }
-            _handCdsGobList.Clear();
+            if (newhdCds == null) return;
+            CleanHandCards();
             AllocateCds(newhdCds);
         }
+
+        /// <summary>
+        /// 发牌有动画
+        /// </summary>
+        /// <param name="newhdCds"></param>
+        public void ResetHandCdsWithAnim(int[] newhdCds)
+        {
+            if (newhdCds == null) return;
+            CleanHandCards();
+            AllocateCdsWithAnim(newhdCds);
+        }
+
+        /// <summary>
+        /// 清除手上的手牌
+        /// </summary>
+        void CleanHandCards()
+        {
+            _hdGrid.transform.DestroyChildren();       //清楚已有手牌
+            _handCdsGobList.Clear();
+        }
+
+
 
         /// <summary>
         /// 移除某些手牌
@@ -269,42 +266,97 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
             var len = losecds.Length;
             for (int i = 0; i < len; i++)
             {
-                var gob = _handCdsGobList.Find((x) => x.GetComponent<PokerCardItem>().CdValue == losecds[i]);
+                var gob = _handCdsGobList.Find(x => x.GetComponent<PokerCardItem>().CdValue == losecds[i]);
                 _handCdsGobList.Remove(gob);
                 DestroyImmediate(gob);
             }
             _hdGrid.repositionNow = true;
+            _hdGrid.Reposition();
         }
 
         /// <summary>
-        /// 给手牌发牌
+        /// 给手牌发牌,无过程
         /// </summary>
         /// <param name="cds"></param>
         public void AllocateCds(int[] cds)
         {
-            if(cds==null || cds.Length<1) return;
+            if (cds == null || cds.Length < 1)
+            {
+                return;
+            }
 
             cds = SortCds(cds);
             for (int i = 0; i < cds.Length; i++)
             {
-                AddHandCdGob(CdItemOrg, i + 2, cds[i]);
+                AddHandCdGob(CdItemOrg, 2 * i + 100, cds[i]);
             }
             _hdGrid.repositionNow = true;
+            _hdGrid.Reposition();
         }
 
-        private void AddHandCdGob(GameObject cdItemOrg, int layerIndex, int cdValueData)
+        public void AllocateCdsWithAnim(int[] cds)
         {
-            var gob = NGUITools.AddChild(_hdGrid.gameObject, cdItemOrg);
+            if (cds.Length < 1) return;
+            cds = SortCds(cds);
+
+            int len = cds.Length;
+            _cards = new int[len];
+            Array.Copy(cds, _cards, len);
+            _index = 0;
+
+            CreatOneMoveCard();
+        }
+
+
+        private void CreatOneMoveCard()
+        {
+            var gob = AddHandCdGob(CdItemOrg, _index, _cards[_index]);
+            gob.name = string.Format("ShiftCard{0}", _index);
+
+            var card = gob.GetComponent<ShiftCard>();
+            card.OnCardLeftMove = new EventDelegate(OnCardLeftMove);
+            card.SetLastObj(_index == 0 ? null : _handCdsGobList[_index - 1]);
+
+            Facade.EventCenter.DispatchEvent(GlobalConstKey.PlaySound, "k_give");
+        }
+
+
+        private void OnCardLeftMove()
+        {
+            _index++;
+            if (_index < _cards.Length)
+            {
+                CreatOneMoveCard();
+            }
+            else
+            {
+                for (int i = 0; i < _index; i++)
+                {
+                    var card = _handCdsGobList[i].GetComponent<ShiftCard>();
+                    card.CancelMove();
+                }
+            }
+        }
+
+        private int[] _cards;
+
+        private int _index;
+
+        private GameObject AddHandCdGob(GameObject cdItemOrg, int layerIndex, int cdValueData)
+        {
+            var gob = _hdGrid.gameObject.AddChild(cdItemOrg);
+            gob.name = "gob" + layerIndex;
             _handCdsGobList.Add(gob);
             gob.SetActive(true);
             var pokerItem = gob.GetComponent<PokerCardItem>();
             pokerItem.SetHdcdctrlInstance(this);
-            pokerItem.SetLayer(layerIndex);
+            pokerItem.SetLayer(layerIndex * 2 + 100);
             pokerItem.SetCdValue(cdValueData);
+            return gob;
         }
 
         /// <summary>
-        /// 获取一组牌的值，从大到小排序
+        /// 排序一组牌的值，从大到小排序
         /// </summary>
         /// <param name="cards"></param>
         /// <returns></returns>
@@ -341,13 +393,13 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
         /// <param name="pureCdvalue">单纯牌大小的值</param>
         public void JustUpCd(int pureCdvalue)
         {
-            var cdItemGob = _handCdsGobList.Find((x) =>
+            var cdItemGob = _handCdsGobList.Find(x =>
                 {
                     var poker = x.GetComponent<PokerCardItem>();
                     var thisCdPure = GetValue(x.GetComponent<PokerCardItem>().CdValue);
 
                     return poker.IsCdUp == false && thisCdPure == pureCdvalue;
-                }           
+                }
                );
             cdItemGob.GetComponent<PokerCardItem>().IsCdUp = true;
         }
@@ -369,7 +421,14 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
         /// <returns></returns>
         public List<int> GetUpCdList()
         {
-            return (from cdGob in _handCdsGobList select cdGob.GetComponent<PokerCardItem>() into cditem where cditem.IsCdUp select cditem.CdValue).ToList();
+            List<int> seletedCards = new List<int>();
+            for (int i = 0; i < _handCdsGobList.Count; i++)
+            {
+                var card = _handCdsGobList[i];
+                var item = card.GetComponent<PokerCardItem>();
+                if (item.IsCdUp) seletedCards.Add(item.CdValue);
+            }
+            return seletedCards;
         }
 
         /// <summary>
@@ -382,9 +441,65 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
             var len = upcds.Length;
             for (int i = 0; i < len; i++)
             {
-                var cdItemGob = _handCdsGobList.Find((x) => x.GetComponent<PokerCardItem>().CdValue == upcds[i]);
+                var cdItemGob = _handCdsGobList.Find(x => x.GetComponent<PokerCardItem>().CdValue == upcds[i]);
                 cdItemGob.GetComponent<PokerCardItem>().IsCdUp = true;
             }
+        }
+
+        public bool CheckLuckyCards()
+        {
+            //_cards 正常情况是用
+            //_handCdsGobList 重连时使用，因为重连时 _cards 是 null
+
+            var list = new List<int>();
+            if (_cards != null)
+            {
+                for (int i = 0; i < _cards.Length; i++)
+                {
+                    if (CheckCard(_cards[i]))
+                    {
+                        list.Add(_cards[i]);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < _handCdsGobList.Count; i++)
+                {
+                    var card = _handCdsGobList[i].GetComponent<PokerCardItem>().CdValue;
+                    if (CheckCard(card))
+                    {
+                        list.Add(card);
+                    }
+                }
+            }
+
+            //检查2王
+            if (CheckCardModel(list, 2, (card) => card == SmallJoker || card == BigJoker))
+            {
+                return true;
+            }
+            //检查4个2
+            if (CheckCardModel(list, 4, (card) => card == 0x1F || card == 0x2F || card == 0x3F || card == 0x4F))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool CheckCard(int card)
+        {
+            return card == 0x1F || card == 0x2F || card == 0x3F || card == 0x4F || card == SmallJoker || card == BigJoker;
+        }
+
+        private bool CheckCardModel(List<int> cards, int result, Func<int, bool> expression)
+        {
+            var value = 0;
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (expression(cards[i])) value++;
+            }
+            return value >= result;
         }
     }
 

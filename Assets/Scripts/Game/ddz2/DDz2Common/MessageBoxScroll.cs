@@ -1,11 +1,16 @@
 ﻿using System.Collections;
+using Assets.Scripts.Game.ddz2.InheritCommon;
+using com.yxixia.utile.YxDebug;
 using UnityEngine;
+using YxFramwork.Common;
+using YxFramwork.View;
 
 namespace Assets.Scripts.Game.ddz2.DDz2Common
 {
 
     public class MessageBoxScroll : MonoBehaviour
     {
+
         /// <summary>
         /// 显示的内容宽度
         /// </summary>
@@ -14,12 +19,6 @@ namespace Assets.Scripts.Game.ddz2.DDz2Common
         [SerializeField] protected TweenWidth TweenWidth;
 
         [SerializeField] protected UIPanel UiPanel;
-
-        // Update is called once per frame
-        void Update () {
-	        
-        }
-
 
         private IEnumerator StartShowUiContent()
         {
@@ -35,7 +34,7 @@ namespace Assets.Scripts.Game.ddz2.DDz2Common
             }
         }
 
-        void OnEnable()
+        protected void OnEnable()
         {
             StopAllCoroutines();
             StartCoroutine(StartShowUiContent());
@@ -46,7 +45,7 @@ namespace Assets.Scripts.Game.ddz2.DDz2Common
             TweenWidth.PlayForward();
         }
 
-        void OnDisable()
+        protected void OnDisable()
         {
             TweenWidth.ResetToBeginning();
             UiPanel.baseClipRegion = new Vector4(UiPanel.baseClipRegion.x, UiPanel.baseClipRegion.y, 30, UiPanel.baseClipRegion.w);
@@ -69,5 +68,41 @@ namespace Assets.Scripts.Game.ddz2.DDz2Common
         {
             gameObject.SetActive(false);
         }
+
+        public void OnChangeRoomBtnClick()
+        {
+            var gdata = App.GetGameData<DdzGameData>();
+            if (gdata.IsGameStart || gdata.AllReady())
+            {
+                YxDebug.Log("正在游戏中,无法更换房间!");
+                YxMessageBox.Show(new YxMessageBoxData
+                {
+                    Msg = "正在游戏中,无法更换房间!",
+                    Delayed = 5,
+                });
+            }
+            else
+            {
+                YxDebug.Log("正在更换房间....");
+                App.GetRServer<DdzGameServer>().ChangeRoom();
+            }
+        }
+
+        public void OnLeaveBtnClick()
+        {
+            YxDebug.LogError(" Try to Leave Room");
+            var gdata = App.GetGameData<DdzGameData>();
+            if (gdata.IsGameStart || gdata.AllReady())
+            {
+                YxDebug.LogError(" Is started , can't Leave Room");
+                YxMessageBox.Show("游戏还在进行中，请结束游戏后再退出！！！");
+            }
+            else
+            {
+                YxDebug.LogError(" Leave Room , successfully!");
+                App.QuitGameWithMsgBox();
+            }
+        }
+
     }
 }

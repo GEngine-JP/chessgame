@@ -1,28 +1,38 @@
-﻿using Assets.Scripts.Common;
+﻿using System.Collections;
+using Assets.Scripts.Common;
 using Assets.Scripts.Common.Interface;
+using Assets.Scripts.Common.YxPlugins;
 using UnityEngine;
 using YxFramwork.Common;
-using YxFramwork.Common.Interface;
-using YxFramwork.Common.Model;
+using YxFramwork.Common.Interfaces;
+using YxFramwork.Manager;
+using YxPlugins.Interfaces;
 
 namespace Assets.Scripts.Hall.Controller
 {
-    /**    
-     *QQ:           765858558
-     *Unity版本：   5.4.0f3 
-     *创建时间:     2018-02-05  
-     *历史记录: 
-    */
-    internal class HallEnter : EnterHall
-    { 
+    internal class HallEnter : YxBaseHallEnter
+    {
         protected override ISysCfg GetSystemCfg()
-        { 
+        {
             return new SysConfig();
         }
 
-        protected override IUI GetUIImpl()
+        protected override IUI GetUIImpl(Vector2 screenSize)
         {
-            return new NguiImpl();
-        } 
+            return new UIImpl(screenSize);
+        }
+
+        protected override IBasePluginsFactory GetPluginsFactory()
+        {
+            return new YxPluginsFactory();
+        }
+
+        protected override void OnAwake()
+        {
+            base.OnAwake();
+            var root = GetComponent<UIRoot>();
+            root.manualWidth = (int) ScreenSize.x;
+            root.manualHeight = (int) ScreenSize.y;
+        }
     }
 }

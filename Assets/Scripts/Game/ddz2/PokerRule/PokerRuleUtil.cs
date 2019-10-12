@@ -2,6 +2,7 @@
 using Assets.Scripts.Game.ddz2.PokerCdCtrl;
 using System;
 using System.Collections.Generic;
+
 namespace Assets.Scripts.Game.ddz2.PokerRule
 {
 
@@ -16,23 +17,23 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
         /// </summary>
         /// <param name="orgcds">原始牌组，可能没排序</param>
         /// <returns></returns>
-        public static CardType GetCdsType(int[]orgcds)
-        {
-            var sortedCds = SortCds(orgcds);
-            if (sortedCds == null) return CardType.None;
-            var len = sortedCds.Length;
-            var cardList = new List<Card>();
-            for (int i = 0; i < len; i++)
-            {
-                cardList.Add(Card.DeskToAi(sortedCds[i]));
-            }
-            var result = GetCardTypeResult(cardList, orgcds.Length);
+       public static CardType GetCdsType(int[] orgcds)
+       {
+           var sortedCds = SortCds(orgcds);
+           if (sortedCds == null) return CardType.None;
+           var len = sortedCds.Length;
+           var cardList = new List<Card>();
+           for (int i = 0; i < len; i++)
+           {
+               cardList.Add(Card.DeskToAi(sortedCds[i]));
+           }
+           var result = GetCardTypeResult(cardList, orgcds.Length);
 
-            if (result == null) return CardType.None;
+           if (result == null) return CardType.None;
 
-            return result.getType();
-        }
-
+           return result.getType();
+       }
+      
 
         /// <summary>
         /// 从服务器端copy的卡牌类型判断方法
@@ -90,7 +91,7 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
             }
             else
             {
-                CardCount ci = getCardCount(list);
+                CardCount ci = GetCardCount(list);
                 List<int> arr0 = ci.a[0];
                 List<int> arr1 = ci.a[1];
                 List<int> arr2 = ci.a[2];
@@ -101,13 +102,13 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
                     return new CardTypeResult(CardType.C5, first);
                 }
                 // 链子
-                if (arr0.Count == len && isSequenceArr(arr0))
+                if (arr0.Count == len && IsSequenceArr(arr0))
                 {
                     return new CardTypeResult(CardType.C123, last);
                 }
 
                 // 连对
-                if (arr1.Count*2 == len && isSequenceArr(arr1))
+                if (arr1.Count*2 == len && IsSequenceArr(arr1))
                 {
                     return new CardTypeResult(CardType.C1122, last);
                 }
@@ -131,45 +132,45 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
                 }
 
                 // 分析飞机			
-                int count = arr2.Count;
-                if (count > 0)
+                int arr2Count = arr2.Count;
+                if (arr2Count > 0)
                 {
                     //如果是三顺 存在类似 333，444，555，777 这样的飞机带单排的情况和 333，555，666，777，888，带1张单牌的 两种特殊情况
-                    if (!isSequenceArr(arr2) && (count==4 ||count==5))
+                    if (!IsSequenceArr(arr2) && (arr2Count == 4 || arr2Count == 5))
                     {
                         var listTemp = new List<int>();
                         //去头
-                        for (int i = 1; i < count; i++)
+                        for (int i = 1; i < arr2Count; i++)
                         {
                             listTemp.Add(arr2[i]);
                         }
-                        if (isSequenceArr(listTemp))
+                        if (IsSequenceArr(listTemp))
                         {
-                            if (count == 4 && (arr0.Count + arr1.Count + arr3.Count) == 0)
-                                return new CardTypeResult(CardType.C11122234, arr2[count - 1], ci);
+                            if (arr2Count == 4 && (arr0.Count + arr1.Count + arr3.Count) == 0)
+                                return new CardTypeResult(CardType.C11122234, arr2[arr2Count - 1], ci);
 
                             //如果是4组连三， 那必须是带一组3张 和 1个1张的组合组成 飞机带单张
-                            if (count == 5)
+                            if (arr2Count == 5)
                                 if (arr0.Count == 1 && (arr1.Count + arr3.Count == 0))
-                                    return new CardTypeResult(CardType.C11122234, arr2[count - 1], ci);
+                                    return new CardTypeResult(CardType.C11122234, arr2[arr2Count - 1], ci);
                         }
 
 
                         //去尾
                         listTemp.Clear();
-                        for (int i = 0; i < count - 1; i++)
+                        for (int i = 0; i < arr2Count - 1; i++)
                         {
                             listTemp.Add(arr2[i]);
                         }
-                        if (isSequenceArr(listTemp))
+                        if (IsSequenceArr(listTemp))
                         {
-                            if (count == 4 && (arr0.Count + arr1.Count + arr3.Count)==0)
-                                return new CardTypeResult(CardType.C11122234, arr2[count - 2], ci);
+                            if (arr2Count == 4 && (arr0.Count + arr1.Count + arr3.Count)==0)
+                                return new CardTypeResult(CardType.C11122234, arr2[arr2Count - 2], ci);
 
                             //如果是4组连三， 那必须是带一组3张 和 1个1张的组合组成 飞机带单张
-                            if (count == 5)
+                            if (arr2Count == 5)
                                 if (arr0.Count == 1 && (arr1.Count + arr3.Count == 0))
-                                    return new CardTypeResult(CardType.C11122234, arr2[count - 2], ci);
+                                    return new CardTypeResult(CardType.C11122234, arr2[arr2Count - 2], ci);
                         }
 
 
@@ -212,23 +213,29 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
                         //--------------------------------------------------------------------------end
 
                     }
-                    else if (isSequenceArr(arr2))
+                    else if (IsSequenceArr(arr2))
                     {
-                        if (count * 3 == len)
+                        if (arr2Count * 3 == len)
                         {
-                            return new CardTypeResult(CardType.C111222, arr2[count - 1], ci);
+                            return new CardTypeResult(CardType.C111222, arr2[arr2Count - 1], ci);
                         }
 
-                        if (arr0.Count + arr1.Count * 2 + arr3.Count * 4 == count)
+                        if (arr0.Count + arr1.Count * 2 + arr3.Count * 4 == arr2Count)
                         {
-                            return new CardTypeResult(CardType.C11122234, arr2[count - 1], ci);
+                            return new CardTypeResult(CardType.C11122234, arr2[arr2Count - 1], ci);
                         }
 
-                        if (arr1.Count + arr3.Count * 2 == count && arr0.Count == 0)
+                        if (arr1.Count + arr3.Count * 2 == arr2Count && arr0.Count == 0)
                         {
-                            return new CardTypeResult(CardType.C1112223344, arr2[count - 1], ci);
+                            return new CardTypeResult(CardType.C1112223344, arr2[arr2Count - 1], ci);
                         }
                     }
+                }
+
+                //只有炸弹不让出牌
+                if (arr3.Count > 1)
+                {
+                    return null;
                 }
 
                 //如果上面没分析出飞机，则进一步吧炸弹拆成3张的，分析飞机带单牌
@@ -242,9 +249,10 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
 
                     if (threeGpList.Select(cds => cds.Length).Any(cdsLen => cdsLen == orgCdsLen - cdsLen * 3))
                     {
-                        var maxcd = arr2[count - 1];
-                        if (arr3[count - 1] > maxcd) maxcd = arr3[count - 1];
-                        return new CardTypeResult(CardType.C11122234, maxcd, ci);
+                        var maxcard = arr2[arr2Count - 1];              //3张同牌最大的牌面值 (不含花色)
+                        int arr3MaxCard = arr3[arr3.Count - 1];     //4张同牌最大的牌面值 (不含花色)
+                        if (arr3MaxCard > maxcard) maxcard = arr3MaxCard;
+                        return new CardTypeResult(CardType.C11122234, maxcard, ci);
                     }
                 }
             }
@@ -255,10 +263,10 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
 
         /** 获得单张的个数，对子的个数，三张的个数，4张的个数 */
 
-        public static CardCount getCardCount(List<Card> list)
+        public static CardCount GetCardCount(List<Card> list)
         {
-            CardCount card_index = new CardCount();
-            int[] count = analyzeCards(list);
+            CardCount cardIndex = new CardCount();
+            int[] count = AnalyzeCards(list);
             for (int i = 0; i < 15; ++i)
             {
                 int v = count[i];
@@ -266,9 +274,9 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
                     continue;
                 if (v > 4)
                     v = 4;
-                card_index.a[v - 1].Add(i + 3); //card's weight
+                cardIndex.a[v - 1].Add(i + 3); //card's weight
             }
-            return card_index;
+            return cardIndex;
         }
 
         /// <summary>
@@ -276,7 +284,7 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
         /// </summary>
         /// <param name="cards"></param>
         /// <returns></returns>
-        public static int[] analyzeCards(List<Card> cards)
+        public static int[] AnalyzeCards(List<Card> cards)
         {
             int[] count = new int[15]; // 13,14是小王和大王，如果存在的话
             for (int i = 0; i < 15; i++)
@@ -300,7 +308,7 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
         }
 
         /** 判断是否排序好 */
-        private static bool isSequenceArr(List<int> list)
+        private static bool IsSequenceArr(List<int> list)
         {
             bool result = false;
 

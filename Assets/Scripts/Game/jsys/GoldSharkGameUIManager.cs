@@ -8,11 +8,6 @@ namespace Assets.Scripts.Game.jsys
 
     public class GoldSharkGameUIManager : MonoBehaviour
     {
-
-
-        public static GoldSharkGameUIManager Instance;
-
-
         public Transform ChipsUI;
 
         public Transform BottonUI;
@@ -41,8 +36,6 @@ namespace Assets.Scripts.Game.jsys
 
         public void Awake()
         {
-            Instance = this;
-
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
         }

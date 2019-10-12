@@ -3,13 +3,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
 using YxFramwork.Common.Utils;
+using YxFramwork.Enums;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.jsys
 {
     public class TurnGroupsManager : MonoBehaviour
     {
-        public static TurnGroupsManager Instance;
         //跑马灯的数组
         public Transform[] paoma;
         //当前图片的位置
@@ -35,7 +37,6 @@ namespace Assets.Scripts.Game.jsys
 
         public void Awake()
         {
-            Instance = this;
             GameConfig = new GameConfig();
         }
 
@@ -44,13 +45,14 @@ namespace Assets.Scripts.Game.jsys
         /// </summary>
         public void showWinning()
         {
-            if (App.GetGameData<GlobalData>().Winning == 0)
+            if (App.GetGameData<JsysGameData>().Winning == 0)
             {
                 HandselUI.transform.gameObject.SetActive(false);
                 return;
             }
             HandselUI.transform.gameObject.SetActive(true);
-            CaiJin.text = App.GetGameData<GlobalData>().Winning + "";
+            var win = App.GetGameData<JsysGameData>().Winning;
+            CaiJin.text = YxUtiles.GetShowNumberForm(win);
         }
 
         /// <summary>
@@ -67,31 +69,33 @@ namespace Assets.Scripts.Game.jsys
         /// <param name="data"></param>
         public void PlayGame()
         {
-            App.GetGameData<GlobalData>().Judge = true;
+            var gameMgr = App.GetGameManager<JsysGameManager>();
+            var gdata = App.GetGameData<JsysGameData>();
+            gdata.Judge = true;
             _addTime = 0f;
             // Debug.Log("@@@@@@@@@@@@@开始转圈!!!!!!!!!!!!!!!!!!!!");
             //判断最后位置是编号几的动物
-            App.GetGameData<GlobalData>().EndAnimal = AnimalType[App.GetGameData<GlobalData>().EndPos];
+            gdata.EndAnimal = AnimalType[gdata.EndPos];
             //Debug.Log("最后一个动物的数字" + App.GetGameData<GlobalData>().EndAnimal);
             GameConfig.MarqueeInterval = 0.01f;
-            CurretImg = App.GetGameData<GlobalData>().StarPos;
+            CurretImg = gdata.StarPos;
             _nImg = CurretImg;
-            if (App.GetGameData<GlobalData>().IsShark)
+            if (gdata.IsShark)
             {
-                GameConfig.TurnTableResult = 28 * 3 + App.GetGameData<GlobalData>().FishIdx;
+                GameConfig.TurnTableResult = 28 * 3 + gdata.FishIdx;
             }
-            if (App.GetGameData<GlobalData>().IsShark == false)
+            if (gdata.IsShark == false)
             {
-                GameConfig.TurnTableResult = 28 * 3 + App.GetGameData<GlobalData>().EndPos;
+                GameConfig.TurnTableResult = 28 * 3 + gdata.EndPos;
             }
-            App.GetGameData<GlobalData>().SharkPos = AnimalType[App.GetGameData<GlobalData>().FishIdx];
-
-            if (App.GetGameData<GlobalData>().IsShark && (App.GetGameData<GlobalData>().SharkPos == 8 || App.GetGameData<GlobalData>().SharkPos == 9))
+            gdata.SharkPos = AnimalType[gdata.FishIdx];
+            var musicMgr = Facade.Instance<MusicManager>();
+            if (gdata.IsShark && (gdata.SharkPos == 8 || gdata.SharkPos == 9))
             {
                 Debug.Log("");
-                App.GetGameData<GlobalData>().EndAnimal = App.GetGameData<GlobalData>().SharkPos;
-                AudioPlay.Instance.PlaySounds("Dajiang");
-                App.GetGameData<GlobalData>().Judge = false;
+                gdata.EndAnimal = gdata.SharkPos;
+                musicMgr.Play("Dajiang");
+                gdata.Judge = false;
                 ChangeState();
                 paoma[CurretImg].gameObject.SetActive(false);
                 isWait = false;
@@ -102,16 +106,18 @@ namespace Assets.Scripts.Game.jsys
                 paoma[CurretImg].gameObject.SetActive(false);
             }
             isWait = true;
-            MusicManager.Instance.Stop();
+            musicMgr.Stop();
 
-            AudioPlay.Instance.PlaySounds("Paodeng");
+            musicMgr.Play("Paodeng");
 
             if (GameConfig.IsBetPanelOnShow)
-                BetPanelManager.Instance.HideUI();
+            {
+                gameMgr.BetPanelMgr.HideUI();
+            }
         }
         public void PlayS()
         {
-            AudioPlay.Instance.PlaySounds("Animal" + App.GetGameData<GlobalData>().SharkPos + "");
+            Facade.Instance<MusicManager>().Play("Animal" + App.GetGameData<JsysGameData>().SharkPos + "");
         }
         IEnumerator Wait()
         {
@@ -150,8 +156,8 @@ namespace Assets.Scripts.Game.jsys
         /// </summary>
         public void DiaoYong()
         {
-            App.GameData.GStatus = GameStatus.Normal;
-            ResultUIManager.Instance.GameFinish();
+            App.GameData.GStatus = YxEGameStatus.Normal;
+            App.GetGameManager<JsysGameManager>().ResultUIMgr.GameFinish();
         }
         private float _addTime;
 
@@ -163,14 +169,15 @@ namespace Assets.Scripts.Game.jsys
                 CurretImg = _nImg % 28;
                 if (_nImg == GameConfig.TurnTableResult)
                 {
+                    var gameMgr = App.GetGameManager<JsysGameManager>();
                     Paoma(CurretImg);
                     GameConfig.MarqueeInterval = 0.01f;
                     GameConfig.TurnTableResult = 0;
                     _nImg = 0;
                     _addTime = 0f;
                     GameConfig.TurnTableState = (int)GameConfig.GoldSharkState.Finish;
-                    AnimationManager.Instance.ShowAnimation();
-                    ModelManager.Instance.GotoKaiJiang();
+                    gameMgr.AnimationMgr.ShowAnimation();
+                    gameMgr.ModelMgr.GotoKaiJiang();
                     Invoke("DiaoYong", 3f);
                     paoma[0].gameObject.SetActive(false);
                 }

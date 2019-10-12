@@ -5,12 +5,7 @@ namespace Assets.Scripts.Game.brnn3d
 {
     public class DownUILeftBg : MonoBehaviour
     {
-        public static DownUILeftBg Instance;
-        protected void Awake()
-        {
-            Instance = this;
-        }
-
+        public LuziInfoUIMgr TheLuziInfoUIMgr;
         //显示下面历史记录的背景
         public void ShowDownUILeftBg()
         {

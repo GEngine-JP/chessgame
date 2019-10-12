@@ -2,7 +2,6 @@
 {  //
     public class LuziData
     {
-        public static LuziData Instance;
         public byte ByZPoint;
         public byte ByXpoint;
         public byte ByWinResult;

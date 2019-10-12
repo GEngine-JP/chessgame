@@ -1,13 +1,14 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
+using YxFramwork.Common;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
 
 namespace Assets.Scripts.Game.jsys
 {
     public class TimerManager : MonoBehaviour
     {
-        public static TimerManager Instance;
         public Text Timertext;
 
         public Transform TimerImg;
@@ -19,18 +20,17 @@ namespace Assets.Scripts.Game.jsys
         private Action _callBack;
         private float currTimer;
 
-        protected void Start()
-        {
-            Instance = this;
-        }
-
         public void GameXiazhuBack()
         {
-            MusicManager.Instance.Stop();
-            AudioPlay.Instance.PlaySounds("Dengdai");
-            TurnGroupsManager.Instance.GameConfig.TurnTableState = (int)GameConfig.GoldSharkState.Bet;
-            if (!TurnGroupsManager.Instance.GameConfig.IsBetPanelOnShow)
-                BetPanelManager.Instance.ShowUI();
+            var gameMgr = App.GetGameManager<JsysGameManager>();
+            var musicMgr = Facade.Instance<MusicManager>();
+            musicMgr.Stop();
+            musicMgr.Play("Dengdai");
+            gameMgr.TurnGroupsMgr.GameConfig.TurnTableState = (int)GameConfig.GoldSharkState.Bet;
+            if (!gameMgr.TurnGroupsMgr.GameConfig.IsBetPanelOnShow)
+            {
+                gameMgr.BetPanelMgr.ShowUI();
+            }
         }
         public void SetClock(long s)
         {

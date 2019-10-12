@@ -1,0 +1,339 @@
+fileFormatVersion: 2
+guid: 17a3d50f260975344965a898b84415f4
+timeCreated: 1523262781
+licenseType: Pro
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: lady_0
+    21300002: lady_1
+    21300004: lady_2
+    21300006: lady_3
+    21300008: lady_4
+    21300010: lady_5
+    21300012: lady_6
+    21300014: lady_7
+    21300016: lady_8
+    21300018: lady_9
+    21300020: lady_10
+    21300022: lady_11
+    21300024: lady_12
+    21300026: lady_13
+    21300028: lady_14
+    21300030: lady_15
+    21300032: lady_16
+    21300034: lady_17
+    21300036: lady_18
+    21300038: lady_19
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -3
+  maxTextureSize: 1024
+  textureSettings:
+    filterMode: 2
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 100
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 100
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: lady_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 794.77856
+        width: 440.43698
+        height: 221
+      alignment: 9
+      pivot: {x: 0.49269253, y: 0.52362645}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_1
+      rect:
+        serializedVersion: 2
+        x: 429.65182
+        y: 792.9466
+        width: 445.00003
+        height: 231.0534
+      alignment: 9
+      pivot: {x: 0.49965876, y: 0.51309955}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_2
+      rect:
+        serializedVersion: 2
+        x: 865
+        y: 845
+        width: 142
+        height: 179
+      alignment: 9
+      pivot: {x: 0.528169, y: 0.5111732}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_3
+      rect:
+        serializedVersion: 2
+        x: 885
+        y: 782
+        width: 130
+        height: 74
+      alignment: 9
+      pivot: {x: 0.41538462, y: 0.38513514}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 414
+        width: 113
+        height: 367
+      alignment: 9
+      pivot: {x: 0.48672566, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_5
+      rect:
+        serializedVersion: 2
+        x: 104.79123
+        y: 520
+        width: 114
+        height: 262
+      alignment: 9
+      pivot: {x: 0.48867342, y: 0.5057252}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_6
+      rect:
+        serializedVersion: 2
+        x: 210
+        y: 527
+        width: 195
+        height: 254
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_7
+      rect:
+        serializedVersion: 2
+        x: 104.34698
+        y: 431.7721
+        width: 125.00001
+        height: 102
+      alignment: 9
+      pivot: {x: 0.49722415, y: 0.49243045}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_8
+      rect:
+        serializedVersion: 2
+        x: 219
+        y: 414
+        width: 142
+        height: 123
+      alignment: 9
+      pivot: {x: 0.5, y: 0.49999997}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_9
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 81.22601
+        width: 239.65564
+        height: 338
+      alignment: 9
+      pivot: {x: 0.4725194, y: 0.5175262}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_10
+      rect:
+        serializedVersion: 2
+        x: 237
+        y: 223
+        width: 166
+        height: 194
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_11
+      rect:
+        serializedVersion: 2
+        x: 237
+        y: 160
+        width: 25
+        height: 22
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_12
+      rect:
+        serializedVersion: 2
+        x: 241
+        y: 177
+        width: 45
+        height: 49
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_13
+      rect:
+        serializedVersion: 2
+        x: 283
+        y: 29
+        width: 70
+        height: 197
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_14
+      rect:
+        serializedVersion: 2
+        x: 248
+        y: 123
+        width: 33
+        height: 35
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_15
+      rect:
+        serializedVersion: 2
+        x: 237
+        y: 100
+        width: 25
+        height: 23
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_16
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 116.80452
+        height: 87.47624
+      alignment: 9
+      pivot: {x: 0.05447733, y: 0.742904}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_17
+      rect:
+        serializedVersion: 2
+        x: 109.64611
+        y: 16
+        width: 121.00001
+        height: 74
+      alignment: 9
+      pivot: {x: 0.09385536, y: 0.17648429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_18
+      rect:
+        serializedVersion: 2
+        x: 218.3939
+        y: 13.891266
+        width: 73.000015
+        height: 74
+      alignment: 9
+      pivot: {x: 0.49460393, y: 0.49471262}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: lady_19
+      rect:
+        serializedVersion: 2
+        x: 474.15848
+        y: 618.271
+        width: 257.99997
+        height: 126
+      alignment: 9
+      pivot: {x: 0.5110137, y: 0.48991275}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    outline: []
+  spritePackingTag: 
+  userData: 99828547103809
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
-using Assets.Scripts.Game.ddz2.DDz2Common;
 using Assets.Scripts.Game.ddz2.DdzEventArgs;
+using Assets.Scripts.Game.ddz2.DDzGameListener.InfoPanel;
 using Assets.Scripts.Game.ddz2.InheritCommon;
+using Assets.Scripts.Game.ddz2.PokerRule;
 using UnityEngine;
 using YxFramwork.Common;
 using YxFramwork.ConstDefine;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
 
 namespace Assets.Scripts.Game.ddz2.DDzGameListener.AudioListener
@@ -14,181 +16,320 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.AudioListener
     public class DDzAudioListener : ServEvtListener
     {
         /// <summary>
-        /// 语言种类，p是普通话，""空字符是方言
+        /// 语言种类，p是普通话
         /// </summary>
-        const string LanguageType = "p";
+        public string LanguageType = "p";
 
         //用于播放音效的声音列表
-        [SerializeField] 
-        protected AudioSource[] AudioSourcesList = new AudioSource[5];
+        //[SerializeField] 
+        //protected AudioSource[] AudioSourcesList = new AudioSource[5];
 
-        /// <summary>
-        /// 标记声音大小
-        /// </summary>
-        private float _soundVolume;
+        private bool _isCounting;
+        private float _waitTime;
+
+        void PlayAndPauseBgSound(string soundName)
+        {
+            var audioClip = Facade.Instance<MusicManager>().GetAudioClip(soundName);
+            if (audioClip == null) return;
+
+            _waitTime = audioClip.length + 0.5f;
+            PlayAudioOneShot(soundName);
+            if (!_isCounting)
+            {
+                _isCounting = true;
+                StartCoroutine(PauseSoundAndPlay());
+            }
+        }
+
+        IEnumerator PauseSoundAndPlay()
+        {
+            Facade.Instance<MusicManager>().SetMusicPause(true);
+            while (_isCounting && _waitTime >= 0)
+            {
+                yield return null;
+                _waitTime -= Time.deltaTime;
+            }
+            _isCounting = false;
+            _waitTime = 0;
+            Facade.Instance<MusicManager>().SetMusicPause(false);
+        }
+
 
         // Use this for initialization
-        void Awake () {
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeGrab, OnTypeGrab);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypePass, OnTypePass);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeOutCard, OnTypeOutCard);
+        protected void Awake()
+        {
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeAllocate, OnTypeAllocate);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeGrab, OnTypeGrab);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypePass, OnTypePass);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeOutCard, OnTypeOutCard);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeDoubleOver, OnDoubleOver);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyRemind, TimeRemind);
+            Facade.EventCenter.AddEventListeners<string, string>(GlobalConstKey.PlaySound, PlayChunTian);
+            Facade.EventCenter.AddEventListeners<string, string>(GlobalConstKey.PlaySoundAndPauseBgSound, PlayAndPauseBgSound);
+           
+        }
+  
+     
 
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeDoubleOver, OnDoubleOver);
+
+        private void OnTypeAllocate(DdzbaseEventArgs obj)
+        {
+            PlayAudioOneShot("k_start");
+        }
+
+        private void PlayChunTian(string soundName)
+        {
+            PlayAudioOneShot(soundName);
+        }
+
+        private void TimeRemind(DdzbaseEventArgs obj)
+        {
+            PlayAudioOneShot("k_remind");
         }
 
         /// <summary>
         /// 当收到加倍已经结束的信息
         /// </summary>
-        protected virtual void OnDoubleOver(object sender, DdzbaseEventArgs args)
+        protected virtual void OnDoubleOver(DdzbaseEventArgs args)
         {
             var data = args.IsfObjData;
             var rates = data.GetIntArray("jiabei");
             var len = rates.Length;
 
-            var landSeat = App.GetGameData<GlobalData>().LandSeat;
+
             for (int i = 0; i < len; i++)
             {
-                var userData = App.GetGameData<GlobalData>().GetUserInfo(i);
-                if(userData==null) continue;
+                var userInfo = App.GetGameData<DdzGameData>().GetOnePlayerInfo(i);
+                if (userInfo == null) continue;
                 //if(i==landSeat)continue;//忽略地主喊叫
 
-                var sex = userData.GetShort(NewRequestKey.KeySex);
+                var sex = userInfo.SexI;
                 if (sex != 0 && sex != 1) sex = 0;
-                string soundName = "";
+                string source = sex == 1 ? "man" : "woman";
+                string soundName;
+
                 if (rates[i] > 1)
                 {
-                    soundName = LanguageType + sex + ".jiabei";
+                    soundName = LanguageType + sex + "_jiabei";
                 }
                 else
                 {
-                    soundName = LanguageType + sex + ".bujiabei";
+                    soundName = LanguageType + sex + "_bujiabei";
                 }
 
-                PlayAudioOneShot(soundName);
+                PlayAudioOneShot(soundName, source);
             }
         }
 
-        void Start()
+
+        protected void Start()
         {
-            App.GetGameData<GlobalData>().OnhandCdsNumChanged = OnHandCdsChanged;
-
-            _soundVolume = MusicManager.Instance.EffectVolume;//PlayerPrefs.GetFloat(SettingCtrl.SoundValueKey, 1);
-
-            SettingCtrl.OnSoundValueChangeEvt = OnSoundValueChange;
+            App.GetGameData<DdzGameData>().OnhandCdsNumChanged = OnHandCdsChanged;
         }
-
-        /// <summary>
-        /// 当有调试声音大小时
-        /// </summary>
-        /// <param name="value"></param>
-        void OnSoundValueChange(float value)
-        {
-            _soundVolume = value;
-        }
-
-
+                        
         public override void RefreshUiInfo()
         {
-           // throw new System.NotImplementedException();
+            
         }
 
         /// <summary>
         /// 当有人叫了分了
         /// </summary>
-        /// <param name="obj"></param>
         /// <param name="args"></param>
-        protected void OnTypeGrab(object obj, DdzbaseEventArgs args)
+        protected void OnTypeGrab(DdzbaseEventArgs args)
         {
             var data = args.IsfObjData;
+            var gdata = App.GetGameData<DdzGameData>();
             //分数
             var score = data.GetInt(GlobalConstKey.C_Score);
             var seat = data.GetInt(GlobalConstKey.C_Sit);//座位
-            var sex = App.GetGameData<GlobalData>().GetUserInfo(seat).GetShort(NewRequestKey.KeySex);
+            var sex = gdata.GetOnePlayerInfo(seat, true).SexI;
             if (sex != 0 && sex != 1) sex = 0;
-            string soundName = "";
-            if (score > 0)
-            {
-                soundName = LanguageType + sex + "." + score + "fen";
-            }
-            else
-            {
-                soundName = LanguageType + sex + "." + "bujiao";
-            }
-
-
-            PlayAudioOneShot(soundName);
+            string source = sex == 1 ? "man" : "woman";
+            //string soundName;
+            //if (score > 0)
+            //{
+            //    soundName = string.Format("{0}{1}_{2}fen", LanguageType, sex, score); //LanguageType + sex + "_" + score + "fen";    //叫很喊出分数
+            //}
+            //else
+            //{
+            //    soundName = string.Format("{0}{1}_{2}fen", LanguageType, sex, score);  //LanguageType + sex + "_" + "bujiao";   //0分布叫
+            //}
+            string soundName = string.Format("{0}{1}_{2}{3}", LanguageType, sex, score,
+                gdata.RobModel ? "qiangdizhu" : "fen");
+            PlayAudioOneShot(soundName, source);
         }
 
 
         /// <summary>
         /// 当是上家出牌时，之前说的话要消失
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        private void OnTypeOutCard(object sender, DdzbaseEventArgs args)
+        private void OnTypeOutCard(DdzbaseEventArgs args)
         {
             var data = args.IsfObjData;
-
-            var sex = App.GetGameData<GlobalData>().GetUserInfo(data.GetInt(RequestKey.KeySeat)).GetShort(NewRequestKey.KeySex);
+            int seat = data.GetInt(GlobalConstKey.C_Sit);
+            var sex = App.GetGameData<DdzGameData>().GetOnePlayerInfo(seat, true).SexI;
             if (sex != 0 && sex != 1) sex = 0;
             var cards = data.GetIntArray(RequestKey.KeyCards);
+            string source = sex == 1 ? "man" : "woman";
+            //string soundName = string.Format("{0}{1}_{2}", LanguageType, sex, GetAudioName(cards)); // LanguageType + sex + "_" + GetAudioName(cards);
 
-            string soundName = LanguageType + sex + "." + GetAudioName(cards);
-            PlayAudioOneShot(soundName);
+            string soundName;
+            if (data.ContainsKey("ctype"))
+            {
+                int cardType = data.GetInt("ctype");
+                soundName = string.Format("{0}{1}_{2}", LanguageType, sex,
+                    GetAudioName(cards, (CardType) cardType));
+            }
+            else
+            {
+                soundName = string.Format("{0}{1}_{2}", LanguageType, sex, GetAudioName(cards));
+            }
+
+            PlayAudioOneShot(soundName, source);
+            int cardCount = cards.Length;
+
+            string outCardSoundName = cardCount > 3 ? "k_3morecard" : "k_outcard";
+            PlayAudioOneShot(outCardSoundName);
         }
+
+        
+
+
 
         /// <summary>
         /// 有人不要
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        private void OnTypePass(object sender, DdzbaseEventArgs args)
+        private void OnTypePass(DdzbaseEventArgs args)
         {
             var data = args.IsfObjData;
             var seat = data.GetInt(GlobalConstKey.C_Sit);//座位
-            var sex = App.GetGameData<GlobalData>().GetUserInfo(seat).GetShort(NewRequestKey.KeySex);
+            var sex = App.GetGameData<DdzGameData>().GetOnePlayerInfo(seat, true).SexI;
             if (sex != 0 && sex != 1) sex = 0;
-            string soundName = LanguageType + sex + "." + "buyao";
-            PlayAudioOneShot(soundName);
+            string source = sex == 1 ? "man" : "woman";
+            string soundName = string.Format("{0}{1}_buyao", LanguageType, sex);
+            PlayAudioOneShot(soundName, source);
         }
 
         /// <summary>
         /// 当有人手牌数量剩1张时
         /// </summary>
         /// <param name="userSeat"></param>
-        /// <param name="cdsLeftNum"></param>
-        private void OnHandCdsChanged(int userSeat,int cdsLeftNum)
+        private void OnHandCdsChanged(int userSeat)
         {
-            if (cdsLeftNum != 1 && cdsLeftNum!=2) return;
+            var ddzPlayer = App.GetGameData<DdzGameData>().GetPlayer<DdzPlayer>(userSeat, true);
+            if (ddzPlayer == null) return;
+            int cardCount = ddzPlayer.CardCount;
+            if (cardCount > 2) return;
 
-            var user = App.GetGameData<GlobalData>().GetUserInfo(userSeat);
-            short sex = 0;
-            if (user.ContainsKey(NewRequestKey.KeySex)) sex = user.GetShort(NewRequestKey.KeySex);
-            if (sex != 0 && sex != 1) sex = 0;
-            string soundName = LanguageType + sex + "." + cdsLeftNum.ToString(CultureInfo.InvariantCulture)+ "zhang";
-            PlayAudioOneShot(soundName);
+            int sex = ddzPlayer.Info.SexI;
 
-            PlayAudioOneShot("Special_alert");
+            string source = sex == 1 ? "man" : "woman";
+            string soundName = string.Format("{0}{1}_{2}zhang", LanguageType, sex, cardCount); 
+            PlayAudioOneShot(soundName, source);
+
+            if (cardCount > 0)
+                PlayAudioOneShot("Special_alert");
         }
 
-        /// <summary>
-        /// 标记取到的audioSource
-        /// </summary>
-        private short _avlaudioI=0;
+
         /// <summary>
         /// 用一个极有可能没有被占用的AudioSource播放声音clip
         /// </summary>
-        public void PlayAudioOneShot(string soundName){
-
-            var soundClip = App.GetGameData<GlobalData>().GetSoundClip(soundName);
-            if (soundClip == null) return;
-            if (_avlaudioI >= AudioSourcesList.Length) _avlaudioI = 0;
-
-            var listi = _avlaudioI++;
-            AudioSourcesList[listi].volume = _soundVolume;
-            AudioSourcesList[listi].PlayOneShot(soundClip);
+        public void PlayAudioOneShot(string audioName, string source = "AudioSources", int delayed = 0)
+        {
+            Facade.Instance<MusicManager>().Play(audioName, source, delayed);
         }
 
+
+        /// <summary>
+        /// 获得声音文件的标记名字部分
+        /// </summary>
+        /// <param name="cards"></param>
+        /// <param name="cardType">获得的牌值（包括花色的）</param>
+        /// <returns></returns>
+        public static string GetAudioName(int[] cards,CardType cardType)
+        {
+            var str = new string[cards.Length];
+            for (int i = 0; i < cards.Length; i++)
+            {
+                str[i] = cards[i].ToString("x").Substring(1, 1);
+
+            }
+            System.Array.Sort(str);
+
+            switch (cardType)
+            {
+                case CardType.C1:
+                    if (cards[0] == 81)
+                    {
+                        return "xiaowang";
+                    }
+                    if (cards[0] == 97)
+                    {
+                        return "dawang";
+                    }
+                    return str[0];
+
+                case CardType.C123:
+                    if (str[0] == str[1] && str[1] != str[2]) return "shuangshun";   //查看是否是双顺
+                    return "shunzi";
+                case CardType.C1122:
+                    return "shuangshun";
+                case CardType.C111222:
+                    return "feiji";
+                case CardType.C1112223344:
+                case CardType.C11122234:
+                    return "feijidaichibang";
+
+                case CardType.C2:
+                    if (cards[0] == 97 || cards[1] == 97 || cards[0] == 81 || cards[1] == 81)
+                    {
+                        return "huojian";
+                    }
+                    if (str[0] == str[1] || HaveMagic(cards))
+                    {
+                        if (HaveMagic(cards))
+                        {
+                            return "1dui" + str[1];
+                        }
+                        return "1dui" + str[0];
+                    }
+                    return "1dui" + str[1];
+
+                case CardType.C3:
+                    return "3zhang" + str[1];
+                case CardType.C31:
+                    return "3dai1";
+                case CardType.C32:
+                    return "3dai2";
+
+
+                case CardType.C4:
+                    if (HaveMagic(cards))     //如果有癞子
+                    {
+                        if (str[1] == str[2] && str[2] == str[3])
+                        {
+                            return "zhadan";
+                        }
+                    }
+                    return str[0] != str[3] ? "3dai1" : "zhadan";
+
+                case CardType.C411:
+                    return "4dai2";
+
+                case CardType.C42:
+                    return "huojian";
+
+                case CardType.C5:
+                    //超级炸弹
+                    break;
+
+            }
+            return string.Empty;
+        }
 
         /// <summary>
         /// 获得声音文件的标记名字部分
@@ -197,8 +338,6 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.AudioListener
         /// <returns></returns>
         public static string GetAudioName(int[] cards)
         {
-
-      
             var str = new string[cards.Length];
             for (int i = 0; i < cards.Length; i++)
             {
@@ -233,10 +372,9 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.AudioListener
                         return "1dui" + str[0];
 
                     }
-                    else
-                    {
-                        return "huojian";
-                    }
+
+                    return "huojian";
+
                 case 3:
                     return "3zhang" + str[1];
                 case 4:
@@ -261,7 +399,7 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.AudioListener
                             return "zhadan";
                         }
                     }
-                  
+
                     if (str[0] != str[1] && str[2] != str[3])
                     {
 
@@ -273,7 +411,7 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.AudioListener
                     }
                     return "4dai1";
                 case 6:
-                
+
                     if (str[0] != str[1] && str[1] != str[2] && str[2] != str[3])
                     {
                         return "shunzi";
@@ -295,7 +433,9 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.AudioListener
                     }
                     if (str[4] == str[5] && str[5] == str[6] && str[6] == str[7])
                     {
-                        return "4dai2dui";
+                        if (str[0] == str[1])
+                            return "4dai2dui";
+                        return "feijidaichibang";
                     }
                     if (str[0] == str[1] && str[1] == str[2] && str[2] == str[3])
                     {
@@ -321,6 +461,10 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.AudioListener
                     }
                     if (str[0] == str[1] && str[2] == str[3] && str[0] != str[2])
                     {
+                        if (str[3] == str[4])
+                        {
+                            return "feijidaichibang";
+                        }
                         return "shuangshun";
                     }
                     return "shunzi";
@@ -371,6 +515,7 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.AudioListener
                     }
             }
         }
+
         private static bool HaveMagic(IEnumerable<int> cards)
         {
             return cards.Any(s => s == 113);

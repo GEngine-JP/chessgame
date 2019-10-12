@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Assets.Scripts.Game.ddz2.PokerRule
+﻿namespace Assets.Scripts.Game.ddz2.PokerRule
 {
     /** 牌类型 */
     public enum CardType

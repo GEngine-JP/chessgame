@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Assets.Scripts.Common.Utils;
 using Assets.Scripts.Game.ddz2.DDz2Common;
 using Assets.Scripts.Game.ddz2.DDz2Common.ImgPress;
 using Assets.Scripts.Game.ddz2.DdzEventArgs;
@@ -11,8 +10,8 @@ using YxFramwork.Controller;
 using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
 using YxFramwork.Tool;
-using com.yxixia.utile.YxDebug;
 using Assets.Scripts.Game.ddz2.InheritCommon;
+using YxFramwork.Common.Adapters;
 
 namespace Assets.Scripts.Game.ddz2.DDzGameListener.TotalResultPanel
 {
@@ -47,6 +46,7 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.TotalResultPanel
         /// 总结算发过来的信息缓存
         /// </summary>
         private ISFSObject _ttGameResultData;
+
         /// <summary>
         /// 游戏信息
         /// </summary>
@@ -82,54 +82,66 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.TotalResultPanel
         [SerializeField]
         private UILabel _roomerInfo;
 
-        public static TotalResultListener Instance { private set; get; }
+        /// <summary>
+        /// 大赢家头像
+        /// </summary>
+        [SerializeField]
+        private YxBaseTextureAdapter _bigWinnerImg;
+
 
         protected override void OnAwake()
         {
-            Instance = this;
-            Ddz2RemoteServer.AddOnGameOverEvt(OnGameOverEvt);
-            Ddz2RemoteServer.AddOnGameInfoEvt(OnGameInfo);
-            Ddz2RemoteServer.AddOnGetRejoinDataEvt(OnGameInfo);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyGetGameInfo, OnGameInfo);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyOnRejoin, OnGameInfo);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyRoomGameOver, OnGameOverEvt);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyShowReadyBtn, ShowTtResultView);
+        }
+
+        private void ShowTtResultView(DdzbaseEventArgs obj)
+        {
+            if (_ttGameResultData == null)
+                return;
+            if (!App.GetGameData<DdzGameData>().IsRoomGame)
+                return;
+            ShowTtResultView();
         }
 
         /// <summary>
-        /// 场景销毁后，重置静态变量
+        /// 显示总结算界面
         /// </summary>
-        private void OnDestroy()
+        void ShowTtResultView()
         {
-            Instance = null;
+            if (!App.GetGameData<DdzGameData>().IsRoomGame)
+                return;
+
+            UiGameObject.SetActive(true);
+            SetData(_ttGameResultData);
+            _ttGameResultData = null;
         }
 
-        private void OnGameOverEvt(object sender, DdzbaseEventArgs args)
+        /// <summary>
+        /// 当房间游戏结束时
+        /// </summary>
+        /// <param name="args"></param>
+        private void OnGameOverEvt(DdzbaseEventArgs args)
         {
-           _ttGameResultData = args.IsfObjData;
+            _ttGameResultData = args.IsfObjData; //赋值总结算数据
+
+            ShowTtResultView(); //解散房间的情况下,直接显示总结算界面
         }
+
         /// <summary>
         /// 游戏初始化部分信息需要缓存，用于结算显示
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        private void OnGameInfo(object sender, DdzbaseEventArgs args)
+        private void OnGameInfo(DdzbaseEventArgs args)
         {
             _gameInfo = args.IsfObjData;
         }
 
         public override void RefreshUiInfo()
         {
-            if (_ttGameResultData == null) return;
 
-            UiGameObject.SetActive(true);
-            SetData(_ttGameResultData);
-
-            _ttGameResultData = null;
-        }
-
-        /// <summary>
-        /// 标记是否已经结束所有牌局
-        /// </summary>
-        public bool IsEndAllRound
-        {
-            get { return _ttGameResultData != null; }
         }
 
 
@@ -141,18 +153,38 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.TotalResultPanel
             ISFSArray userArray = data.GetSFSArray("users");
 
             DDzUtil.ClearPlayerGrid(GridGob);
+            int bigWinnerSeat = -1;
+            int bigScore = -1;
 
             for (int i = 0; i < userArray.Count; i++)
             {
-               var gob =  NGUITools.AddChild(GridGob, ItemsOrgGob);
-               gob.SetActive(true);
-               var resultItem = gob.GetComponent<ResultItem>();
-               resultItem.SetUserInfo(userArray.GetSFSObject(i));
+                var gob = GridGob.AddChild(ItemsOrgGob);
+                gob.SetActive(true);
+                var userInfo = userArray.GetSFSObject(i);
+                var resultItem = gob.GetComponent<ResultItem>();
+                resultItem.SetUserInfo(userInfo);
+                int tempScore = userInfo.GetInt("gold");
+                if (tempScore > bigScore)
+                {
+                    bigScore = tempScore;
+                    bigWinnerSeat = userInfo.GetInt("seat");
+                }
             }
 
             GridGob.GetComponent<UIGrid>().repositionNow = true;
+
+            if (_bigWinnerImg != null)
+            {
+                var gdata = App.GetGameData<DdzGameData>();
+                var bigWinnerInfo = gdata.GetOnePlayerInfo(bigWinnerSeat, true);
+                YxFramwork.Common.DataBundles.PortraitDb.SetPortrait(bigWinnerInfo.AvatarX, _bigWinnerImg,
+                    bigWinnerInfo.SexI);
+            }
+
             InfoAbout(data);
         }
+
+
         /// <summary>
         /// 大结算周边信息处理
         /// </summary>
@@ -186,12 +218,14 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.TotalResultPanel
                 _roomId.text = _gameInfo.GetInt("rid").ToString();
             }
         }
+
+
         /// <summary>
         /// 时间转化
         /// </summary>
         /// <param name="svt"></param>
         /// <returns></returns>
-        public  DateTime GetSvtTime(long svt)
+        public DateTime GetSvtTime(long svt)
         {
             DateTime s = new DateTime(1970, 1, 1, 8, 0, 0);
             s = s.AddSeconds(svt);
@@ -203,47 +237,38 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.TotalResultPanel
         /// </summary>
         public void OnClickBackHall()
         {
-            //App.GetGameData<GlobalData>().ClearParticalGob();
+            //App.GetGameData<DdzGameData>().ClearParticalGob();
             UiGameObject.SetActive(false);
-            App.OnQuitGame();
+            App.QuitGame();
         }
+
+        private string _screenshot;
 
         /// <summary>
         /// 点击分享战绩按钮
         /// </summary>
         public void OnCLickShare()
         {
-            YxWindowManager.ShowWaitFor();
+            _screenshot = App.UI.CaptureScreenshot();
+            Invoke("CaptureScreenshot", 1f);
+        }
 
-            Facade.Instance<WeChatApi>().InitWechat();
-
-            UserController.Instance.GetShareInfo(delegate(ShareInfo info)
-                {
-                    YxWindowManager.HideWaitFor();
-                    Img.DoScreenShot(new Rect(0, 0, Screen.width, Screen.height), imageUrl =>
-                        {
-                            YxDebug.Log("Url == " + imageUrl);
-                            if (Application.platform == RuntimePlatform.Android)
-                            {
-                                imageUrl = "file://" + imageUrl;
-                            }
-                            info.ImageUrl = imageUrl;
-                            info.ShareType = ShareType.Image;
-                            Facade.Instance<WeChatApi>().ShareContent(info, str =>
-                                {
-                                    //成功后给奇哥发消息
-                                    var parm = new Dictionary<string, object>
-                                        {
-                                            {"option", 2},
-                                            {"bundle_id", Application.bundleIdentifier},
-                                            {"share_plat", SharePlat.WxSenceTimeLine.ToString()},
-                                        };
-                                    Facade.Instance<TwManger>().SendAction("shareAwards", parm, null);
-                                });
-                        });
-                });
-
-            //Facade.Instance<TwManger>().SendAction("shareAwards",new Dictionary<string,object>() { {"bundle_id",Application.bundleIdentifier}, {"share_plat",} }, );
+        void CaptureScreenshot()
+        {
+            Facade.Instance<WeChatApi>().InitWechat(App.Config.WxAppId);
+            var dic = new Dictionary<string, object>();
+            dic["type"] = 0;
+            dic["game_key_c"] = App.GameKey;
+            dic["image"] = _screenshot;
+            dic["shareType"] = 1;
+            dic["sharePlat"] = 0;
+            UserController.Instance.GetShareInfo(dic, info => Facade.Instance<WeChatApi>().ShareContent(info, str =>
+            {
+                var dict = new Dictionary<string, object>();
+                dict["option"] = 2;
+                dict["sharePlat"] = SharePlat.WxSenceSession.ToString();
+                Facade.Instance<TwManager>().SendAction("shareGameResultRequest", dict, null);
+            }));
         }
 
     }

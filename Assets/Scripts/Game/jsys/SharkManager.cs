@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using YxFramwork.Common;
 
 namespace Assets.Scripts.Game.jsys
 {
@@ -19,9 +20,9 @@ namespace Assets.Scripts.Game.jsys
 
         public void StartMove()
         {
-            Hashtable args = new Hashtable();
-            int num = Random.Range(0, 9);
-            _currTransform = ModelManager.Instance.PointsTransforms[num].transform;
+            var args = new Hashtable();
+            var num = Random.Range(0, 9);
+            _currTransform = App.GetGameManager<JsysGameManager>().ModelMgr.PointsTransforms[num].transform;
             args.Add("position", _currTransform.position);
 
             //设置类型为线性，线性效果会好一些。

@@ -5,40 +5,50 @@ using Sfs2X.Entities.Data;
 using UnityEngine;
 using YxFramwork.Common;
 using YxFramwork.ConstDefine;
-using YxFramwork.View;
+using YxFramwork.Framework.Core;
 
 namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
 {
     public class ReadyBtnListener : ServEvtListener
     {
-        /// <summary>
-        /// 显示showreadybtn按钮
-        /// </summary>
-        private bool _isShowReadyBtn;
 
         /// <summary>
         /// 准备按钮
         /// </summary>
         [SerializeField]
         protected GameObject ReadyBtnSprite;
+
         protected override void OnAwake()
         {
-            Ddz2RemoteServer.AddOnGameInfoEvt(OnGameInfo);  
-            Ddz2RemoteServer.AddOnGetRejoinDataEvt(OnRejoin);
-            Ddz2RemoteServer.AddOnUserReadyEvt(OnUserReady);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyGetGameInfo, OnGameInfo);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyOnRejoin, OnRejoin);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyOnUserReady, OnUserReady);
+            Facade.EventCenter.AddEventListeners<string, DdzbaseEventArgs>(GlobalConstKey.KeyShowReadyBtn, ShowReadyBtn);
+            Facade.EventCenter.AddEventListeners<int, DdzbaseEventArgs>(GlobalConstKey.TypeAllocate, HideReadyBtn);
         }
 
-        private void OnUserReady(object sender, DdzbaseEventArgs args)
+        private void HideReadyBtn(DdzbaseEventArgs args)
+        {
+            SetReadyBtnActive(false);
+        }
+
+        private void ShowReadyBtn(DdzbaseEventArgs args)
+        {
+            SetReadyBtnActive(true);
+        }
+
+
+        private void OnUserReady(DdzbaseEventArgs args)
         {
             var data = args.IsfObjData;
             if (data.ContainsKey(RequestKey.KeySeat) &&
-                data.GetInt(RequestKey.KeySeat) == App.GetGameData<GlobalData>().GetSelfSeat)
+                data.GetInt(RequestKey.KeySeat) == App.GetGameData<DdzGameData>().SelfSeat)
             {
-                IsReadyBtnActive(false);
+                SetReadyBtnActive(false);
             }
         }
 
-        private void OnRejoin(object sender, DdzbaseEventArgs args)
+        private void OnRejoin(DdzbaseEventArgs args)
         {
             CheckReadyBtnShow(args.IsfObjData);
         }
@@ -46,15 +56,13 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
 
         public override void RefreshUiInfo()
         {
-            // throw new System.NotImplementedException();
         }
 
         /// <summary>
         /// 发送准备游戏信息
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="args"></param>
-        private void OnGameInfo(object sender, DdzbaseEventArgs args)
+        private void OnGameInfo(DdzbaseEventArgs args)
         {
             CheckReadyBtnShow(args.IsfObjData);
         }
@@ -63,48 +71,39 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.BtnCtrlPanel
 
         private void CheckReadyBtnShow(ISFSObject data)
         {
-            _isShowReadyBtn = false;
+            bool showReadyBtn = true;
             if (data.ContainsKey(NewRequestKey.KeyCargs2))
             {
                 var cargsInfo = data.GetSFSObject(NewRequestKey.KeyCargs2);
                 if (cargsInfo.ContainsKey(NewRequestKey.KeyReadyBtn))
-                    _isShowReadyBtn = cargsInfo.GetUtfString(NewRequestKey.KeyReadyBtn) == "1";
-
+                    showReadyBtn = cargsInfo.GetUtfString(NewRequestKey.KeyReadyBtn) == "1";
             }
+
             //如果不显示准备按钮，则直接自动准备
-            if (!_isShowReadyBtn)
+            if (!showReadyBtn)
             {
-                GlobalData.ServInstance.SendPlayerReadyServCmd();
+                App.GetRServer<DdzGameServer>().SendPlayerReadyServCmd();
                 return;
             }
 
-            if (data.ContainsKey(RequestKey.KeyUser))
-            {
-                var userData = data.GetSFSObject(RequestKey.KeyUser);
-                if (!App.GetGameData<GlobalData>().IsStartGame
-                    && userData.ContainsKey(RequestKey.KeyState) && userData.GetBool(RequestKey.KeyState) == false)
-                {
-                    IsReadyBtnActive(true);
-                }
+            if (!data.ContainsKey(RequestKey.KeyUser)) return;
+            var userData = data.GetSFSObject(RequestKey.KeyUser);
+            bool active = !App.GetGameData<DdzGameData>().IsGameStart           //游戏没有开始
+                          && userData.ContainsKey(RequestKey.KeyState) &&       
+                          userData.GetBool(RequestKey.KeyState) == false;       //检测玩家状态没有准备
 
-                else
-                {
-/*                    if (!App.GetGameData<GlobalData>().IsStartGame)
-                        GlobalData.ServInstance.SendPlayerReadyServCmd();*/
-                    IsReadyBtnActive(!userData.GetBool(RequestKey.KeyState));
-                }
-            }
+            SetReadyBtnActive(active);
         }
 
 
-        private void IsReadyBtnActive(bool value)
+        private void SetReadyBtnActive(bool value)
         {
             ReadyBtnSprite.SetActive(value);
         }
 
         public void OnReadyBtnClick()
         {
-            GlobalData.ServInstance.SendPlayerReadyServCmd();
+            App.GetRServer<DdzGameServer>().SendPlayerReadyServCmd();
         }
 
     }

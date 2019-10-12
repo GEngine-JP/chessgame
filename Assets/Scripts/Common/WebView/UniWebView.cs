@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Common.WebView
 {
-#if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_EDITOR
+#if UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_EDITOR||UNITY_STANDALONE
     /// <summary>
     /// 网页内嵌组件 
     /// </summary>
@@ -182,7 +182,7 @@ namespace Assets.Scripts.Common.WebView
                 if (_bouncesEnable != value)
                 {
                     _bouncesEnable = value;
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR&&(UNITY_ANDROID||UNITY_IOS)
                 UniWebViewPlugin.SetBounces(gameObject.name, _bouncesEnable);
 #endif
                 }
@@ -202,7 +202,7 @@ namespace Assets.Scripts.Common.WebView
                 if (_zoomEnable != value)
                 {
                     _zoomEnable = value;
-#if !UNITY_EDITOR
+#if  !UNITY_EDITOR&&(UNITY_ANDROID||UNITY_IOS)
                 UniWebViewPlugin.SetZoomEnable(gameObject.name, _zoomEnable);
 #endif
                 }

@@ -1,10 +1,12 @@
-﻿using UnityEngine;
+﻿using com.yxixia.utile.YxDebug;
+using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
-using com.yxixia.utile.YxDebug;
+using YxFramwork.Tool;
 
-namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
+namespace Assets.Scripts.Game.Shuihuzhuan
 {
     public class BottomUIControl : MonoBehaviour
     {
@@ -26,12 +28,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
 
         //跳过动画开关
         public bool skip_bool= false;
-
-        /// <summary>
-        /// 总钱数
-        /// </summary>
-        public Text myMoneyText;
-
+          
         /// <summary>
         /// 当局所得
         /// </summary>
@@ -52,14 +49,15 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public Text LineText;
 
-        private int everyTimeNum = 0;
-        private int iWinMoney = 0;
-        private int MainMoney = 0;
-        private bool Kongzhi = false;
+        private int _everyTimeNum = 0;
+        private int _iWinMoney = 0;
+        private int _mainMoney = 0;
+        private bool _kongzhi = false;
         private void Awake()
         {
             instance = this;
-//            RefreshBetNum();
+            skip_bool = GetSkipAniState();
+            SetSkipStype(skip_bool);
         }
 
         /// <summary>
@@ -67,16 +65,13 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public void BeginTurn()
         {
-//            winMoneyText.text = 0.ToString();
-//            myMoneyText.text = App.GetGameData<GlobalData>().iMainMoney.ToString();
-            MusicManager.Instance.Play("gundong2");
-            App.GetGameData<GlobalData>().MainMoney = App.GetGameData<GlobalData>().iMainMoney;
-            if (App.GetGameData<GlobalData>().iMainMoney >= App.GetGameData<GlobalData>().BetNum)
+            Facade.Instance<MusicManager>().Play("gundong2");
+            var gdata = App.GetGameData<WmarginGameData>();
+            if (gdata.GetPlayerInfo().CoinA >= gdata.BetNum)
             {
-                //                YxDebug.LogError("---------------向服务器发送数据--------------------");
-                GameServer.Instance.MyGameStart(App.GetGameData<GlobalData>().BetBaseNum); //服务器发送数据
-//                App.GetGameData<GlobalData>().ZhuanState = 1;
-                if (App.GetGameData<GlobalData>().IsAuto)
+                //Debug.LogError("---------------向服务器发送数据--------------------");
+                App.GetRServer<WmarginGameServer>().SendMyGameStart(App.GetGameData<WmarginGameData>().BetBaseNum); //服务器发送数据
+                if (gdata.IsAuto)
                 {
                     GameStateUiControl.instance.Isaudt();
                 }
@@ -87,9 +82,9 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
             }
             else//如果是自动而且自己的金币少于加注钱，那么就把自动关闭
             {
-                if (App.GetGameData<GlobalData>().IsAuto)
+                if (gdata.IsAuto)
                 {
-                    App.GetGameData<GlobalData>().IsAuto = false;
+                    gdata.IsAuto = false;
                     Auto(false);
                     GameStateUiControl.instance.LostWait();
                 }
@@ -101,9 +96,24 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public void DaxiaoheFun()
         {
-            myMoneyText.text = App.GetGameData<GlobalData>().iMainMoney.ToString();
-            winMoneyText.text = App.GetGameData<GlobalData>().iWinMoney.ToString();
+            var gdata = App.GetGameData<WmarginGameData>();
+            Facade.EventCenter.DispatchEvent(EWmarginEventType.RefreshTotalMoney, gdata.GetPlayerInfo().CoinA);
+            SetWinMoneyText(gdata.iWinMoney);
+        }
 
+        protected void SetWinMoneyText(int coin)
+        {
+            winMoneyText.text = YxUtiles.GetShowNumberToString(coin);
+        }
+
+        protected void SetBetNumText(int coin)
+        {
+            betNumText.text = YxUtiles.GetShowNumberToString(coin);
+        }
+
+        protected void SetBetBaseText(int coin)
+        {
+            betBaseText.text = YxUtiles.GetShowNumberToString(coin);
         }
 
         /// <summary>
@@ -111,13 +121,11 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public void ShuaXin()
         {
-            int i = 0;
-            i = App.GetGameData<GlobalData>().MainMoney - App.GetGameData<GlobalData>().BetNum;
-            App.GetGameData<GlobalData>().MainMoney = 0;
-            App.GetGameData<GlobalData>().MainMoney = i;
-            myMoneyText.text = i.ToString();
-
-         
+            var gdata = App.GetGameData<WmarginGameData>();
+            var self = gdata.GetPlayerInfo();
+            var coin = self.CoinA - gdata.BetNum;
+            self.CoinA = coin;
+            Facade.EventCenter.DispatchEvent(EWmarginEventType.RefreshTotalMoney, coin);
         }
 
         /// <summary>
@@ -126,22 +134,22 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         public void AutoBtnFun()
         {
             Auto(true);
-            App.GetGameData<GlobalData>().IsAuto = true;
-            if (App.GetGameData<GlobalData>().IsAotozhuangtai)//如果在运行动画就不能进行自动
+            App.GetGameData<WmarginGameData>().IsAuto = true;
+            if (App.GetGameData<WmarginGameData>().IsAotozhuangtai)//如果在运行动画就不能进行自动
             {
                 YxDebug.LogError("执行");
-              if (App.GetGameData<GlobalData>().ZhuanState == 1) //刚下注
+              if (App.GetGameData<WmarginGameData>().ZhuanState == 1) //刚下注
                {
                    BeginTurn();
                 }
             
-             if (App.GetGameData<GlobalData>().ZhuanState == 2) //输了
+             if (App.GetGameData<WmarginGameData>().ZhuanState == 2) //输了
              {
                 BeginTurn();
              }
-             if (App.GetGameData<GlobalData>().ZhuanState == 3) //赢了
+             if (App.GetGameData<WmarginGameData>().ZhuanState == 3) //赢了
              {
-                 if (App.GetGameData<GlobalData>().iWinMoney == 0)
+                 if (App.GetGameData<WmarginGameData>().iWinMoney == 0)
                  {
                      BeginTurn();
                  }
@@ -166,18 +174,17 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public void AddBetNumFun()
         {
-            App.GetGameData<GlobalData>().ZhuanState = 1;
-            if (App.GetGameData<GlobalData>().BetBaseNum < (App.GetGameData<GlobalData>().iXiazhushangxian *10))//压注数不能大于9
+            App.GetGameData<WmarginGameData>().ZhuanState = 1;
+            if (App.GetGameData<WmarginGameData>().BetBaseNum < (App.GetGameData<WmarginGameData>().iXiazhushangxian *10))//压注数不能大于9
             {
-                App.GetGameData<GlobalData>().BetBaseNum = App.GetGameData<GlobalData>().BetBaseNum+App.GetGameData<GlobalData>().iXiazhushangxian;
+                App.GetGameData<WmarginGameData>().BetBaseNum = App.GetGameData<WmarginGameData>().BetBaseNum+App.GetGameData<WmarginGameData>().iXiazhushangxian;
             }
-            else App.GetGameData<GlobalData>().BetBaseNum = App.GetGameData<GlobalData>().iXiazhushangxian;//否则押注数是1
+            else App.GetGameData<WmarginGameData>().BetBaseNum = App.GetGameData<WmarginGameData>().iXiazhushangxian;//否则押注数是1
             RefreshBetNum();
-            if (App.GetGameData<GlobalData>().BetBaseNum != 0)//初始化的时候判断
+            if (App.GetGameData<WmarginGameData>().BetBaseNum != 0)//初始化的时候判断
             {
                 GameStateUiControl.instance.BeginButton.interactable = true;//如果是不等于0 那就打开开始
                 GameStateUiControl.instance.ZiDongButton.interactable = true;//如果是不等于0 那就打开自动
-
             }
         }
         /// <summary>
@@ -185,50 +192,45 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public void GetWinMoneyBtnFun()
         {
-            MusicManager.Instance.Play("defen");
+            Facade.Instance<MusicManager>().Play("defen");
             GameStateUiControl.instance.BiBeiButton.interactable = false;
-            everyTimeNum = 0;
-            iWinMoney = 0;
-            MainMoney = 0;
-            iWinMoney = App.GetGameData<GlobalData>().iWinMoney;
-            MainMoney = App.GetGameData<GlobalData>().MainMoney;
-            if (iWinMoney >= 10)
+            _everyTimeNum = 0;
+            var gdata = App.GetGameData<WmarginGameData>();
+            _iWinMoney = gdata.iWinMoney;
+            _mainMoney = (int)gdata.GetPlayerInfo().CoinA;
+            if (_iWinMoney >= 10)
             {
-                everyTimeNum = App.GetGameData<GlobalData>().iWinMoney/10;
-                Kongzhi = true;
+                _everyTimeNum = _iWinMoney / 10;
+                _kongzhi = true;
             }
-            else Kongzhi = false;
+            else _kongzhi = false;
             GetMoney();
         }
 
         public void GetMoney() //得分动画
         {
-            if (iWinMoney >= 10 || Kongzhi)
+            if (_iWinMoney >= 10 || _kongzhi)
             {
-                iWinMoney -= everyTimeNum;
-                MainMoney += everyTimeNum;
+                _iWinMoney -= _everyTimeNum;
+                _mainMoney += _everyTimeNum;
             }
             else
             {
-                MainMoney = MainMoney + iWinMoney;
-                iWinMoney = 0;
+                _mainMoney = _mainMoney + _iWinMoney;
+                _iWinMoney = 0;
             }
             RefreshMoney();
-            if (iWinMoney <= 0)
+            if (_iWinMoney <= 0)
             {
-                myMoneyText.text =App.GetGameData<GlobalData>().iMainMoney.ToString( );
-                winMoneyText.text = 0.ToString();
+                var gdata = App.GetGameData<WmarginGameData>();
+                Facade.EventCenter.DispatchEvent(EWmarginEventType.RefreshTotalMoney, gdata.GetPlayerInfo().CoinA);
+                SetWinMoneyText(0);
                 GameStateUiControl.instance.DeFenWait();//显示赢了
-               
-                if (App.GetGameData<GlobalData>().IsAuto)
+                WinPanelControl.instance.winPanel.SetActive(false);
+                if (gdata.IsAuto)
                 {
                     GameStateUiControl.instance.StopButton.interactable = false;
-                }
-                WinPanelControl.instance.winPanel.SetActive(false);
-                if (App.GetGameData<GlobalData>().IsAuto)//是否为自动
-                {
                     BeginTurn();
-
                 }
                 return;
              }
@@ -237,10 +239,9 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         }
         public void RefreshMoney()//显示金钱和当局所得
         {
-            myMoneyText.text = MainMoney.ToString();
-            WinPanelControl.instance.winText.text =iWinMoney.ToString();
-            winMoneyText.text = iWinMoney.ToString();
- 
+            Facade.EventCenter.DispatchEvent(EWmarginEventType.RefreshTotalMoney, (long)_mainMoney);
+            WinPanelControl.instance.SetWinText(_iWinMoney);
+            SetWinMoneyText(_iWinMoney);
         }
         /// <summary>
         /// 手动
@@ -248,7 +249,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         public void HandBtnFun()
         {
             Auto(false);
-            App.GetGameData<GlobalData>().IsAuto = false ;
+            App.GetGameData<WmarginGameData>().IsAuto = false ;
             GameStateUiControl.instance.Esc.interactable = true;
            
 
@@ -267,18 +268,19 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public void RefreshBetNum()
         {
-            int i = App.GetGameData<GlobalData>().BetBaseNum;
-            betBaseText.text = i.ToString();
-            App.GetGameData<GlobalData>().BetNum = App.GetGameData<GlobalData>().BetLineNum * i;//总压注钱数
-            betNumText.text = App.GetGameData<GlobalData>().BetNum.ToString();
+            var gdata = App.GetGameData<WmarginGameData>();
+            var i = gdata.BetBaseNum;
+            SetBetNumText(i);
+            gdata.BetNum = App.GetGameData<WmarginGameData>().BetLineNum * i;//总压注钱数
+            SetBetNumText(gdata.BetNum);
         }
         public void SetMoney()
         {
-            myMoneyText.text = App.GetGameData<GlobalData>().MainMoney.ToString();
-            LineText.text = App.GetGameData<GlobalData>().BetLineNum.ToString();
-            betBaseText.text = App.GetGameData<GlobalData>().BetBaseNum.ToString();
-            betNumText .text =
-                (App.GetGameData<GlobalData>().BetBaseNum * App.GetGameData<GlobalData>().BetLineNum).ToString();
+            var gdata = App.GetGameData<WmarginGameData>();
+//            Facade.EventCenter.DispatchEvent(EWmarginEventType.RefreshTotalMoney, gdata.GetPlayerInfo().CoinA);
+            LineText.text = gdata.BetLineNum.ToString();
+            SetBetBaseText(gdata.BetBaseNum);
+            SetBetNumText(gdata.BetBaseNum * gdata.BetLineNum);
         }
         /// <summary>
         /// 显示当前所应的钱数大小和
@@ -286,22 +288,20 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         public void Theincome()
         {
 
-            winMoneyText.text = 0.ToString();
-            myMoneyText.text = App.GetGameData<GlobalData>().MainMoney.ToString();
+            SetWinMoneyText(0);
+            Facade.EventCenter.DispatchEvent(EWmarginEventType.RefreshTotalMoney, App.GetGameData<WmarginGameData>().GetPlayerInfo().CoinA);
         }
         /// <summary>
         /// 显示当前所应的钱数大小和
         /// </summary>
         public void TheincomeMali()
         {
-
-            winMoneyText.text = 0.ToString();
-            myMoneyText.text = App.GetGameData<GlobalData>().iMainMoney.ToString();
+            SetWinMoneyText(0);
+            Facade.EventCenter.DispatchEvent(EWmarginEventType.RefreshTotalMoney, App.GetGameData<WmarginGameData>().GetPlayerInfo().CoinA);
         }
         public void Escfun()
         {
-            GameServer.Instance.OnQuitGame();
-
+            App.GameManager.OnQuitGameClick();
         }
         /// <summary>
         /// 停止按钮
@@ -310,16 +310,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         
         public void BtnStop()
         {
-            //print(App.GetGameData<GlobalData>().MainMoney.ToString());
-            //for (int i = 0; i < TurnControl.instance.turnItems.Length; i++)
-            //{
-            //    TurnControl.instance.turnItems[i].GetComponent<TurnItemControl>().canMove = false;
-            //}
-            
-            //for (int i = 0; i < TurnControl.instance.resultImages.Length; i++)
-            //{
-            //    TurnControl.instance.resultImages[i].enabled = true; 
-            //}
+            if (skip_bool){return;}
             skip_bool = true;
             Invoke("SkipToFalse",2);
         }
@@ -331,16 +322,24 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
 
         public void SkipAni()
         {
-            skip_bool = skip_bool ? false : true;
-            if (skip_bool)
-            {
-                skip.GetComponent<Image>().sprite = skip_true;
-            }
-            else
-            {
-                skip.GetComponent<Image>().sprite = skip_false;
+            skip_bool = !skip_bool;
+            SetSkipStype(skip_bool);
+            SetSkipAniState(skip_bool);
+        }
 
-            }
+        public void SetSkipStype(bool isSkip)
+        {
+            skip.GetComponent<Image>().sprite = isSkip ? skip_true : skip_false;
+        }
+
+        public void SetSkipAniState(bool isSkip)
+        {
+            PlayerPrefs.SetInt(string.Format("{0}_skipanistate", App.GameKey),isSkip?1:0);
+        }
+
+        public bool GetSkipAniState()
+        {
+            return PlayerPrefs.GetInt(string.Format("{0}_skipanistate", App.GameKey), 0)>0;
         }
     }
 }

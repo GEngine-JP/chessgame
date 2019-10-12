@@ -1,9 +1,11 @@
 using UnityEngine;
+using YxFramwork.Common.Adapters;
+using YxFramwork.Enums;
 using YxFramwork.Framework;
 
 namespace Assets.Scripts.Common.Adapters
 { 
-    public class NtoULabelAdapter : MonoBehaviour
+    public class NtoULabelAdapter : YxBaseAdapter
     {
         public UIFont FontRes;
 
@@ -26,6 +28,11 @@ namespace Assets.Scripts.Common.Adapters
             var ladapter = GetComponent<YxBaseLabelAdapter>();
             if (ladapter == null) return;
             ladapter.Font(null);
+        }
+
+        public override YxEUIType UIType
+        {
+            get { return YxEUIType.Default; }
         }
     }
 }

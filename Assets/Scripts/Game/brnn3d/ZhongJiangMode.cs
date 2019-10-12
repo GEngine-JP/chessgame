@@ -4,14 +4,8 @@ namespace Assets.Scripts.Game.brnn3d
 {
     public class ZhongJiangMode : MonoBehaviour
     {
-        public static ZhongJiangMode Instance;
         public Transform[] zhongjiangEffs = new Transform[4];
-
-        protected void Awake()
-        {
-            Instance = this;
-
-        }
+ 
         //中奖闪烁效果的显示
         public void ShowZhongJiangEffect(int areaID, bool[] isShow)
         {

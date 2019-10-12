@@ -1,10 +1,10 @@
-﻿using Assets.Scripts.Game.lswc.Control.Scene.Manager;
-using Assets.Scripts.Game.lswc.Data;
+﻿using Assets.Scripts.Game.lswc.Data;
 using Assets.Scripts.Game.lswc.Manager;
+using Assets.Scripts.Game.lswc.Scene;
 using UnityEngine;
-using Assets.Scripts.Game.lswc;
+using YxFramwork.Common;
 
-namespace Assets.Scripts.Game.lswc.Control.Scene.Item
+namespace Assets.Scripts.Game.lswc.Item
 {
     /// <summary>
     /// 晶体控制类，处理单个晶体闪烁
@@ -69,7 +69,7 @@ namespace Assets.Scripts.Game.lswc.Control.Scene.Item
                     break;
             }
         
-            _changeMaterial = LSResourseManager.Instance.GetMaterial(localType);
+            _changeMaterial = App.GetGameManager<LswcGamemanager>().ResourseManager.GetMaterial(localType);
 
             if (OnChangeLocalCorlor != null)
             {

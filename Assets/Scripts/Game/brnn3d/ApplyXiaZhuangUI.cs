@@ -4,14 +4,8 @@ namespace Assets.Scripts.Game.brnn3d
 {
     public class ApplyXiaZhuangUI : MonoBehaviour
     {
-        public static ApplyXiaZhuangUI Instance;
-
         public Transform ApplyZhuangtf;
         public Transform XiaZhuangtf;
-        public void Awake()
-        {
-            Instance = this;
-        }
 
         //显示上庄的按钮
         public void ShowApplyZhuang()

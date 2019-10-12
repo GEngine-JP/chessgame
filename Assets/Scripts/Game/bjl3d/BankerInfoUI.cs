@@ -1,16 +1,16 @@
-﻿using Assets.Scripts.Game.bjl3d.Scripts;
-using Sfs2X.Entities.Data;
+﻿using Sfs2X.Entities.Data;
 using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
-using YxFramwork.Common.Utils;
 using com.yxixia.utile.YxDebug;
+using YxFramwork.Common.Model;
+using YxFramwork.Enums;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.bjl3d
 {
     public class BankerInfoUI : MonoBehaviour// G 11.15
     {
-        public static BankerInfoUI Instance;
         private Image _rankerHeadPortraitImg;
         private Text _rankerNameText;
         private Text _rankerGameCurrencyText;
@@ -18,13 +18,11 @@ namespace Assets.Scripts.Game.bjl3d
         private Text _gameNumber;
 
 
-        public static BankerInfoUI Intance;
         /// <summary>
         /// 获取UI操作控件
         /// </summary>
         protected void Awake()
         {
-            Instance = this;
             Transform tf = transform.FindChild("RankerHeadPortrait_Img");
             if (tf == null)
                 YxDebug.LogError("No Such Object");//没有该物体    
@@ -61,8 +59,6 @@ namespace Assets.Scripts.Game.bjl3d
             if (tf != null) _gameNumber = tf.GetComponent<Text>();
             if (_gameNumber == null)
                 YxDebug.LogError("No Such  Component");//没有该组件
-
-            Intance = this;
         }
 
         private long _resultGold;
@@ -75,15 +71,16 @@ namespace Assets.Scripts.Game.bjl3d
         /// </summary>
         public void GameInnings()
         {
-            UserInfoUI.Instance.GameConfig.GameNum++;
+            var gameCfg = App.GetGameData<Bjl3DGameData>().GameConfig;
+            gameCfg.GameNum++;
             if (_isChangezhuang)
             {
-                UserInfoUI.Instance.GameConfig.GameNum = 1;
-                _gameNumber.text = UserInfoUI.Instance.GameConfig.GameNum + "";
+                gameCfg.GameNum = 1;
+                _gameNumber.text = gameCfg.GameNum + "";
             }
             else
             {
-                _gameNumber.text = UserInfoUI.Instance.GameConfig.GameNum + "";
+                _gameNumber.text = gameCfg.GameNum + "";
             }
 
         }
@@ -92,12 +89,13 @@ namespace Assets.Scripts.Game.bjl3d
         /// </summary>
         public void ShowUserInfoUI()
         {
+            var gdata = App.GetGameData<Bjl3DGameData>();
             if (_record == -1)
             {
-                _record = App.GetGameData<GlobalData>().B;
+                _record = gdata.B;
             }
 
-            if (_record != App.GetGameData<GlobalData>().B)
+            if (_record != gdata.B)
             {
                 _isChangezhuang = true;
             }
@@ -105,55 +103,39 @@ namespace Assets.Scripts.Game.bjl3d
             {
                 _isChangezhuang = false;
             }
-            if (App.GetGameData<GlobalData>().BankList == null || App.GetGameData<GlobalData>().BankList.Size() == 0)
+            if (gdata.BankList == null || gdata.BankList.Size() == 0)
             {
-                App.GetGameData<GlobalData>().CurrentBanker.Seat = App.GetGameData<GlobalData>().B;
+                gdata.CurrentBanker.Seat = gdata.B;
                 _rankerNameText.text = "系统庄";
-//                _resultGold += App.GetGameData<GlobalData>().ResultBnakerTotal;
                 _rankerAchievementText.text = /*_resultGold +*/ "";
-                _rankerGameCurrencyText.text = "";
-//                App.GetGameData<GlobalData>().ResultBnakerTotal = 0;
+                _rankerGameCurrencyText.text = "∞";
                 return;
             }
-            foreach (ISFSObject banber in App.GetGameData<GlobalData>().BankList)
-            {
-                UserInfo user = new UserInfo();
+            var waitForRankerListUI = App.GetGameManager<Bjl3DGameManager>().TheWaitForRankerListUI;
 
-                user.Seat = banber.GetInt("seat");
-                user.Gold = banber.GetLong("ttgold");
-                user.Name = banber.GetUtfString("username");
-                if (user.Seat == App.GetGameData<GlobalData>().B)
+            foreach (ISFSObject banker in gdata.BankList)
+            {
+                var user = new YxBaseUserInfo();
+                user.Parse(banker);
+                if (banker.ContainsKey("username"))
                 {
-                    WaitForRankerListUI.Instance.ShowRankerListUI(user.Name, user.Gold + "");
+                    user.NickM = banker.GetUtfString("username");
                 }
-            }
 
-            foreach (ISFSObject banber in App.GetGameData<GlobalData>().BankList)
-            {
-                UserInfo user = new UserInfo();
-
-                user.Seat = banber.GetInt("seat");
-                user.Gold = banber.GetLong("ttgold");
-                user.Name = banber.GetUtfString("username");
-                App.GetGameData<GlobalData>().CurrentBanker.Seat = App.GetGameData<GlobalData>().B;
-                if (user.Seat == App.GetGameData<GlobalData>().B)
+                gdata.CurrentBanker.Seat = gdata.B;
+                if (user.Seat == gdata.B)
                 {
-                    App.GameData.GStatus = GameStatus.PlayAndConfine;
-                    App.GetGameData<GlobalData>().CurrentBanker = user;
-                    _rankerNameText.text = user.Name;
-//                    _resultGold += App.GetGameData<GlobalData>().ResultBnakerTotal;
-//                    _rankerAchievementText.text = _resultGold + "";
-                    _rankerAchievementText.text = App.GetGameData<GlobalData>().ResultBnakerTotal+"";
-                    _rankerGameCurrencyText.text = user.Gold + "";
-//                    App.GetGameData<GlobalData>().ResultBnakerTotal = 0;
+                    App.GameData.GStatus = YxEGameStatus.PlayAndConfine;
+                    gdata.CurrentBanker = user;
+                    _rankerNameText.text = user.NickM;
+                    _rankerAchievementText.text = YxUtiles.GetShowNumberToString(gdata.ResultBnakerTotal);
+                    _rankerGameCurrencyText.text = YxUtiles.GetShowNumberToString(user.CoinA);
                 }
                 else
                 {
-                    WaitForRankerListUI.Instance.ShowRankerListUI(user.Name, user.Gold + "");
+                    waitForRankerListUI.ShowRankerListUI(user.NickM, user.CoinA);
                 }
             }
-
-
         }
     }
 }

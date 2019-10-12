@@ -1,8 +1,8 @@
-﻿using Assets.Scripts.Game.lswc.Control.System;
-using Assets.Scripts.Game.lswc.Core;
-using UnityEngine;
+﻿using Assets.Scripts.Game.lswc.Core;
 using YxFramwork.Manager;
 using UnityEngine.UI;
+using YxFramwork.Common;
+using YxFramwork.Framework.Core;
 
 namespace Assets.Scripts.Game.lswc.Windows
 {
@@ -11,13 +11,6 @@ namespace Assets.Scripts.Game.lswc.Windows
     /// </summary>
     public class LSSettingWindow : InstanceControl
     {
-
-        private static LSSettingWindow _instance;
-
-        public static LSSettingWindow Instance
-        {
-            get { return _instance; }
-        }
         private Slider _musicVolume;
 
         private Slider _effectVolume;
@@ -28,11 +21,11 @@ namespace Assets.Scripts.Game.lswc.Windows
 
         private void Awake()
         {
-            _instance = this;
             Find();
             InitListenr();
-            _musicVolume.value = MusicManager.Instance.MusicVolume;
-            _effectVolume.value = MusicManager.Instance.EffectVolume;
+            var musicMgr = Facade.Instance<MusicManager>();
+            _musicVolume.value = musicMgr.MusicVolume;
+            _effectVolume.value = musicMgr.EffectVolume;
         }
 
         private void Find()
@@ -50,15 +43,16 @@ namespace Assets.Scripts.Game.lswc.Windows
 
         private void OnClickSureBtn()
         {
-            LSSystemControl.Instance.PlaySuccess(true);
-            MusicManager.Instance.MusicVolume = _musicVolume.value;
-            MusicManager.Instance.EffectVolume = _effectVolume.value;
+            App.GetGameManager<LswcGamemanager>().SystemControl.PlaySuccess(true);
+            var musicMgr = Facade.Instance<MusicManager>();
+            musicMgr.MusicVolume = _musicVolume.value;
+            musicMgr.EffectVolume = _effectVolume.value;
             Hide();
         }
 
         private void OnClickCancelBtn()
         {
-            LSSystemControl.Instance.PlaySuccess(true);
+            App.GetGameManager<LswcGamemanager>().SystemControl.PlaySuccess(true);
             Hide();
         }
 
@@ -74,7 +68,6 @@ namespace Assets.Scripts.Game.lswc.Windows
 
         public override void OnExit()
         {
-            _instance = null;
         }
     }
 }

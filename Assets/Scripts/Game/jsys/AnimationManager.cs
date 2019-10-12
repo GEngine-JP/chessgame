@@ -2,13 +2,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
 
 namespace Assets.Scripts.Game.jsys
 {
     public class AnimationManager : MonoBehaviour
     {
-        public static AnimationManager Instance;
         //下注按钮的图片数组
         public Image[] BetAnimationImages;
 
@@ -18,77 +18,74 @@ namespace Assets.Scripts.Game.jsys
         //倍数的数组
         public Sprite[] BeishuSprites;
 
-        public void Awake()
-        {
-            Instance = this;
-        }
-
         /// <summary>
         /// 收到转动结果消息处理,显示获奖动画
         /// </summary>
         public void ShowAnimation()
         {
             //Debug.Log("收到转动结果消息处理,显示获奖动画");
-            BetPanelManager.Instance.ShowiWiningText(App.GetGameData<GlobalData>().Winning);
-            SetBeishuSprite(App.GetGameData<GlobalData>().Multiplying[App.GetGameData<GlobalData>().EndAnimal]);
-
-            AudioPlay.Instance.PlaySounds("Animal" + App.GetGameData<GlobalData>().EndAnimal + "");
-           
+            var gdata = App.GetGameData<JsysGameData>();
+            App.GetGameManager<JsysGameManager>().BetPanelMgr.ShowiWiningText(gdata.Winning);
+            SetBeishuSprite(gdata.Multiplying[gdata.EndAnimal]);
+            Facade.Instance<MusicManager>().Play("Animal" + gdata.EndAnimal + "");
 //            StartCoroutine(PlaySound(App.GetGameData<GlobalData>().EndAnimal));
             //显示此局游戏所出现的小动物按钮的闪动
-
             Invoke("ShowBetPanel", 1.0f);
         }
+
         IEnumerator PlaySound(int num)
         {
             if (num == 8 || num == 9)
             {
                 yield return new WaitForSeconds(1f);
-                AudioPlay.Instance.PlaySounds("Dajiang");
+                Facade.Instance<MusicManager>().Play("Dajiang");
             }
         }
+
         public void ShowBetPanel()
         {
-            if (App.GetGameData<GlobalData>().IsShark)
+            var gdata = App.GetGameData<JsysGameData>();
+            var turnGroupsMgr = App.GetGameManager<JsysGameManager>().TurnGroupsMgr;
+            if (gdata.IsShark)
             {
-                if (8 == App.GetGameData<GlobalData>().SharkPos)
+                if (8 == gdata.SharkPos)
                 {
-                    TurnGroupsManager.Instance.GameConfig.IsSliverShark = true;
+                    turnGroupsMgr.GameConfig.IsSliverShark = true;
 
                 }
-                if (9 == App.GetGameData<GlobalData>().SharkPos)
+                if (9 == gdata.SharkPos)
                 {
-                    TurnGroupsManager.Instance.GameConfig.IsGoldShark = true;
+                    turnGroupsMgr.GameConfig.IsGoldShark = true;
                 }
-                BetAnimationImages[App.GetGameData<GlobalData>().SharkPos].gameObject.SetActive(true);
+                BetAnimationImages[gdata.SharkPos].gameObject.SetActive(true);
             }
             else
             {
-                if (0 <= App.GetGameData<GlobalData>().EndAnimal && App.GetGameData<GlobalData>().EndAnimal <= 3)
+                if (0 <= gdata.EndAnimal && gdata.EndAnimal <= 3)
                 {
                     BetAnimationImages[10].gameObject.SetActive(true);
                 }
-                if (3 < App.GetGameData<GlobalData>().EndAnimal && App.GetGameData<GlobalData>().EndAnimal < 8)
+                if (3 < gdata.EndAnimal && gdata.EndAnimal < 8)
                 {
                     BetAnimationImages[11].gameObject.SetActive(true);
                 }
-                if (TurnGroupsManager.Instance.GameConfig.IsGoldShark)
+                if (turnGroupsMgr.GameConfig.IsGoldShark)
                 {
                     BetAnimationImages[9].gameObject.SetActive(true);
-                    TurnGroupsManager.Instance.GameConfig.IsGoldShark = false;
+                    turnGroupsMgr.GameConfig.IsGoldShark = false;
                 }
-                if (TurnGroupsManager.Instance.GameConfig.IsSliverShark)
+                if (turnGroupsMgr.GameConfig.IsSliverShark)
                 {
                     BetAnimationImages[8].gameObject.SetActive(true);
-                    TurnGroupsManager.Instance.GameConfig.IsSliverShark = false;
+                    turnGroupsMgr.GameConfig.IsSliverShark = false;
                 }
-                BetAnimationImages[App.GetGameData<GlobalData>().EndAnimal].gameObject.SetActive(true);
+                BetAnimationImages[gdata.EndAnimal].gameObject.SetActive(true);
             }
         }
 
         public void HideBetPanel()
         {
-            foreach (Image image in BetAnimationImages)
+            foreach (var image in BetAnimationImages)
             {
                 if (image.gameObject.activeSelf)
                 {
@@ -110,9 +107,9 @@ namespace Assets.Scripts.Game.jsys
         //隐藏金鲨银鲨动画
         public void HidGoldSharkAnimation()
         {
-            TurnGroupsManager.Instance.ChangeState();
-            MusicManager.Instance.Stop();
-            AudioPlay.Instance.PlaySounds("Paodeng");
+            App.GetGameManager<JsysGameManager>().TurnGroupsMgr.ChangeState();
+            Facade.Instance<MusicManager>().Stop();
+            Facade.Instance<MusicManager>().Play("Paodeng");
         }
         //设置倍数动画
         public void SetBeishuSprite(int beishu)

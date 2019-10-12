@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
-using YxFramwork.Common.Utils;
+using YxFramwork.Enums;
 
-namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
+namespace Assets.Scripts.Game.Shuihuzhuan
 {
     public class GameStateUiControl : MonoBehaviour
     {
@@ -23,8 +23,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         public Button ShouDongButton;
         public Button Esc;
         public Button TiShi;
-
-             void Awake()
+        void Awake()
         {
             instance = this;
              ChangeToWait(); 
@@ -45,7 +44,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
 
         public void Isaudt()//自动设置
         {
-            App.GameData.GStatus = GameStatus.PlayAndConfine;
+            App.GameData.GStatus = YxEGameStatus.PlayAndConfine;
             ZiDongButton.interactable = true ;
             ShouDongButton.interactable = true;
             BeginButton.interactable = true;
@@ -59,7 +58,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
 
         public void StartWait()//点击开始
         {
-            App.GameData.GStatus = GameStatus.PlayAndConfine;
+            App.GameData.GStatus = YxEGameStatus.PlayAndConfine;
             BeginButton.interactable = false;
             StopButton.interactable = true;
             DefenButton.interactable = false;
@@ -76,7 +75,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public void LostWait()
         {
-            App.GameData.GStatus = GameStatus.Normal;
+            App.GameData.GStatus = YxEGameStatus.Normal;
             BeginButton.interactable = true;
             //StopButton.interactable = true;
             DefenButton.interactable = false;
@@ -86,7 +85,6 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
             ShouDongButton.interactable = true;
             Esc.interactable = true;
             TiShi.interactable = true;
-            TiShi.interactable = false;
         }
         /// <summary>
         /// 赢了
@@ -108,7 +106,7 @@ namespace Assets.Scripts.Game.Shuihuzhuan.Scripts
         /// </summary>
         public void DeFenWait()
         {
-            App.GameData.GStatus = GameStatus.Normal;
+            App.GameData.GStatus = YxEGameStatus.Normal;
             BeginButton.interactable = true;
             StopButton.interactable = true;
             DefenButton.interactable = false ;

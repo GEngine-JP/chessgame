@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Assets.Scripts.Game.ddz2.DDz2Common;
-using Assets.Scripts.Game.ddz2.PokerCdCtrl;
 
 namespace Assets.Scripts.Game.ddz2.PokerRule
 {
@@ -125,23 +123,6 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
 
     public class CheckCardTool
     {
-
-        const int NOT_EXIT = -1;//异常
-        const int BU_CHU = 0;//不出..
-        const int YI_ZHANG = 1;//一张..
-        const int DUI_ZI = 2;//对子..
-        const int BOMB = 4;//普通炸弹..
-        const int SHUN_ZI = 5;//顺子..
-        const int SHUANG_SHUN = 6;//双顺..
-        const int TIAN_ZHA = 7;//双王..
-        const int SUPER_BOMB = 8;//超级炸弹
-        const int PLANE_3 = 9;//3带  三条 三顺
-        const int PLANE_3_1 = 10;//3带1..
-        const int PLANE_3_2 = 11;//3带2..
-        const int PLANE_4 = 12;//4带
-        const int PLANE_4_1 = 13;//4带1
-        const int PLANE_4_2 = 14;//4带2
-
         /// <summary>
         /// 分析cds返回int型
         /// </summary>
@@ -193,9 +174,7 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
             if (posbLd != null) return posbLd;
 
             var posbSanTake = CheckThreeWith(cdsplitStruct, hdSplitSutuct);
-            if (posbSanTake != null) return posbSanTake;
-
-            return null;
+            return posbSanTake;
         }
 
         /// <summary>
@@ -435,7 +414,7 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
                     }
 
                     //组合一下牌变成wholecards
-                    otherCds.AddRange(new int[] { value, value, value });
+                    otherCds.AddRange(new [] { value, value, value });
                     if (_getCdsType != null)
                     {
                         int[] cds = otherCds.ToArray();
@@ -502,9 +481,7 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
 
             //找炸弹
             var bomb = FindBomb(cdsplitStruct);
-            if (bomb != null) return bomb;
-
-            return null;
+            return bomb;
         }
 
 /*
@@ -814,7 +791,7 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
             if (threeCds.Count < 1 || sortedCdLen < 4) return null;
 
             var typ3TakeCds = new List<int>();
-            typ3TakeCds.AddRange(new int[3] { threeCds[0], threeCds[0], threeCds[0] });
+            typ3TakeCds.AddRange(new [] { threeCds[0], threeCds[0], threeCds[0] });
 
 
             //先找三代单牌
@@ -982,11 +959,21 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
         /// </summary>
         /// <param name="cds"></param>
         /// <returns></returns>
-        private int[] RemoveBigCdsInArray(IEnumerable<int> cds)
+        private int[] RemoveBigCdsInArray(int[] cds)
         {
             if (cds == null) return null;
-
-            return cds.Where(cd => PokerRuleUtil.GetValue(cd) < 15).ToArray();
+            var tempList = new List<int>();
+            int len = cds.Length;
+            for (int i = 0; i < len; i++)
+            {
+                int val = cds[i];
+                if(PokerRuleUtil.GetValue(val) < 15)
+                {
+                    tempList.Add(val);
+                }
+            }
+            return tempList.ToArray();
+            //return cds.Where(cd => PokerRuleUtil.GetValue(cd) < 15).ToArray();
         }
 
 /*

@@ -1,273 +1,256 @@
-﻿using System;
-using System.Net.Mime;
-using Assets.Scripts.Game.lswc.Control.System;
+﻿using System.Collections.Generic;
 using Assets.Scripts.Game.lswc.Core;
 using Assets.Scripts.Game.lswc.Data;
-using Assets.Scripts.Game.lswc.Manager;
 using Assets.Scripts.Game.lswc.Tools;
 using Assets.Scripts.Game.lswc.Windows;
 using UnityEngine;
-using System.Collections.Generic;
 using UnityEngine.UI;
 using YxFramwork.Common;
+using YxFramwork.Tool;
 
-public class LSUIManager :InstanceControl
+namespace Assets.Scripts.Game.lswc.Manager
 {
-    private static LSUIManager _instance;
-
-    public static LSUIManager Instance
+    public class LSUIManager :InstanceControl
     {
-        get { return _instance; }
-    }
+        /// <summary>
+        ///下注面板 
+        /// </summary>
+        private LSBetWindow _betWindow;
 
-    /// <summary>
-    ///下注面板 
-    /// </summary>
-    private LSBetWindow _betWindow;
+        /// <summary>
+        /// 设置面板
+        /// </summary>
+        private LSSettingWindow _settingWondow;
 
-    /// <summary>
-    /// 设置面板
-    /// </summary>
-    private LSSettingWindow _settingWondow;
+        /// <summary>
+        /// 历史记录
+        /// </summary>
+        private LSHistoryWindow _historyWindow;
 
-    /// <summary>
-    /// 历史记录
-    /// </summary>
-    private LSHistoryWindow _historyWindow;
+        /// <summary>
+        /// 显示的剩余的时间
+        /// </summary>
+        private Text _timeText;
 
-    /// <summary>
-    /// 显示的剩余的时间
-    /// </summary>
-    private Text _timeText;
+        /// <summary>
+        /// 庄和闲
+        /// </summary>
+        private Image _banker;
 
-    /// <summary>
-    /// 庄和闲
-    /// </summary>
-    private Image _banker;
+        /// <summary>
+        ///红利？？为什么本地随机
+        /// </summary>
+        private Text _bonus;
+        /// <summary>
+        /// 播放动画后的特效？
+        /// </summary>
+        private GameObject _vfx;
 
-    /// <summary>
-    ///红利？？为什么本地随机
-    /// </summary>
-    private Text _bonus;
-    /// <summary>
-    /// 播放动画后的特效？
-    /// </summary>
-    private GameObject _vfx;
+        /// <summary>
+        /// 计时器
+        /// </summary>
+        private List<LSTimeSpan> _spans;
 
-    /// <summary>
-    /// 计时器
-    /// </summary>
-    private List<LSTimeSpan> _spans;
+        /// <summary>
+        /// 删除的计时器
+        /// </summary>
+        private List<LSTimeSpan> _removeSpan;
 
-    /// <summary>
-    /// 删除的计时器
-    /// </summary>
-    private List<LSTimeSpan> _removeSpan;
+        /// <summary>
+        /// 结果界面
+        /// </summary>
+        private LSResultControl _resultPanel;
+         
+        private void Start()
+        {
+            _spans = new List<LSTimeSpan>();
+            _removeSpan = new List<LSTimeSpan>();
+            App.GetGameData<LswcGameData>().OnBetNumChange += OnBetChange;
+            FindChild();
+        }
 
-    /// <summary>
-    /// 结果界面
-    /// </summary>
-    private LSResultControl _resultPanel;
+        private void FindChild()
+        {
+            _betWindow = transform.FindChild("BetWindow").GetComponent<LSBetWindow>();
 
-    private void Awake()
-    {
-        _instance = this;
-        
-    }
+            _settingWondow = transform.FindChild("SettingWindow").GetComponent<LSSettingWindow>();
 
-    private void Start()
-    {
-        _spans = new List<LSTimeSpan>();
-        _removeSpan = new List<LSTimeSpan>();
-        App.GetGameData<GlobalData>().OnBetNumChange += OnBetChange;
-        FindChild();
-    }
+            _historyWindow = transform.FindChild("HistoryWindow").GetComponent<LSHistoryWindow>();
 
-    private void FindChild()
-    {
-        _betWindow = transform.FindChild("BetWindow").GetComponent<LSBetWindow>();
+            _bonus = transform.FindChild("LeftTop/Bonus/BonusNum").GetComponent<Text>();
 
-        _settingWondow = transform.FindChild("SettingWindow").GetComponent<LSSettingWindow>();
+            _timeText = transform.FindChild("RightTop/TimeCutDown/timeCut").GetComponent<Text>();
 
-        _historyWindow = transform.FindChild("HistoryWindow").GetComponent<LSHistoryWindow>();
+            _banker = transform.FindChild("Image/Image").GetComponent<Image>();
 
-        _bonus = transform.FindChild("LeftTop/Bonus/BonusNum").GetComponent<Text>();
+            _vfx = transform.FindChild("VFX").gameObject;
 
-        _timeText = transform.FindChild("RightTop/TimeCutDown/timeCut").GetComponent<Text>();
+            _resultPanel = transform.FindChild("DisplayResult").GetComponent<LSResultControl>();
 
-        _banker = transform.FindChild("Image/Image").GetComponent<Image>();
+        }
 
-        _vfx = transform.FindChild("VFX").gameObject;
+        #region 下注窗口
+        public void ShowBetWindow()
+        {
+            _betWindow.Show();
+        }
 
-        _resultPanel = transform.FindChild("DisplayResult").GetComponent<LSResultControl>();
+        public void HideBetWindow()
+        {
+            _betWindow.Hide();
+        }
 
-    }
+        public void OnBetChange()
+        {
+            _betWindow.SetTotalBets();
+            _betWindow.RefreshItems();
+            _betWindow.SetTotalGold();
+        }
 
-    #region 下注窗口
-    public void ShowBetWindow()
-    {
-        _betWindow.Show();
-    }
+        public void ChangeAnte()
+        {
+            _betWindow.ChangeAnte();
+        }
 
-    public void HideBetWindow()
-    {
-        _betWindow.Hide();
-    }
+        public void SetBetWindow()
+        {
+            _betWindow.SetBetWindow();
+        }
 
-    public void OnBetChange()
-    {
-        _betWindow.SetTotalBets();
-        _betWindow.RefreshItems();
-        _betWindow.SetTotalGold();
-    }
+        #endregion
 
-    public void ChangeAnte()
-    {
-        _betWindow.ChangeAnte();
-    }
+        #region 历史面板
 
-    public void SetBetWindow()
-    {
-        _betWindow.SetBetWindow();
-    }
+        public void SetHistoryWindow()
+        {
+            _historyWindow.InitHistorys();
+        }
 
-    #endregion
+        #endregion
 
-    #region 历史面板
+        #region 设置面板
 
-    public void SetHistoryWindow()
-    {
-        _historyWindow.InitHistorys();
-    }
+        public void ShowSettingWindow()
+        {
+            _settingWondow.Show();
+        }
 
-    #endregion
+        #endregion
+        public override void OnExit()
+        {
+            App.GetGameData<LswcGameData>().OnBetNumChange -= OnBetChange;
+        }
 
-    #region 设置面板
+        public void InitUImanager()
+        {
 
-    public void ShowSettingWindow()
-    {
-        _settingWondow.Show();
-    }
+            SetShowTime(App.GetGameData<LswcGameData>().ShowTime);
 
-    #endregion
-    public override void OnExit()
-    {
-        _instance = null;
-        App.GetGameData<GlobalData>().OnBetNumChange -= OnBetChange;
-    }
+            SetBanker(App.GetGameData<LswcGameData>().SetLastBanker());
+            SetBonus(0);
+            SetHistoryWindow();
 
-    public void InitUImanager()
-    {
-        _bonus.text = "0";
-
-        SetShowTime(App.GetGameData<GlobalData>().ShowTime.ToString());
-
-        SetBanker(App.GetGameData<GlobalData>().SetLastBanker());
-
-        SetBonus("0");
-
-        SetHistoryWindow();
-
-        SetBetWindow();     
-    }
+            SetBetWindow();     
+        }
 
 
-    public void SetShowTime(string time)
-    {
-        _timeText.text = time;
-    }
+        public void SetShowTime(long time)
+        {
+            if (time < 0){time = 0;}
+            _timeText.text = time.ToString();
+        }
 
-    public void SetBanker(Sprite sp)
-    {
-       _banker.overrideSprite=sp;
-    }
+        public void SetBanker(Sprite sp)
+        {
+            _banker.overrideSprite=sp;
+        }
 
-    public void SetBonus(string bouns)
-    {
-        _bonus.text = bouns;
-    }
+        public void SetBonus(int bouns)
+        {
+            _bonus.text = YxUtiles.GetShowNumberToString(bouns);
+        }
 
-    public void SetVFXActive(bool show)
-    {
-        _vfx.SetActive(show);
-    }
+        public void SetVFXActive(bool show)
+        {
+            _vfx.SetActive(show);
+        }
 
-    /// <summary>
-    /// 变化庄和闲图片到目标图片
-    /// </summary>
-    /// <param name="banker"></param>
-    /// <param name="time"></param>
-    /// <param name="frame"></param>
-    public void ChangeBankerTo(LSBankerType banker,float time,float frame)
-    {
-        LSTimeSpan span=new LSTimeSpan(true,frame,time);
-        _spans.Add(span);
-        span.OnTimeFrameFinished = delegate()
+        /// <summary>
+        /// 变化庄和闲图片到目标图片
+        /// </summary>
+        /// <param name="banker"></param>
+        /// <param name="time"></param>
+        /// <param name="frame"></param>
+        public void ChangeBankerTo(LSBankerType banker,float time,float frame)
+        {
+            var span=new LSTimeSpan(true,frame,time);
+            _spans.Add(span);
+            span.OnTimeFrameFinished = delegate()
             {
-                SetBanker(App.GetGameData<GlobalData>().GetRandomBanker());
+                SetBanker(App.GetGameData<LswcGameData>().GetRandomBanker());
             };
-        span.OnTimeFinished = delegate()
+            span.OnTimeFinished = delegate()
             {
                 span.OnTimeFinished=null;
                 _removeSpan.Add(span);
-                SetBanker(LSResourseManager.Instance.GetSprite(App.GetGameData<GlobalData>().GetBankerOrSpriteName(banker)));
+                SetBanker(App.GetGameManager<LswcGamemanager>().ResourseManager.GetSprite(App.GetGameData<LswcGameData>().GetBankerOrSpriteName(banker)));
             };
-    }
+        }
 
-    /// <summary>
-    /// 本地随机显示彩金数量
-    /// </summary>
-    /// <param name="totalTime"></param>
-    /// <param name="frameTime"></param>
-    public void SetRandomBonus(float totalTime,float frameTime)
-    {
-        LSTimeSpan span =new LSTimeSpan(true,frameTime,totalTime);
-        _spans.Add(span);
-        span.OnTimeFrameFinished = delegate()
+        /// <summary>
+        /// 本地随机显示彩金数量
+        /// </summary>
+        /// <param name="totalTime"></param>
+        /// <param name="frameTime"></param>
+        public void SetRandomBonus(float totalTime,float frameTime)
+        {
+            var span =new LSTimeSpan(true,frameTime,totalTime);
+            _spans.Add(span);
+            span.OnTimeFrameFinished = delegate()
             {
-                SetBonus(App.GetGameData<GlobalData>().GetRandomNum().ToString());
+                SetBonus(App.GetGameData<LswcGameData>().GetRandomNum());
             };
-        span.OnTimeFinished = delegate()
+            span.OnTimeFinished = delegate()
             {
                 span.OnTimeFinished = null;
                 _removeSpan.Add(span);
             };
-    }
+        }
 
-    public void ShowResultPanel()
-    {
-
-        _resultPanel.gameObject.SetActive(true);
-
-        _resultPanel.ShowResultInfo(App.GetGameData<GlobalData>().LastResult.ShowResults, App.GetGameData<GlobalData>().TotalBets, App.GetGameData<GlobalData>().LastResult.WinBets, App.GetGameData<GlobalData>().LastResult.Multiple);
-    }
-
-    public void HideResultPanel()
-    {
-        _resultPanel.Hide();
-    }
-
-    void Update()
-    {
-        if (_spans != null)
+        public void ShowResultPanel()
         {
-            foreach (var span in _spans)
+            var gdata = App.GetGameData<LswcGameData>();
+            _resultPanel.gameObject.SetActive(true); 
+            _resultPanel.ShowResultInfo(gdata.LastResult.ShowResults, gdata.TotalBets, gdata.LastResult.WinBets, gdata.LastResult.Multiple);
+        }
+
+        public void HideResultPanel()
+        {
+            _resultPanel.Hide();
+        }
+
+        void Update()
+        {
+            if (_spans != null)
             {
-                if (span!=null)
+                foreach (var span in _spans)
                 {
-                    span.Run(); 
-                }             
-            }
-            if (_removeSpan != null && _removeSpan.Count > 0)
-            {
-                for (int i = 0; i < _removeSpan.Count; i++)
-                {
-                    LSTimeSpan span = _removeSpan[i];
-                    _spans.Remove(span);
+                    if (span!=null)
+                    {
+                        span.Run(); 
+                    }             
                 }
-                _removeSpan.Clear();
+                if (_removeSpan != null && _removeSpan.Count > 0)
+                {
+                    for (int i = 0; i < _removeSpan.Count; i++)
+                    {
+                        LSTimeSpan span = _removeSpan[i];
+                        _spans.Remove(span);
+                    }
+                    _removeSpan.Clear();
+                }
             }
         }
-    }
 
+    }
 }

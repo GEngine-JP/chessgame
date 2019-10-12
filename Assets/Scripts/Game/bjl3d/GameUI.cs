@@ -1,30 +1,25 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using YxFramwork.Common;
-using YxFramwork.Common.Utils;
+using YxFramwork.Common; 
+using YxFramwork.Enums;
 
 namespace Assets.Scripts.Game.bjl3d
 {
     public class GameUI : MonoBehaviour//改11 15
     {
-
-        public static GameUI Instance;
-
-        public Button SuperBtn;
+        public Button SuperBtn; 
         public Transform SuperUI;
-
         public Transform GameBackUItf;
-
         public Transform SettleMentUItf;
 
-        private Transform note_textTF;
+        public SettingPnl SettingWindow;
 
+        private Transform note_textTF;
         int aliasingValue = 1;
 
         protected void Awake()
         {
-            Instance = this;
             note_textTF = transform.Find("NoteText");
         }
 
@@ -39,28 +34,32 @@ namespace Assets.Scripts.Game.bjl3d
         {
             yield return new WaitForSeconds(7);
             if (!SettleMentUItf.gameObject.activeSelf)
+            {
                 SettleMentUItf.gameObject.SetActive(true);
-            SettleMentUI st = SettleMentUItf.GetComponent<SettleMentUI>();
+            }
+            var st = SettleMentUItf.GetComponent<SettleMentUI>();
 
             if (st != null)
+            {
                 st.GameResultFun();
-            UserInfoUI.Instance.ShowSelfInfoUI();//刷新玩家自己的信息
+            }
+            App.GameData.GetPlayer().UpdateView();//刷新玩家自己的信息
             Invoke("HideSettleMentUI", 7f);
-            CoinTypeInfoUI.Intance.SelectClickeCoinTypeAudio(-1);
+            App.GetGameManager<Bjl3DGameManager>().TheCoinTypeInfoUI.DisplaySelected(false);
         }
         /// <summary>
         /// 推出房间
         /// </summary>
         public void ReturnToHall()
         {
-            if (App.GameData.GStatus != GameStatus.PlayAndConfine)
+            if (App.GameData.GStatus != YxEGameStatus.PlayAndConfine)
             {
                 if (!GameBackUItf.gameObject.activeSelf)
                     GameBackUItf.gameObject.SetActive(true);
             }
             else
             {
-               Instance.NoteText_Show("游戏正在进行中，请稍后！！！");
+               NoteText_Show("游戏正在进行中，请稍后！！！");
             }
             
         }
@@ -70,10 +69,12 @@ namespace Assets.Scripts.Game.bjl3d
         public void HideSettleMentUI()
         {
             if (SettleMentUItf.gameObject.activeSelf)
+            {
                 SettleMentUItf.gameObject.SetActive(false);
-            GameScene.Instance.ClearPai();
-            CoinTypeInfoUI.Intance.SelectClickeCoinTypeAudio(UserInfoUI.Instance.GameConfig.CoinType);
-
+            }
+            var gameMgr = App.GetGameManager<Bjl3DGameManager>();
+            gameMgr.TheGameScene.ClearPai();
+            gameMgr.TheCoinTypeInfoUI.DisplaySelected(true);
         }
         //
         /// <summary>
@@ -96,7 +97,7 @@ namespace Assets.Scripts.Game.bjl3d
         /// </summary>
         public void HideBtmUI()
         {
-            UerInfoCountDownLuziUI.Intance.ClickeUIFun();
+            App.GetGameManager<Bjl3DGameManager>().TheUerInfoCountDownLuziUI.ClickeUIFun();
         }
         /// <summary>
         /// 下不了注文本显示
@@ -116,7 +117,7 @@ namespace Assets.Scripts.Game.bjl3d
         }
         public void OnSetting()
         {
-            SettingPnl.Instance.Show(true);
+            SettingWindow.Show(true);
         }
 
     }

@@ -4,14 +4,7 @@ namespace Assets.Scripts.Game.brnn3d
 {
     public class StateUI : MonoBehaviour
     {
-        public static StateUI Instance;
         public Transform[] StateTfs = new Transform[5];
-
-        protected void Awake()
-        {
-            Instance = this;
-
-        }
 
         public void SetStateUI(int stateId)
         {

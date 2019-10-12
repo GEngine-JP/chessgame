@@ -1,51 +1,93 @@
-﻿using Assets.Scripts.Game.lswc.Control.Scene.Manager;
-using Assets.Scripts.Game.lswc.Control.System;
+﻿using Assets.Scripts.Game.lswc.Core;
 using Assets.Scripts.Game.lswc.Data;
 using Assets.Scripts.Game.lswc.Item;
 using Assets.Scripts.Game.lswc.Manager;
+using Assets.Scripts.Game.lswc.Scene;
 using UnityEngine;
 using YxFramwork.Common;
-using YxFramwork.Common.Utils;
 using com.yxixia.utile.YxDebug;
+using YxFramwork.Enums;
 
 namespace Assets.Scripts.Game.lswc.States
 {
+    public class LSGameState
+    {
+        /// <summary>
+        /// 初始化数据状态
+        /// </summary>
+        public LSInitState InitState = new LSInitState();
+        /// <summary>
+        /// 下注阶段
+        /// </summary>
+        public LSBetState BetState = new LSBetState();
+        /// <summary>
+        /// 等待结果阶段
+        /// </summary>
+        public LSWaitResultState WaitResultState = new LSWaitResultState();
+        /// <summary>
+        /// 处理游戏结果
+        /// </summary>
+        public LSJudgeResultState JudgeResultState = new LSJudgeResultState();
+        /// <summary>
+        /// 
+        /// </summary>
+        public LSSendLampShowNumState SendLampShowNumState = new LSSendLampShowNumState();
+        /// <summary>
+        /// 通用旋转阶段
+        /// </summary>
+        public LSRotateState RotateState = new LSRotateState();
+        /// <summary>
+        /// 
+        /// </summary>
+        public LSShowGameTypeState ShowGameTypeState = new LSShowGameTypeState();
+        /// <summary>
+        /// 动物展示阶段--看向动物
+        /// </summary>
+        public LSLookAtAnimalState LookAtAnimalState = new LSLookAtAnimalState();
+        /// <summary>
+        /// 动物展示阶段--动物移动
+        /// </summary>
+        public LSAnimalMoveState AnimalMoveState = new LSAnimalMoveState();
+        /// <summary>
+        /// 动物播放动画阶段
+        /// </summary>
+        public LSShowAnimationState ShowAnimationState = new LSShowAnimationState();
+        /// <summary>
+        /// 显示结果阶段
+        /// </summary>
+        public LSShowResultUIState ShowResultUIState = new LSShowResultUIState();
+        /// <summary>
+        /// 空状态，这个状态不满足完成一个单独状态，什么也不做，作为游戏结束后等待下一次游戏的开始
+        /// </summary>
+        public LSEmptyState EmptyState = new LSEmptyState();
+    }
+
     /// <summary>
     /// 初始化数据状态
     /// </summary>
     public class LSInitState : LSState
     {
-        private static LSInitState _instance;
-
-        public static LSInitState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSInitState();
-                }
-                return _instance;
-            }
-        }
-
         public override void Enter()
         {
             base.Enter();
-            switch (App.GetGameData<GlobalData>().GlobalGameStatu)
+            var gdata = App.GetGameData<LswcGameData>();
+            var gameStates = gdata.GameStates;
+            switch (gdata.GlobalELswcGameStatu)
             {
-                case GameState.BetState:
-                    NextState = LSBetState.Instance;
-                    LSBetState.Instance.DuraTime = App.GetGameData<GlobalData>().ShowTime;
+                case ELswcGameState.BetState:
+                    NextState = gameStates.BetState;//LSBetState.Instance;
+                    gameStates.BetState.DuraTime = gdata.ShowTime;//LSBetState.Instance
                     break;
-                case GameState.ResultState:
+                case ELswcGameState.ResultState:
                     ProcessPlayerInit();
                     break;
-                case GameState.Empyt:
-                case GameState.InitState:
-                case GameState.WaitState:
-                    NextState = LSBetState.Instance;
-                    LSEmptyState.Instance.Update();
+                case ELswcGameState.GameOver:
+                    App.GetGameManager<LswcGamemanager>().UIManager.SetShowTime(0);
+                    ProcessPlayerInit();
+                    break;
+                case ELswcGameState.WaitState:
+                    NextState = gameStates.BetState;//LSBetState.Instance;
+                    gameStates.EmptyState.Update();//LSEmptyState.Instance
                     break;
             }
         }
@@ -53,82 +95,81 @@ namespace Assets.Scripts.Game.lswc.States
         public override void Excute()
         {
             base.Excute();
-            LSSystemControl.Instance.ChangeState(NextState);
+            App.GetGameManager<LswcGamemanager>().SystemControl.ChangeState(NextState);
         }
 
         private void ProcessPlayerInit()
         {
-
-            if (App.GetGameData<GlobalData>().LastResult.Reward == LSRewardType.SENDLAMP)
+            var gdata = App.GetGameData<LswcGameData>();
+            var gstate = gdata.GameStates;
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            if (gdata.LastResult.Reward == LSRewardType.SENDLAMP)
             {
                 //送灯模式
                 YxDebug.LogError("送灯模式暂时未定数据格式，需要重新处理");
-                NextState = LSSendLampShowNumState.Instance;
+                NextState = gstate.SendLampShowNumState;//LSSendLampShowNumState.Instance;
                 NextState.DuraTime = LSConstant.ShowSendLightNumTime;
-                LSTurnTableControl.Instance.PlayAnimation();
+                gameMgr.TurnTableControl.PlayAnimation();
             }
             else
             {
+                var showTime = gdata.ShowTime;
+                var onTime = LSConstant.ShowAnimationTime;
                 //非送灯模式
-                if (App.GetGameData<GlobalData>().ShowTime <= LSConstant.ShowAnimationTime)
+                if (showTime <= onTime)
                 {
-                    NextState = LSShowAnimationState.Instance;
+                    NextState = gstate.ShowAnimationState;//LSShowAnimationState.Instance;
                     NextState.DuraTime = LSConstant.ShowAnimationTime;
-                    App.GetGameData<GlobalData>().LastResult.ToAnimal.MoveToCenter(0);
+                    App.GetGameData<LswcGameData>().LastResult.ToAnimal.MoveToCenter(0);
                     QuickRoate();
                     SetShowTime();
                 }
-                else if (App.GetGameData<GlobalData>().ShowTime <= LSConstant.ShowAnimationTime + LSConstant.AnimoveMoveToCenterTime)
+                else if (showTime <= (onTime+= LSConstant.AnimoveMoveToCenterTime))//LSConstant.ShowAnimationTime + LSConstant.AnimoveMoveToCenterTime)
                 {
-                    NextState = LSAnimalMoveState.Instance;
+                    NextState = gstate.AnimalMoveState; //LSAnimalMoveState.Instance;
                     NextState.DuraTime = LSConstant.AnimoveMoveToCenterTime;
                     QuickRoate();
                     SetShowTime();
                 }
-                else if (App.GetGameData<GlobalData>().ShowTime <= LSConstant.ShowAnimationTime + LSConstant.AnimoveMoveToCenterTime + LSConstant.LookAtAnimalTime)
+                else if (showTime <= (onTime += LSConstant.LookAtAnimalTime))//LSConstant.ShowAnimationTime + LSConstant.AnimoveMoveToCenterTime + LSConstant.LookAtAnimalTime)
                 {
-                    NextState = LSLookAtAnimalState.Instance;
+                    NextState = gstate.LookAtAnimalState;//LSLookAtAnimalState.Instance;
                     NextState.DuraTime = LSConstant.LookAtAnimalTime;
                     QuickRoate();        
                     SetShowTime();
                 }
-                else if (App.GetGameData<GlobalData>().ShowTime <= LSConstant.ShowAnimationTime + LSConstant.AnimoveMoveToCenterTime + LSConstant.LookAtAnimalTime + LSConstant.RotationTime)
+                else if (showTime <= (onTime += LSConstant.RotationTime)) //LSConstant.ShowAnimationTime + LSConstant.AnimoveMoveToCenterTime + LSConstant.LookAtAnimalTime + LSConstant.RotationTime)
                 {
-                    NextState = LSRotateState.Instance;
+                    NextState = gstate.RotateState;//LSRotateState.Instance;
                     NextState.DuraTime = LSConstant.RotationTime;
                     SetShowTime();
                 }
-                else if (App.GetGameData<GlobalData>().ShowTime <= LSConstant.ShowAnimationTime + LSConstant.AnimoveMoveToCenterTime + LSConstant.LookAtAnimalTime + LSConstant.RotationTime + LSConstant.ShowGameTypeTime)
+                else if (showTime <= onTime + LSConstant.ShowGameTypeTime)//LSConstant.ShowAnimationTime + LSConstant.AnimoveMoveToCenterTime + LSConstant.LookAtAnimalTime + LSConstant.RotationTime + LSConstant.ShowGameTypeTime)
                 {
-                    NextState = LSShowGameTypeState.Instance;
+                    NextState = gstate.ShowGameTypeState;//LSShowGameTypeState.Instance;
                     NextState.DuraTime = LSConstant.ShowGameTypeTime;
-   
-                    LSSystemControl.Instance.PlayeGameStateMusic(LSConstant.BackgroundMusci_Normal);
+
+                    gameMgr.SystemControl.PlayeGameStateMusic(LSRewardType.NORMAL);//LSConstant.BackgroundMusci_Normal
                     SetShowTime();
                 }
- 
                 else
                 {
-                    NextState = LSJudgeResultState.Instance;
+                    NextState = gstate.JudgeResultState;//LSJudgeResultState.Instance;
                 }
             }
         }
 
         private void QuickRoate()
         {
-            LSAnimalItemControl.Instance.QuickRotate(App.GetGameData<GlobalData>().AnimalRandomSeed * 15);
-            LSTurnTableControl.Instance.QuickRoate(App.GetGameData<GlobalData>().LastResult.ToAngle.y);
-            LSSystemControl.Instance.PlayeGameStateMusic(App.GetGameData<GlobalData>().LastResult.Reward);
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            gameMgr.AnimalItemCtrl.QuickRotate(App.GetGameData<LswcGameData>().AnimalRandomSeed * 15);
+            gameMgr.TurnTableControl.QuickRoate(App.GetGameData<LswcGameData>().LastResult.ToAngle.y);
+            gameMgr.SystemControl.PlayeGameStateMusic(App.GetGameData<LswcGameData>().LastResult.Reward);
         }
 
         private void SetShowTime()
         {
-            LSUIManager.Instance.SetShowTime("0");
-        }
-
-        public override void Exit()
-        {
-            base.Exit();
+            App.GetGameManager<LswcGamemanager>().UIManager.SetShowTime(0);
         }
     }
 
@@ -137,42 +178,28 @@ namespace Assets.Scripts.Game.lswc.States
     /// </summary>
     public class LSBetState : LSState
     {
-        private static LSBetState _instance;
-
-        public static LSBetState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSBetState();
-                }
-                return _instance;
-            }
-        }
-
-
         public override void Enter()
         {
             base.Enter();
 
-            LSUIManager.Instance.ShowBetWindow();
-            NextState = LSWaitResultState.Instance;
+            App.GetGameManager<LswcGamemanager>().UIManager.ShowBetWindow();
+            NextState = App.GetGameData<LswcGameData>().GameStates.WaitResultState;//LSWaitResultState.Instance;
         }
 
         public override void Excute()
         {
             base.Excute();
-            LSSystemControl.Instance.PlayeGameStateMusic(LSConstant.BackgroundMusic_WaitBet);
-            LSUIManager.Instance.SetShowTime(App.GetGameData<GlobalData>().ShowTime.ToString());
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            gameMgr.SystemControl.PlayeGameStateMusic(6);//LSConstant.BackgroundMusic_WaitBet
+            gameMgr.UIManager.SetShowTime(App.GetGameData<LswcGameData>().ShowTime);
             if(_duraTime<=0)
             {
-                LSSystemControl.Instance.ChangeState(NextState);
+                gameMgr.SystemControl.ChangeState(NextState);
             }
             UpdateState = true;
         }
 
-        private float _frameTime = 0;
+        private float _frameTime;
 
         private float _ShowCountDownVoiceTime = 5;
 
@@ -184,17 +211,18 @@ namespace Assets.Scripts.Game.lswc.States
             {
                 _duraTime -= 1;
                 _frameTime = 0;
+                var sysCtrl = App.GetGameManager<LswcGamemanager>().SystemControl;
                 if (_duraTime <= _ShowCountDownVoiceTime && _frameTime >= 0)
                 {
-                    LSSystemControl.Instance.PlayVoice(LSConstant.BetCountDownVoice);
+                    sysCtrl.PlayVoice(LSConstant.BetCountDownVoice);
                 }
                 if (_duraTime <= 0)
                 {
                     _duraTime = 0;
-                    LSSystemControl.Instance.ChangeState(NextState);
+                    sysCtrl.ChangeState(NextState);
                     return;
                 }
-                LSUIManager.Instance.SetShowTime(Mathf.FloorToInt(_duraTime).ToString());
+                App.GetGameManager<LswcGamemanager>().UIManager.SetShowTime(Mathf.FloorToInt(_duraTime));
             }
 
         }
@@ -202,9 +230,10 @@ namespace Assets.Scripts.Game.lswc.States
         public override void Exit()
         {
             base.Exit();
-            LSUIManager.Instance.SetShowTime(Mathf.FloorToInt(_duraTime).ToString());
-            App.GetRServer<LSServerManager>().SendBetRequest();
-            LSUIManager.Instance.HideBetWindow();
+            var uiMgr = App.GetGameManager<LswcGamemanager>().UIManager;
+            uiMgr.SetShowTime(Mathf.FloorToInt(_duraTime));
+            App.GetRServer<LswcGameServer>().SendBetRequest();
+            uiMgr.HideBetWindow();
             _frameTime = 0;
         }
     }
@@ -214,25 +243,11 @@ namespace Assets.Scripts.Game.lswc.States
     /// </summary>
     public class LSWaitResultState : LSState
     {
-        private static LSWaitResultState _instance;
-
-        public static LSWaitResultState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSWaitResultState();
-                }
-                return _instance;
-            }
-        }
-
         public override void Enter()
         {
             base.Enter();
 
-            NextState = LSJudgeResultState.Instance;
+            NextState = App.GetGameData<LswcGameData>().GameStates.JudgeResultState;//LSJudgeResultState.Instance;
         }
 
         public override void Excute()
@@ -244,9 +259,9 @@ namespace Assets.Scripts.Game.lswc.States
         public override void Update()
         {
             base.Update();
-            if (App.GetGameData<GlobalData>().ISGetResult)
+            if (App.GetGameData<LswcGameData>().ISGetResult)
             {
-                LSSystemControl.Instance.ChangeState(NextState);
+                App.GetGameManager<LswcGamemanager>().SystemControl.ChangeState(NextState);
             }
         }
     }
@@ -256,31 +271,18 @@ namespace Assets.Scripts.Game.lswc.States
     /// </summary>
     public class LSJudgeResultState : LSState
     {
-        private static LSJudgeResultState _instance;
-
-        public static LSJudgeResultState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSJudgeResultState();
-                }
-                return _instance;
-            }
-        }
-
         public override void Enter()
         {
+            var gdata = App.GetGameData<LswcGameData>();
             base.Enter();
-            if (App.GetGameData<GlobalData>().LastResult.Reward == LSRewardType.SENDLAMP)
+            if (gdata.LastResult.Reward == LSRewardType.SENDLAMP)
             {
-                NextState = LSSendLampShowNumState.Instance;
+                NextState = gdata.GameStates.SendLampShowNumState;//LSSendLampShowNumState.Instance;
                 NextState.DuraTime = LSConstant.ShowSendLightNumTime;
             }
             else
             {
-                NextState = LSShowGameTypeState.Instance;
+                NextState = gdata.GameStates.ShowGameTypeState;//LSShowGameTypeState.Instance;
                 NextState.DuraTime = LSConstant.ShowGameTypeTime;
             }
         }
@@ -288,7 +290,7 @@ namespace Assets.Scripts.Game.lswc.States
         public override void Excute()
         {
             base.Excute();
-            LSSystemControl.Instance.ChangeState(NextState);
+            App.GetGameManager<LswcGamemanager>().SystemControl.ChangeState(NextState);
         }
     }
 
@@ -297,24 +299,10 @@ namespace Assets.Scripts.Game.lswc.States
     /// </summary>
     public class LSSendLampShowNumState : LSState
     {
-        private static LSSendLampShowNumState _instance;
-
-        public static LSSendLampShowNumState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSSendLampShowNumState();
-                }
-                return _instance;
-            }
-        }
-
         public override void Enter()
         {
             base.Enter();
-            NextState = LSRotateState.Instance;
+            NextState = App.GetGameData<LswcGameData>().GameStates.RotateState;//LSRotateState.Instance;
             NextState.DuraTime = LSConstant.RotationTime;
         }
 
@@ -322,7 +310,7 @@ namespace Assets.Scripts.Game.lswc.States
         {
             base.Excute();
             SetLastHistory();
-            LSSystemControl.Instance.ChangeState(NextState);
+            App.GetGameManager<LswcGamemanager>().SystemControl.ChangeState(NextState);
         }
 
         private void SetLastHistory()
@@ -335,20 +323,6 @@ namespace Assets.Scripts.Game.lswc.States
     /// </summary>
     public class LSRotateState : LSState
     {
-        private static LSRotateState _instance;
-
-        public static LSRotateState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSRotateState();
-                }
-                return _instance;
-            }
-        }
-
         /// <summary>
         /// 彩金刷新频率
         /// </summary>
@@ -359,29 +333,30 @@ namespace Assets.Scripts.Game.lswc.States
         /// </summary>
         private float _setBankerFrame = 0.5f;
 
-        private float _animalCache = 0;
+        private float _animalCache;
 
         private float _animalFrame = 0.1f;
 
-        private int _randomNum = 0;
+        private int _randomNum;
 
         public override void Enter()
         {
             base.Enter();
+            var gdata = App.GetGameData<LswcGameData>();
             //需求，如果游戏中，且下注了，就不让退出游戏
-            if(App.GetGameData<GlobalData>().TotalBets>0)
+            if(gdata.TotalBets>0)
             {
-                App.GameData.GStatus = GameStatus.PlayAndConfine;
+                gdata.GStatus = YxEGameStatus.PlayAndConfine;
             }  
 
-            if (LSSystemControl.Instance.NeedSignAnimal(App.GetGameData<GlobalData>().LastResult.Reward))
+            if (App.GetGameManager<LswcGamemanager>().SystemControl.NeedSignAnimal(gdata.LastResult.Reward))
             {
-                NextState = LSLookAtAnimalState.Instance;
+                NextState = gdata.GameStates.LookAtAnimalState;//LSLookAtAnimalState.Instance;
                 NextState.DuraTime = LSConstant.LookAtAnimalTime;
             }
             else
             {
-                NextState = LSShowAnimationState.Instance;
+                NextState = gdata.GameStates.ShowAnimationState;//LSShowAnimationState.Instance;
                 NextState.DuraTime = LSConstant.ShowAnimationTime;
             }
         }
@@ -389,10 +364,12 @@ namespace Assets.Scripts.Game.lswc.States
         public override void Excute()
         {
             base.Excute();
-            LSTurnTableControl.Instance.Rotate(App.GetGameData<GlobalData>().LastResult.ToAngle.y, _duraTime);//要求指针先停止旋转，然后动物停止
-            LSAnimalItemControl.Instance.Rotate(App.GetGameData<GlobalData>().AnimalRandomSeed * 15, _duraTime);
-            LSUIManager.Instance.ChangeBankerTo(App.GetGameData<GlobalData>().LastResult.Banker, _duraTime, _setBankerFrame);
-            LSUIManager.Instance.SetRandomBonus(_duraTime, _setBonuFrame);
+            var gdata = App.GetGameData<LswcGameData>();
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            gameMgr.TurnTableControl.Rotate( gdata.LastResult.ToAngle.y, _duraTime);//要求指针先停止旋转，然后动物停止
+            gameMgr.AnimalItemCtrl.Rotate(gdata.AnimalRandomSeed * 15, _duraTime);
+            gameMgr.UIManager.ChangeBankerTo(gdata.LastResult.Banker, _duraTime, _setBankerFrame);
+            gameMgr.UIManager.SetRandomBonus(_duraTime, _setBonuFrame);
             UpdateState = true;
         }
 
@@ -404,7 +381,7 @@ namespace Assets.Scripts.Game.lswc.States
 
             _duraTime -= Time.deltaTime;
 
-            if (App.GetGameData<GlobalData>().LastResult.Reward == LSRewardType.BIG_THREE)
+            if (App.GetGameData<LswcGameData>().LastResult.Reward == LSRewardType.BIG_THREE)
             {
                 _animalCache += Time.deltaTime;
 
@@ -414,24 +391,26 @@ namespace Assets.Scripts.Game.lswc.States
 
                     _animalCache = 0;
 
-                    LSBigThreeReward.Instance.SetCurrentAnimal((LSAnimalType)(_randomNum % 8));
+                    App.GetGameManager<LswcGamemanager>().BigThreeReward.SetCurrentAnimal((LSAnimalType)(_randomNum % 8));
                 }
             }
 
             if (_duraTime <= 0)
             {
                 _duraTime = 0;
-                LSSystemControl.Instance.ChangeState(NextState);
+                App.GetGameManager<LswcGamemanager>().SystemControl.ChangeState(NextState);
             }
 
         }
         public override void Exit()
         {
             base.Exit();
-            switch (App.GetGameData<GlobalData>().LastResult.Reward)
+            var gdata = App.GetGameData<LswcGameData>();
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            switch (App.GetGameData<LswcGameData>().LastResult.Reward)
             {
                 case LSRewardType.BIG_THREE:
-                    LSBigThreeReward.Instance.SetCurrentAnimal(App.GetGameData<GlobalData>().LastResult.Ani);
+                    gameMgr.BigThreeReward.SetCurrentAnimal(gdata.LastResult.Ani);
                     break;
                 case LSRewardType.BIG_FOUR:
                     //原项目中对应功能不可用，不知道什么表现
@@ -439,28 +418,14 @@ namespace Assets.Scripts.Game.lswc.States
                     break;
             }
 
-            LSSystemControl.Instance.PlayVoice(App.GetGameData<GlobalData>().LastResult.lastResultVoice);
-            LSUIManager.Instance.SetHistoryWindow();
+            gameMgr.SystemControl.PlayVoice(gdata.LastResult.lastResultVoice);
+            gameMgr.UIManager.SetHistoryWindow();
         }
     }
 
 
     public class LSShowGameTypeState : LSState
     {
-        private static LSShowGameTypeState _instance;
-
-        public static LSShowGameTypeState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSShowGameTypeState();
-                }
-                return _instance;
-            }
-        }
-
         private LS_Detail_Result detailRes;
 
         //private float _animalCache = 0;
@@ -472,62 +437,49 @@ namespace Assets.Scripts.Game.lswc.States
         public override void Enter()
         {
             base.Enter();
-            detailRes = App.GetGameData<GlobalData>().LastResult;
-            NextState = LSRotateState.Instance;
+            var gdata = App.GetGameData<LswcGameData>();
+            detailRes = gdata.LastResult;
+            NextState = gdata.GameStates.RotateState;//LSRotateState.Instance;
             NextState.DuraTime = LSConstant.RotationTime;
         }
 
         public override void Excute()
         {
             base.Excute();
-
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
             //根据类型播放对应的状态前置动画
             switch (detailRes.Reward)
             {
-                ///正常模式，送灯模式，彩金模式无前置动画
+                //正常模式，送灯模式，彩金模式无前置动画
                 case LSRewardType.NORMAL:
                 case LSRewardType.HANDSEL:
                 case LSRewardType.SENDLAMP:
                     _duraTime = 0;
                     break;
                 case LSRewardType.LIGHTING:
-                    LSShowGameTypeManager.Instance.ShowGameTypeLighting(detailRes.Multiple);
-                    LSSystemControl.Instance.PlayVoice(LSConstant.ShanDianVoice);
+                    App.GetGameManager<LswcGamemanager>().ShowGameTypeManager.ShowGameTypeLighting(detailRes.Multiple);
+                    gameMgr.SystemControl.PlayVoice(LSConstant.ShanDianVoice);
                     break;
                 case LSRewardType.BIG_THREE:
-                    LSShowGameTypeManager.Instance.ShowBigThree();
-                    LSTurnTableControl.Instance.PlayAnimation();
-                    break; ;
+                    gameMgr.ShowGameTypeManager.ShowBigThree();
+                    gameMgr.TurnTableControl.PlayAnimation();
+                    break;
                 case LSRewardType.BIG_FOUR:
-                    LSShowGameTypeManager.Instance.ShowBigFour(true);
-                    LSTurnTableControl.Instance.PlayAnimation();
+                    gameMgr.ShowGameTypeManager.ShowBigFour(true);
+                    gameMgr.TurnTableControl.PlayAnimation();
                     break;
             }
-            LSSystemControl.Instance.PlayeGameStateMusic(detailRes.Reward);
+            gameMgr.SystemControl.PlayeGameStateMusic(detailRes.Reward);
             UpdateState = true;
         }
 
         public override void Update()
         {
-            base.Update();
-
-            //if (GlobalData.LastResult.Reward == LSRewardType.BIG_THREE)
-            //{
-            //    _animalCache += Time.deltaTime;
-
-            //    if (_animalCache >= _animalFrame)
-            //    {
-            //        _randomNum++;
-
-            //        _animalCache = 0;
-
-            //        LSBigThreeReward.Instance.SetCurrentAnimal((LSAnimalType)(_randomNum % 8));
-            //    }
-            //}
+            base.Update(); 
             _duraTime -= Time.deltaTime;
             if (_duraTime <= 0)
             {
-                LSSystemControl.Instance.ChangeState(NextState);
+                App.GetGameManager<LswcGamemanager>().SystemControl.ChangeState(NextState);
             }
         }
 
@@ -545,24 +497,10 @@ namespace Assets.Scripts.Game.lswc.States
     /// </summary>
     public class LSLookAtAnimalState : LSState
     {
-        private static LSLookAtAnimalState _instance;
-
-        public static LSLookAtAnimalState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSLookAtAnimalState();
-                }
-                return _instance;
-            }
-        }
-
         public override void Enter()
         {
             base.Enter();
-            NextState = LSAnimalMoveState.Instance;
+            NextState = App.GetGameData<LswcGameData>().GameStates.AnimalMoveState;//LSAnimalMoveState.Instance;
             NextState.DuraTime = LSConstant.AnimoveMoveToCenterTime;
 
         }
@@ -570,11 +508,12 @@ namespace Assets.Scripts.Game.lswc.States
         public override void Excute()
         {
             base.Excute();
-            LSFireWorksControl.Instance.Show();
-            LSCrystalControl.Instance.Show(true);
-            LSSystemControl.Instance.PlayeGameStateMusic(LSConstant.WaitForShowAnimal);
-            LSTurnTableControl.Instance.PlayAnimation();
-            LSCameraManager.Instance.RotateToPosition(App.GetGameData<GlobalData>().LastResult.ToAngle.y, _duraTime);
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            gameMgr.FireWorksControl.Show();
+            gameMgr.CrystalControl.Show(true);
+            gameMgr.SystemControl.PlayeGameStateMusic(7);//LSConstant.WaitForShowAnimal
+            gameMgr.TurnTableControl.PlayAnimation();
+            gameMgr.CameraManager.RotateToPosition(App.GetGameData<LswcGameData>().LastResult.ToAngle.y, _duraTime);
             UpdateState = true;
         }
 
@@ -582,9 +521,9 @@ namespace Assets.Scripts.Game.lswc.States
         {
             base.Update();
             _duraTime -= Time.time;
-            if (_duraTime <= 0 && !LSCameraManager.Instance.IsMoving)
+            if (_duraTime <= 0 && !App.GetGameManager<LswcGamemanager>().CameraManager.IsMoving)
             {
-                LSSystemControl.Instance.ChangeState(NextState);
+                App.GetGameManager<LswcGamemanager>().SystemControl.ChangeState(NextState);
             }
         }
     }
@@ -594,51 +533,39 @@ namespace Assets.Scripts.Game.lswc.States
     /// </summary>
     public class LSAnimalMoveState : LSState
     {
-        private static LSAnimalMoveState _instance;
-
-        public static LSAnimalMoveState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSAnimalMoveState();
-                }
-                return _instance;
-            }
-        }
-
         public override void Enter()
         {
             base.Enter();
-            NextState = LSShowAnimationState.Instance;
+            NextState = App.GetGameData<LswcGameData>().GameStates.ShowAnimationState;//LSShowAnimationState.Instance;
             NextState.DuraTime = LSConstant.ShowAnimationTime;
         }
 
         public override void Excute()
         {
             base.Excute();
-            LSUIManager.Instance.SetVFXActive(true);
-            LSAnimalItem item = App.GetGameData<GlobalData>().LastResult.ToAnimal;
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            gameMgr.UIManager.SetVFXActive(true);
+            var item = App.GetGameData<LswcGameData>().LastResult.ToAnimal;
             item.MoveToCenter(_duraTime);
-            LSCameraManager.Instance.MoveDown(_duraTime * 2, _duraTime * 0.5f, item);
+            gameMgr.CameraManager.MoveDown(_duraTime * 2, _duraTime * 0.5f, item);
             UpdateState = true;
         }
 
         public override void Update()
         {
             base.Update();
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
             _duraTime -= Time.deltaTime;
-            if (_duraTime < 0 && !LSCameraManager.Instance.IsMoving)
+            if (_duraTime < 0 && !gameMgr.CameraManager.IsMoving)
             {
-                LSSystemControl.Instance.ChangeState(NextState);
+                gameMgr.SystemControl.ChangeState(NextState);
             }
         }
 
         public override void Exit()
         {
             base.Exit();
-            LSUIManager.Instance.SetVFXActive(false);
+            App.GetGameManager<LswcGamemanager>().UIManager.SetVFXActive(false);
         }
     }
 
@@ -647,43 +574,29 @@ namespace Assets.Scripts.Game.lswc.States
     /// </summary>
     public class LSShowAnimationState : LSState
     {
-        private static LSShowAnimationState _instance;
-
-        public static LSShowAnimationState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSShowAnimationState();
-                }
-                return _instance;
-            }
-        }
-
         private bool needLook;
-
         public override void Enter()
         {
             base.Enter();
 
-            needLook = LSSystemControl.Instance.NeedSignAnimal(App.GetGameData<GlobalData>().LastResult.Reward);
-            NextState = LSShowResultUIState.Instance;
+            needLook = App.GetGameManager<LswcGamemanager>().SystemControl.NeedSignAnimal(App.GetGameData<LswcGameData>().LastResult.Reward);
+            NextState = App.GetGameData<LswcGameData>().GameStates.ShowResultUIState;//LSShowResultUIState.Instance;
             NextState.DuraTime = LSConstant.ShowResultUITime;
         }
 
         public override void Excute()
         {
             base.Excute();
-            ///播三次吧
+            var lastResult = App.GetGameData<LswcGameData>().LastResult;
+            //播三次吧
             if (needLook)
             {
-                App.GetGameData<GlobalData>().LastResult.ToAnimal.CurAnimation = LSAnimalAnimationType.RAWARD;
-                LSAnimalItemControl.Instance.PlayAnimation(3);
+                lastResult.ToAnimal.CurAnimation = LSAnimalAnimationType.RAWARD;
+                App.GetGameManager<LswcGamemanager>().AnimalItemCtrl.PlayAnimation(3);
             }
-            else if (App.GetGameData<GlobalData>().LastResult.Reward == LSRewardType.BIG_THREE)
+            else if (lastResult.Reward == LSRewardType.BIG_THREE)
             {
-                LSBigThreeReward.Instance.PlayAnimation(3);
+                App.GetGameManager<LswcGamemanager>().BigThreeReward.PlayAnimation(3);
             }
             UpdateState = true;
         }
@@ -695,17 +608,19 @@ namespace Assets.Scripts.Game.lswc.States
             if (_duraTime <= 0)
             {
                 _duraTime = 0;
-                LSSystemControl.Instance.ChangeState(NextState);
+                App.GetGameManager<LswcGamemanager>().SystemControl.ChangeState(NextState);
             }
         }
 
         public override void Exit()
         {
             base.Exit();
-            App.GetGameData<GlobalData>().LastResult.ToAnimal.CurAnimation = LSAnimalAnimationType.WATCH;
-            if (LSSystemControl.Instance.NeedSignAnimal(App.GetGameData<GlobalData>().LastResult.Reward))
+            var gdata = App.GetGameData<LswcGameData>();
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            gdata.LastResult.ToAnimal.CurAnimation = LSAnimalAnimationType.WATCH;
+            if (gameMgr.SystemControl.NeedSignAnimal(gdata.LastResult.Reward))
             {
-                LSCameraManager.Instance.ZoomOut(2);
+                gameMgr.CameraManager.ZoomOut(2);
             }
         }
 
@@ -717,48 +632,33 @@ namespace Assets.Scripts.Game.lswc.States
     /// </summary>
     public class LSShowResultUIState : LSState
     {
-        private static LSShowResultUIState _instance;
-
-        public static LSShowResultUIState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSShowResultUIState();
-                }
-                return _instance;
-            }
-        }
-
-        private float cacheTime = 0;
-
-        private bool isReset;
+        private float cacheTime;
 
         public override void Enter()
         {
             base.Enter();
+            var gdata = App.GetGameData<LswcGameData>();
             //应该在打开后关闭，不应该在这处理
-            App.GameData.GStatus = GameStatus.Normal;
-            NextState = LSEmptyState.Instance;
-            App.GetGameData<GlobalData>().ShowTime = 0;
-            isReset = false;
+            gdata.GStatus = YxEGameStatus.Normal;
+            NextState = gdata.GameStates.EmptyState;//LSEmptyState.Instance;
+            gdata.ShowTime = 0;
             cacheTime = 0;
         }
 
         public override void Excute()
         {
             base.Excute();
-            LSFireWorksControl.Instance.Hide();
-            LSUIManager.Instance.SetVFXActive(false);
-            LSSystemControl.Instance.PlayeGameStateMusic(LSConstant.GameEnd);
-            if (App.GetGameData<GlobalData>().LastResult.Reward == LSRewardType.SENDLAMP)
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            gameMgr.FireWorksControl.Hide();
+            gameMgr.UIManager.SetVFXActive(false);
+            gameMgr.SystemControl.PlayeGameStateMusic(8);//LSConstant.GameEnd
+            if (App.GetGameData<LswcGameData>().LastResult.Reward == LSRewardType.SENDLAMP)
             {
                 //ToDo 送灯显示历史记录面板
             }
             else
             {
-                LSUIManager.Instance.ShowResultPanel();
+                gameMgr.UIManager.ShowResultPanel();
             }
             UpdateState = true;
         }
@@ -769,7 +669,7 @@ namespace Assets.Scripts.Game.lswc.States
             cacheTime += Time.deltaTime;
             if (_duraTime <= cacheTime)
             {
-                LSSystemControl.Instance.ChangeState(NextState);
+                App.GetGameManager<LswcGamemanager>().SystemControl.ChangeState(NextState);
             }
         }
 
@@ -785,26 +685,13 @@ namespace Assets.Scripts.Game.lswc.States
     /// </summary>
     public class LSEmptyState : LSState
     {
-        private static LSEmptyState _instance;
-
-        public static LSEmptyState Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new LSEmptyState();
-                }
-                return _instance;
-            }
-        }
-
         public override void Enter()
         {
             base.Enter();
-            App.GetGameData<GlobalData>().ReadyToNext = false;
-            App.GetGameData<GlobalData>().GlobalGameStatu = GameState.WaitState;
-            NextState = LSBetState.Instance;
+            var gdata = App.GetGameData<LswcGameData>();
+            gdata.ReadyToNext = false;
+            gdata.GlobalELswcGameStatu = ELswcGameState.WaitState;
+            NextState = gdata.GameStates.BetState;//LSBetState.Instance;
         }
 
         public override void Excute()
@@ -816,24 +703,24 @@ namespace Assets.Scripts.Game.lswc.States
         public override void Update()
         {
             base.Update();
-            if (App.GetGameData<GlobalData>().ReadyToNext)
+            var gdata = App.GetGameData<LswcGameData>();
+            if (!gdata.ReadyToNext) { return;}
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
+            if (gameMgr.SystemControl.NeedSignAnimal(gdata.LastResult.Reward))
             {
-                if (LSSystemControl.Instance.NeedSignAnimal(App.GetGameData<GlobalData>().LastResult.Reward))
-                {
-                    App.GetGameData<GlobalData>().LastResult.ToAnimal.MoveBack();
-                }
-                App.GetGameData<GlobalData>().ReadyToNext = false;
-                LSUIManager.Instance.HideResultPanel();
-                LSTurnTableControl.Instance.ResetAnimation();
-                LSCrystalControl.Instance.Show(false);
-                LSBigThreeReward.Instance.HideAll();
-                LSShowGameTypeManager.Instance.ShowBigFour(false);
-                NextState.DuraTime = App.GetGameData<GlobalData>().ShowTime;
-                App.GetGameData<GlobalData>().GlobalGameStatu = GameState.BetState;
-                LSSystemControl.Instance.InitEachRound();
-                LSSystemControl.Instance.ChangeState(NextState);
-                LSAnimalItemControl.Instance.InitPosition();
+                gdata.LastResult.ToAnimal.MoveBack();
             }
+            gdata.ReadyToNext = false;
+            App.GetGameManager<LswcGamemanager>().UIManager.HideResultPanel();
+            gameMgr.TurnTableControl.ResetAnimation();
+            gameMgr.CrystalControl.Show(false);
+            gameMgr.BigThreeReward.HideAll();
+            gameMgr.ShowGameTypeManager.ShowBigFour(false);
+            NextState.DuraTime = gdata.ShowTime;
+            gdata.GlobalELswcGameStatu = ELswcGameState.BetState;
+            gameMgr.SystemControl.InitEachRound();
+            gameMgr.SystemControl.ChangeState(NextState);
+            gameMgr.AnimalItemCtrl.InitPosition();
         }
     }
 

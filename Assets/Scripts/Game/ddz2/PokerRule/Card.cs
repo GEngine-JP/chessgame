@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Assets.Scripts.Game.ddz2.PokerRule
+﻿namespace Assets.Scripts.Game.ddz2.PokerRule
 {
     public class Card
     {
@@ -21,6 +19,9 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
         private readonly byte value;
         private readonly string name;
 
+        /// <summary>
+        /// 权重
+        /// </summary>
         protected int weight;
 
 
@@ -124,6 +125,10 @@ namespace Assets.Scripts.Game.ddz2.PokerRule
             return weight;
         }
 
+        /// <summary>
+        /// 计算权重
+        /// </summary>
+        /// <returns></returns>
         protected int calculateWeight()
         {
             if (this.type == 5)

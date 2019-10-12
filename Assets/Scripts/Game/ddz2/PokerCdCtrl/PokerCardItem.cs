@@ -1,15 +1,16 @@
 ﻿using Assets.Scripts.Game.ddz2.PokerRule;
-using System;
 using System.Globalization;
 using UnityEngine;
 
 namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
 {
+
     /// <summary>
     ///单张扑克控制
     /// </summary>
     public class PokerCardItem : MonoBehaviour
     {
+      
         /// <summary>
         /// 手牌总控制脚本
         /// </summary>
@@ -22,7 +23,7 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
         /// <summary>
         /// 这张手牌的牌值信息（带花色）
         /// </summary>
-        public int CdValue { private set; get; }
+        public int CdValue { protected set; get; }
 
         /// <summary>
         /// 牌面
@@ -63,6 +64,7 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
             CdValueSpUp.GetComponent<UISprite>().depth = layerIndex + 1;
             CdValueSpDown.GetComponent<UISprite>().depth = layerIndex + 1;
         }
+        
 
         /// <summary>
         /// 设置这张扑克的牌值信息，显示效果
@@ -71,6 +73,11 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
         public void SetCdValue(int cdValueData)
         {
             CdValue = cdValueData;
+            SetCardFront();
+        }
+
+        protected void SetCardFront()
+        {
             ColorLeftUp.gameObject.SetActive(false);
             ColorRightDown.gameObject.SetActive(false);
             CdValueSpUp.gameObject.SetActive(false);
@@ -104,8 +111,8 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
             CdValueSpDown.gameObject.SetActive(true);
 
 
-            var color = PokerRuleUtil.GetColor(cdValueData);
-            var value = HdCdsCtrl.GetValue(cdValueData).ToString(CultureInfo.InvariantCulture);
+            var color = PokerRuleUtil.GetColor(CdValue);
+            var value = HdCdsCtrl.GetValue(CdValue).ToString(CultureInfo.InvariantCulture);
 
             ColorLeftUp.spriteName = "s_" + color + "_0";
             ColorRightDown.spriteName = "s_" + color + "_0";
@@ -126,7 +133,7 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
             CdValueSpUp.MakePixelPerfect();
             CdValueSpDown.MakePixelPerfect();
         }
-
+      
 
         private bool _isCdUp;
         /// <summary>
@@ -136,18 +143,15 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
         {
             set
             {
+                var v3 = gameObject.transform.localPosition;
                 //抬起高度
                 if (value)
                 {
-
-                    gameObject.transform.localPosition += new Vector3(0, 30f, 0);
+                    gameObject.transform.localPosition = new Vector3(v3.x, 30f, v3.z);
                 }
                 else
                 {
-
-                    gameObject.transform.localPosition = new Vector3(gameObject.transform.localPosition.x,
-                                                                     0,
-                                                                     gameObject.transform.localPosition.z);
+                    gameObject.transform.localPosition = new Vector3(v3.x, 0, v3.z);
                 }
                 _isCdUp = value;
             }
@@ -155,7 +159,7 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
             get { return _isCdUp; }
         }
 
-        //eventTrigger 的事件相应方法---------------------------------------------------------------------------start
+        #region  eventTrigger 的事件相应方法
         public void OnPress()
         {
             ChangeCdDark();
@@ -183,10 +187,8 @@ namespace Assets.Scripts.Game.ddz2.PokerCdCtrl
                 _hdCdsCtrlInstance.DragOverCdValue = CdValue;
                 _hdCdsCtrlInstance.OnDargOverCd();
             }
-
-
         }
-        //的事件相应方法---------------------------------------------------------------end---
+        #endregion
 
         /// <summary>
         /// 让扑克变暗色

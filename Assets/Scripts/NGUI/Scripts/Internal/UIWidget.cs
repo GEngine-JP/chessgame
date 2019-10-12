@@ -1005,7 +1005,7 @@ public class UIWidget : UIRect
 		if (panel != null && panel.gameObject.layer != gameObject.layer)
 		{
 			Debug.LogWarning("You can't place widgets on a layer different than the UIPanel that manages them.\n" +
-				"If you want to move widgets to a different layer, parent them to a new panel instead.", this);
+				"If you want to move widgets to a different layer, parent them to a new panel instead." + name, this);
 			gameObject.layer = panel.gameObject.layer;
 		}
 	}

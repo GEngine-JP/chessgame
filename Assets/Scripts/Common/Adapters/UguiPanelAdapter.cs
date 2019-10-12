@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using YxFramwork.Framework;
+using YxFramwork.Common.Adapters;
+using YxFramwork.Enums;
 
 namespace Assets.Scripts.Common.Adapters
 {
@@ -10,22 +11,58 @@ namespace Assets.Scripts.Common.Adapters
     [RequireComponent(typeof(GraphicRaycaster))]
     public class UguiPanelAdapter : YxBasePanelAdapter
     {
-        private Canvas _panel;
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsMainPanel;
 
-        protected void Awake()
+        /// <summary>
+        /// 是否需要覆盖
+        /// </summary>
+        public bool OverrideSorting = true;
+        private Canvas _panel;
+        protected Canvas Panel
         {
-            InitPanel();
+            get { return _panel == null ? _panel = GetComponent<Canvas>() : _panel; }
+        }
+
+        protected override void Awake()
+        {
+            base.Awake(); 
+            var panel = Panel;
+            if (panel == null) return;
+            if (OverrideSorting)
+            {
+                panel.overrideSorting = true;
+            }
+            if (!IsMainPanel) return;
+            var rectTs = GetComponent<RectTransform>();
+            rectTs.anchorMax = new Vector2(1f, 1f);
+            rectTs.anchorMin = Vector2.zero;
+            rectTs.anchoredPosition = Vector2.zero;
+            rectTs.pivot = new Vector2(0.5f, 0.5f);
+            rectTs.sizeDelta = Vector2.zero;
+            rectTs.offsetMax = Vector2.zero;
+            rectTs.offsetMin = Vector2.zero;
         }
 
         private IEnumerator Start()
         {
-            InitPanel();
-            while (!_panel.overrideSorting)
+            var panel = Panel;
+            if (OverrideSorting)
             {
-                _panel.overrideSorting = true;
+                while (!panel.overrideSorting)
+                {
+                    panel.overrideSorting = true;
+                    yield return null;
+                }
+            } 
+            if (!IsMainPanel) yield break; 
+            var rectTs = GetComponent<RectTransform>();
+            while (!(transform.parent is RectTransform))
+            {
                 yield return null;
             }
-            var rectTs = GetComponent<RectTransform>();
             rectTs.anchorMax = new Vector2(1f, 1f);
             rectTs.anchorMin = Vector2.zero;
             rectTs.anchoredPosition = Vector2.zero;
@@ -37,12 +74,19 @@ namespace Assets.Scripts.Common.Adapters
 
         protected override void OnSortingOrder(int order)
         {
-            _panel.sortingOrder = order + Order;
+            Panel.sortingOrder = order + Order;
         }
 
-        private void InitPanel()
+        public override Vector4 GetBound()
         {
-            if(_panel==null)_panel = GetComponent<Canvas>();
+            return Vector4.zero;
+        }
+
+        public override int Depth { get; set; }
+
+        public override YxEUIType UIType
+        {
+            get { return YxEUIType.Ugui; }
         }
     }
 }

@@ -1,13 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using Assets.Scripts.Game.ddz2.DdzEventArgs;
 using Assets.Scripts.Game.ddz2.InheritCommon;
 using Assets.Scripts.Game.ddz2.PokerCdCtrl;
 using Assets.Scripts.Game.ddz2.PokerRule;
 using Sfs2X.Entities.Data;
 using UnityEngine;
-using Assets.Scripts.Game.ddz2.DDz2Common;
 using YxFramwork.Common;
 using YxFramwork.ConstDefine;
 
@@ -16,7 +14,7 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
     /// <summary>
     /// 出牌监听脚本
     /// </summary>
-    public abstract class OutCdsListener : ServEvtListener
+    public class OutCdsListener : ServEvtListener
     {
 
         /// <summary>
@@ -60,31 +58,10 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
         protected const int CdWith = 120;
         protected const int CdHeight = 194;
 
-        /// <summary>
-        /// 标记地主座位
-        /// </summary>
-        protected int LandSeat;
 
-        protected override void OnAwake()
+        protected void Start()
         {
-            Ddz2RemoteServer.AddOnGetRejoinDataEvt(OnRejoinGame);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeOutCard, OnTypeOutCard);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypePass, OnTypePass);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeGameOver, OnTypeGameOver);
-            Ddz2RemoteServer.AddOnServResponseEvtDic(GlobalConstKey.TypeFirstOut, OnFirstOut);
-            Ddz2RemoteServer.AddOnUserReadyEvt(OnUserReady);
-        }
-
-        private void OnFirstOut(object sender, DdzbaseEventArgs args)
-        {
-            var data = args.IsfObjData;
-            if (data.ContainsKey(RequestKey.KeySeat)) LandSeat = data.GetInt(RequestKey.KeySeat);
-        }
-
-        void Start()
-        {
-            App.GetGameData<GlobalData>().OnClearParticalGob = ClearParticalGob;
-            YxMsgCenterHandler.GetIntance().AddListener(YxMessageName.ConnectionLost,OnConnectionLost);
+            App.GetGameData<DdzGameData>().OnClearParticalGob = ClearParticalGob;
         }
 
         protected  void OnConnectionLost(object msg)
@@ -105,7 +82,7 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
         /// 卡牌的原型
         /// </summary>
         [SerializeField]
-        private OutCdItem _outcdItemOrg;
+        protected OutCdItem OutcdItemOrg;
 
         /// <summary>
         /// outcds的gird容器
@@ -121,65 +98,9 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
         {
             
         }
+ 
 
-
-        protected void OnRejoinGame(object sender,DdzbaseEventArgs args)
-        {
-            ClearAllOutCds();
-
-            var data = args.IsfObjData;
-
-            //标记地主座位
-            if (data.ContainsKey(NewRequestKey.KeyLandLord)) LandSeat = data.GetInt(NewRequestKey.KeyLandLord);
-
-            if (!data.ContainsKey(NewRequestKey.KeyCurrp) || !data.ContainsKey(NewRequestKey.KeyLastOut))return;
-            var lasOutData = data.GetSFSObject(NewRequestKey.KeyLastOut);
-            OnGetLasOutData(data.GetInt(NewRequestKey.KeyCurrp),lasOutData);
-        }
-
-        /// <summary>
-        /// 当重练时获得 最后一次出牌信息时候
-        /// </summary>
-        /// <param name="currP">最后一次</param>
-        /// <param name="lasOutData"></param>
-        protected abstract void OnGetLasOutData(int currP,ISFSObject lasOutData);
-
-
-        /// <summary>
-        /// 有人出牌后
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        protected abstract void OnTypeOutCard(object sender, DdzbaseEventArgs args);
-
-        /// <summary>
-        /// 有人pass后
-        /// </summary>
-        protected abstract void OnTypePass(object sender, DdzbaseEventArgs args);
-
-
-    
-
-        /// <summary>
-        /// 当游戏结算时
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        protected virtual void OnTypeGameOver(object sender, DdzbaseEventArgs args)
-        {
-        }
-
-        /// <summary>
-        /// 当玩家准备时
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        protected virtual void OnUserReady(object sender, DdzbaseEventArgs args)
-        {
-            ClearAllOutCds();
-        }
-
-        protected void ShowHandCds(int seat, ISFSArray users)
+        public void ShowHandCds(int seat, ISFSArray users)
         {
             var len = users.Count;
             for (int i = 0; i < len; i++)
@@ -193,29 +114,28 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
                 }
             }
         }
+       
 
 
         /// <summary>
         /// 清理旧的出牌
         /// </summary>
-        protected void ClearAllOutCds()
+        public void ClearAllOutCds()
         {
-            var oldCds = OutcdsTemp.ToArray();
-            var len = oldCds.Length;
+            var len = OutcdsTemp.Count;
             for (int i = 0; i < len; i++)
             {
-               DestroyImmediate(oldCds[i]);
+               DestroyImmediate(OutcdsTemp[i]);
             }
             OutcdsTemp.Clear();
-            
         }
 
         /// <summary>
-        /// 给手牌发牌
+        /// 出牌
         /// </summary>
         /// <param name="cds"></param>
         /// <param name="isDizhu">标记是不是地主发牌</param>
-        protected virtual void AllocateCds(int[] cds,bool isDizhu=false)
+        public virtual void AllocateCds(int[] cds,bool isDizhu=false)
         {
             if (cds == null || cds.Length < 1) return;
 
@@ -223,11 +143,11 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
 
             cds = HdCdsCtrl.SortCds(cds);
             var cdsLen = cds.Length;
+            var lastIndex = cdsLen - 1;
             for (int i = 0; i < cdsLen; i++)
             {
-                AddCdGob(_outcdItemOrg.gameObject, i + 2, cds[i], isDizhu);
+                AddCdGob(OutcdItemOrg.gameObject, 100 + i + 2, cds[i], i == lastIndex && isDizhu);
             }
-
             SortCdsGobPos();
         }
 
@@ -235,7 +155,7 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
         /// 出牌时 检查播放例子特效
         /// </summary>
         /// <param name="lasOutData"></param>
-        protected void PlayPartical(ISFSObject lasOutData)
+        public void PlayPartical(ISFSObject lasOutData)
         {
             if(!lasOutData.ContainsKey(RequestKey.KeyCards)) return;
 
@@ -251,7 +171,7 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
                 else CheckPartiCalPlay(type);
             }
         }
-
+    
         /// <summary>
         /// 检查出的牌，播放相应的粒子特效
         /// </summary>
@@ -265,7 +185,7 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
         /// 检查出的牌，播放相应的粒子特效
         /// </summary>
         /// <param name="cdType">卡牌类型</param>
-        private void CheckPartiCalPlay(CardType cdType)
+        public void CheckPartiCalPlay(CardType cdType)
         {
             switch (cdType)
             {
@@ -286,25 +206,25 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
                 case CardType.C111222:
                     {
                         ParticalFeiji.SetActive(false);
-                        StopCoroutine(CornameHideFeiji);
+                        StopCoroutine("HideFeiji");
                         ParticalFeiji.SetActive(true);
-                        StartCoroutine(CornameHideFeiji);
+                        StartCoroutine(HideFeiji());
                         break;
                     }
                 case CardType.C1112223344:
                     {
                         ParticalFeiji.SetActive(false);
-                        StopCoroutine(CornameHideFeiji);
+                        StopCoroutine("HideFeiji");
                         ParticalFeiji.SetActive(true);
-                        StartCoroutine(CornameHideFeiji);
+                        StartCoroutine(HideFeiji());
                         break;
                     }
                 case CardType.C11122234:
                     {
                         ParticalFeiji.SetActive(false);
-                        StopCoroutine(CornameHideFeiji);
+                        StopCoroutine("HideFeiji");
                         ParticalFeiji.SetActive(true);
-                        StartCoroutine(CornameHideFeiji);
+                        StartCoroutine(HideFeiji());
                         break;
                     }
                 case CardType.C4:
@@ -325,7 +245,7 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
         }
 
 
-        private const string CornameHideFeiji = "HideFeiji";
+
         private IEnumerator HideFeiji()
         {
             yield return new WaitForSeconds(FeijiDurTime);
@@ -344,7 +264,7 @@ namespace Assets.Scripts.Game.ddz2.DDzGameListener.OutCdsPanel
 
         private void AddCdGob(GameObject cdItemOrg, int layerIndex, int cdValueData,bool isDizhu =false)
         {
-            var gob = NGUITools.AddChild(Table, cdItemOrg);
+            var gob = Table.AddChild(cdItemOrg);
             gob.name = layerIndex.ToString(CultureInfo.InvariantCulture);
             gob.SetActive(true);
             var pokerItem = gob.GetComponent<OutCdItem>();

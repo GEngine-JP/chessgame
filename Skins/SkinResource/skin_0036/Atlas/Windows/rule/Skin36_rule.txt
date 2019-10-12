@@ -1,0 +1,36 @@
+{"frames": {
+
+"background.png":
+{
+	"frame": {"x":2,"y":2,"w":155,"h":159},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":155,"h":159},
+	"sourceSize": {"w":155,"h":159}
+},
+"tab_0.png":
+{
+	"frame": {"x":2,"y":163,"w":101,"h":54},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":101,"h":54},
+	"sourceSize": {"w":101,"h":54}
+},
+"tab_1.png":
+{
+	"frame": {"x":159,"y":2,"w":78,"h":41},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":78,"h":41},
+	"sourceSize": {"w":78,"h":41}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "Skin36_rule.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":256},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:ad70ad92a84f39ced2c4a3ef398f66a9$"
+}
+}

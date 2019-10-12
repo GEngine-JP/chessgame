@@ -395,7 +395,7 @@ static NSString *UniWebViewDoneButtonTitle = nil;
     }
     
     if (fade || direction != UniWebViewTransitionEdgeNone) {
-        webView.viewAnimating = YES;
+        webView.viewAnimating = NO;
         
         webView.alpha = 1.0;
         if (fade) {
@@ -626,6 +626,9 @@ static NSString *UniWebViewDoneButtonTitle = nil;
 }
 
 - (void)webView:(UniWebView *)webView didFailLoadWithError:(NSError *)error {
+    if (error.code==NSURLErrorCancelled) {
+        return;
+    }
     [webView.spinner hide];
     NSString *webViewName = [self webViewName:webView];
     [webView updateToolBtn];

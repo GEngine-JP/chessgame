@@ -8,68 +8,47 @@ namespace Assets.Scripts.Game.bjl3d
 
     public class PlanScene : MonoBehaviour
     {
-
-        public static PlanScene Instance;
-
         public TextMesh[] SelfNoteTexts;
         public TextMesh[] QuyuNoteTexts;
 
         public Transform[] Planes;
        
-        /// <summary>
-        /// 获取UI操作控件
-        /// </summary>
-        protected void Awake()
-        {
-            Instance = this;
-        }
         public bool IsPointerOverUIObject()
         {
-            PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
-            eventDataCurrentPosition.position = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
-            List<RaycastResult> results = new List<RaycastResult>();
+            var eventDataCurrentPosition = new PointerEventData(EventSystem.current)
+            {
+                position = new Vector2(Input.mousePosition.x, Input.mousePosition.y)
+            };
+            var results = new List<RaycastResult>();
             EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
             return results.Count > 0;
         }
       
-        public void UserNoteDataFun()
+        public void UserNoteDataFun(int serverSeat,int coin)
         {
-            if (App.GetGameData<GlobalData>().UserSeat == App.GetGameData<GlobalData>().CurrentUser.Seat)
-                ShowSelfNoteInfo(App.GetGameData<GlobalData>().P, App.GetGameData<GlobalData>().GoldOne);
-            ShowquyuNoteInfo(App.GetGameData<GlobalData>().P, App.GetGameData<GlobalData>().GoldOne);
-
+            var gdata = App.GetGameData<Bjl3DGameData>();
+            if (serverSeat == gdata.SelfSeat)
+            {
+                ShowSelfNoteInfo(gdata.P, coin);
+            }
+            ShowquyuNoteInfo(gdata.P, coin);
             //筹码显示
-            ShowChouMaZhu(App.GetGameData<GlobalData>().P, App.GetGameData<GlobalData>().GoldOne);
+            ShowChouMaZhu(gdata.P, coin);
         }
 
         public void ShowChouMaZhu(int iArea, long money)
         {
-            int index = 0;
-            switch (money)
+            var list = App.GameData.AnteRate;
+            var count = list.Count;
+            var index = 0;
+            for (var i = 0; i < count; i++)
             {
-                case 100:
-                    index = 0;
-                    break;
-                case 1000:
-                    index = 1;
-                    break;
-                case 10000:
-                    index = 2;
-                    break;
-                case 100000:
-                    index = 3;
-                    break;
-                case 1000000:
-                    index = 4;
-                    break;
-                case 5000000:
-                    index = 5;
-                    break;
-                case 10000000:
-                    index = 6;
-                    break;
+                var value = list[i];
+                if (value != money) continue;
+                index = i;
+                break;
             }
-            Plan plan = Planes[iArea].GetComponent<Plan>();
+            var plan = Planes[iArea].GetComponent<Plan>();
             if (plan == null) return;
             plan.XiaZhuChouMaXianShi(index + 1, iArea);
         }
@@ -79,8 +58,7 @@ namespace Assets.Scripts.Game.bjl3d
         /// </summary>
         public void ShowSelfNoteInfo(int area, int gold)
         {
-
-            BetMoneyUI.Intance.BetMoneySelfNoteInfo(area, gold);
+            App.GetGameManager<Bjl3DGameManager>().TheBetMoneyUI.BetMoneySelfNoteInfo(area, gold);
         }
 
         /// <summary>
@@ -88,7 +66,7 @@ namespace Assets.Scripts.Game.bjl3d
         /// </summary>
         void ShowquyuNoteInfo(int area, int gold)
         {
-            BetMoneyUI.Intance.BetMoneyquyuNoteInfo(area, gold);
+            App.GetGameManager<Bjl3DGameManager>().TheBetMoneyUI.BetMoneyquyuNoteInfo(area, gold);
         }
 
         /// <summary>

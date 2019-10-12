@@ -1,0 +1,140 @@
+{"frames": {
+
+"bindbt.png":
+{
+	"frame": {"x":379,"y":192,"w":117,"h":63},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":117,"h":63},
+	"sourceSize": {"w":117,"h":63}
+},
+"box.png":
+{
+	"frame": {"x":177,"y":240,"w":50,"h":51},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":51},
+	"sourceSize": {"w":50,"h":51}
+},
+"change1.png":
+{
+	"frame": {"x":245,"y":221,"w":55,"h":55},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":55,"h":55},
+	"sourceSize": {"w":55,"h":55}
+},
+"closesp.png":
+{
+	"frame": {"x":177,"y":148,"w":81,"h":35},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":81,"h":35},
+	"sourceSize": {"w":81,"h":35}
+},
+"coin_bg.png":
+{
+	"frame": {"x":273,"y":66,"w":192,"h":44},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":192,"h":44},
+	"sourceSize": {"w":192,"h":44}
+},
+"copybt.png":
+{
+	"frame": {"x":260,"y":156,"w":117,"h":63},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":117,"h":63},
+	"sourceSize": {"w":117,"h":63}
+},
+"goldicon.png":
+{
+	"frame": {"x":302,"y":221,"w":45,"h":47},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":45,"h":47},
+	"sourceSize": {"w":45,"h":47}
+},
+"headFrame.png":
+{
+	"frame": {"x":2,"y":111,"w":173,"h":172},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":173,"h":172},
+	"sourceSize": {"w":173,"h":172}
+},
+"info_bg.png":
+{
+	"frame": {"x":273,"y":7,"w":236,"h":57},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":236,"h":57},
+	"sourceSize": {"w":236,"h":57}
+},
+"line_bg.png":
+{
+	"frame": {"x":2,"y":2,"w":484,"h":3},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":484,"h":3},
+	"sourceSize": {"w":484,"h":3}
+},
+"new_saver_return.png":
+{
+	"frame": {"x":177,"y":185,"w":66,"h":53},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":17,"y":6,"w":66,"h":53},
+	"sourceSize": {"w":136,"h":67}
+},
+"opensp.png":
+{
+	"frame": {"x":177,"y":111,"w":81,"h":35},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":81,"h":35},
+	"sourceSize": {"w":81,"h":35}
+},
+"qiehuan.png":
+{
+	"frame": {"x":2,"y":7,"w":269,"h":102},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":269,"h":102},
+	"sourceSize": {"w":269,"h":102}
+},
+"viewicon.png":
+{
+	"frame": {"x":260,"y":112,"w":161,"h":42},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":161,"h":42},
+	"sourceSize": {"w":161,"h":42}
+},
+"yinxiao_text.png":
+{
+	"frame": {"x":423,"y":152,"w":74,"h":38},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":74,"h":38},
+	"sourceSize": {"w":74,"h":38}
+},
+"yinyue_text.png":
+{
+	"frame": {"x":423,"y":112,"w":74,"h":38},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":74,"h":38},
+	"sourceSize": {"w":74,"h":38}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "sk41_userInfo.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:4172a45dbae114650ad36d331de4af7f$"
+}
+}

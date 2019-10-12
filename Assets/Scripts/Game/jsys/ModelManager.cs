@@ -1,15 +1,12 @@
 ﻿using DG.Tweening;
 using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
 using YxFramwork.Common;
 
 namespace Assets.Scripts.Game.jsys
 {
     public class ModelManager : MonoBehaviour
     {
-
-        public static ModelManager Instance;
         //鱼路径
         public Transform[] PointsTransforms;
         //飞禽路径
@@ -54,7 +51,7 @@ namespace Assets.Scripts.Game.jsys
         public GameObject PandaEffect;
         //动物摄像头路径
         public Transform[] AnimalPath;
-        private Vector3[] animalPaths = new Vector3[2];
+        private Vector3[] _animalPaths = new Vector3[2];
         //龙卷风
         public Transform WindEffect;
         public Transform HitWindEffect;
@@ -62,30 +59,26 @@ namespace Assets.Scripts.Game.jsys
         //开奖号码
         private int _luckyNumber;
 
-        public void Awake()
-        {
-            Instance = this;
-
-        }
-
         //鲨鱼走到开奖位置
         public void GotoKaiJiang()
         {
             //Debug.Log("显示开奖的位置");
-
-            if (App.GetGameData<GlobalData>().Judge)
+            var gdata = App.GetGameData<JsysGameData>();
+            var gameMgr = App.GetGameManager<JsysGameManager>();
+            if (gdata.Judge)
             {
-                _luckyNumber = App.GetGameData<GlobalData>().EndAnimal;
+                _luckyNumber = gdata.EndAnimal;
 
             }
-            else if (App.GetGameData<GlobalData>().Judge == false && (App.GetGameData<GlobalData>().SharkPos == 8 || App.GetGameData<GlobalData>().SharkPos == 9))
+            else if (gdata.Judge == false && (gdata.SharkPos == 8 || gdata.SharkPos == 9))
             {
-                _luckyNumber = App.GetGameData<GlobalData>().SharkPos;
-                App.GetGameData<GlobalData>().Judge = true;
+                _luckyNumber = gdata.SharkPos;
+                gdata.Judge = true;
             }
             //Pan=!Pan;
-            iTween.Stop(RewardAnimals[_luckyNumber].gameObject);
-            Hashtable args = new Hashtable();
+            var rewardAnimal = RewardAnimals[_luckyNumber];
+            iTween.Stop(rewardAnimal.gameObject);
+            var args = new Hashtable();
             //设置类型为线性，线性效果会好一些。
             args.Add("easeType", iTween.EaseType.linear);
             //设置寻路的速度
@@ -103,9 +96,9 @@ namespace Assets.Scripts.Game.jsys
             {
                 //显示陆地,隐藏鱼和鸟模型
                 ChangeToForest();
-                HaidiManager.Instance.Banjiangtai.SetActive(true);
+                gameMgr.HaidiMgr.Banjiangtai.SetActive(true);
                 //设置开奖动物属性isWiner为true
-                GameObject winAnimal = RewardAnimals[_luckyNumber].gameObject;
+                var winAnimal = rewardAnimal.gameObject;
                 winAnimal.GetComponent<Pathfinding>().IsWiner = true;
                 //开奖动物到开奖点,非开奖动物到开奖点附近
                 AnimalGotoPosition();
@@ -118,10 +111,10 @@ namespace Assets.Scripts.Game.jsys
                 ChangeToSky();
                 ShowBirdEffect();
                 ShowOrHideAnimals(AllBirds, false);
-                GameObject winBird = RewardAnimals[_luckyNumber].gameObject;
-                winBird.transform.FindChild("body").gameObject.SetActive(true);
-                winBird.transform.position = BirdWiner.position;
-                winBird.transform.LookAt(BirdCamera.transform);
+                var winBird = rewardAnimal.gameObject.transform;
+                winBird.FindChild("body").gameObject.SetActive(true);
+                winBird.position = BirdWiner.position;
+                winBird.LookAt(BirdCamera.transform);
                 winBird.GetComponent<BirdManager>().IsOpen = true;
                 LookatBird();
                 // SmallfishsBack(allBirdObjs);
@@ -133,10 +126,10 @@ namespace Assets.Scripts.Game.jsys
                 //显示海洋,隐藏动物和鸟模型
                 ChangeToHaidi();
                 ShowOrHideAnimals(AllFishs, false);
-                RewardAnimals[_luckyNumber].FindChild("body").gameObject.SetActive(true);
-                RewardAnimals[_luckyNumber].GetComponent<SharkManager>().IsOpen = true;
-                iTween.MoveTo(RewardAnimals[_luckyNumber].gameObject, args);
-                TurnGroupsManager.Instance.showWinning();
+                rewardAnimal.FindChild("body").gameObject.SetActive(true);
+                rewardAnimal.GetComponent<SharkManager>().IsOpen = true;
+                iTween.MoveTo(rewardAnimal.gameObject, args);
+                gameMgr.TurnGroupsMgr.showWinning();
                 StartCoroutine(OpenStart());
             }
         }
@@ -168,7 +161,7 @@ namespace Assets.Scripts.Game.jsys
             {
                 StartCoroutine(HitWind());
             }
-            Animation an = RewardAnimals[_luckyNumber].gameObject.GetComponentInChildren<Animation>();
+            var an = RewardAnimals[_luckyNumber].gameObject.GetComponentInChildren<Animation>();
             if (an)
             {
                 an.Play("roar");
@@ -185,44 +178,43 @@ namespace Assets.Scripts.Game.jsys
             HitWindEffect.gameObject.SetActive(false);
             if (_luckyNumber >= 4)
             {
-                Animation an = RewardAnimals[_luckyNumber].gameObject.GetComponentInChildren<Animation>();
+                var an = RewardAnimals[_luckyNumber].gameObject.GetComponentInChildren<Animation>();
                 if (an)
                 {
                     an.Play("move");
                 }
             }
 
-            for (int i = 0; i < AllFishObjs.Length; i++)
+            for (var i = 0; i < AllFishObjs.Length; i++)
             {
-
-                SharkManager manger = AllFishObjs[i].GetComponent<SharkManager>();
+                var manger = AllFishObjs[i].GetComponent<SharkManager>();
                 manger.IsOpen = false;
                 manger.CanMove = true;
             }
             ResumeAnimal();
-            for (int i = 0; i < AllBirdObjs.Length; i++)
+            for (var i = 0; i < AllBirdObjs.Length; i++)
             {
-
-                AllBirdObjs[i].GetComponent<BirdManager>().IsOpen = false;
-                AllBirdObjs[i].GetComponent<BirdManager>().CanMove = true;
+                var birdMgr = AllBirdObjs[i].GetComponent<BirdManager>();
+                birdMgr.IsOpen = false;
+                birdMgr.CanMove = true;
             }
         }
         private IEnumerator HitWind()
         {
-       
             yield return new WaitForSeconds(3.5f);
             HitWindEffect.gameObject.SetActive(true);
-            TurnGroupsManager.Instance.HideWinning();
-
+            App.GetGameManager<JsysGameManager>().TurnGroupsMgr.HideWinning();
         }
         //切换海底场景
         public void ChangeToHaidi()
         {
-            if (GoldSharkGameUIManager.Instance.CanChangeBg)
+            var gameMgr = App.GetGameManager<JsysGameManager>();
+            var canChangebg = gameMgr.GoldSharkGameUIMgr;
+            if (canChangebg.CanChangeBg)
             {
-                GoldSharkGameUIManager.Instance.SetBgSprite(1);
-                Instance.LightGameObject.SetActive(true);
-                HaidiManager.Instance.SetBgSprite(2);
+                canChangebg.SetBgSprite(1);
+                LightGameObject.SetActive(true);
+                gameMgr.HaidiMgr.SetBgSprite(2);
                 ShowOrHideAnimals(AllFishs, true);
                 ShowOrHideAnimals(AllAnimals, false);
                 ShowOrHideAnimals(AllBirds, false);
@@ -231,11 +223,13 @@ namespace Assets.Scripts.Game.jsys
         //切换到天空场景
         public void ChangeToSky()
         {
-            if (GoldSharkGameUIManager.Instance.CanChangeBg)
+            var gameMgr = App.GetGameManager<JsysGameManager>();
+            var canChangebg = gameMgr.GoldSharkGameUIMgr;
+            if (canChangebg.CanChangeBg)
             {
-                GoldSharkGameUIManager.Instance.SetBgSprite(0);
-                Instance.LightGameObject.SetActive(false);
-                HaidiManager.Instance.SetBgSprite(1);
+                canChangebg.SetBgSprite(0);
+                LightGameObject.SetActive(false);
+                gameMgr.HaidiMgr.SetBgSprite(1);
                 ShowOrHideAnimals(AllFishs, false);
                 ShowOrHideAnimals(AllAnimals, false);
                 ShowOrHideAnimals(AllBirds, true);
@@ -244,11 +238,13 @@ namespace Assets.Scripts.Game.jsys
         //切换到森林场景
         public void ChangeToForest()
         {
-            if (GoldSharkGameUIManager.Instance.CanChangeBg)
+            var gameMgr = App.GetGameManager<JsysGameManager>();
+            var canChangebg = gameMgr.GoldSharkGameUIMgr;
+            if (canChangebg.CanChangeBg)
             {
-                GoldSharkGameUIManager.Instance.SetBgSprite(0);
-                Instance.LightGameObject.SetActive(false);
-                HaidiManager.Instance.SetBgSprite(0);
+                canChangebg.SetBgSprite(0);
+                LightGameObject.SetActive(false);
+                gameMgr.HaidiMgr.SetBgSprite(0);
                 ShowOrHideAnimals(AllFishs, false);
                 ShowOrHideAnimals(AllAnimals, true);
                 ShowOrHideAnimals(AllBirds, false);
@@ -258,13 +254,13 @@ namespace Assets.Scripts.Game.jsys
         public void AnimalGotoPosition()
         {
             StopPath();
-            Transform[] loseAnimal = new Transform[3];
-            int i = 0;
-            foreach (Transform animal in AllAnimalObjs)
+            var loseAnimal = new Transform[3];
+            var i = 0;
+            foreach (var animal in AllAnimalObjs)
             {
                 if (animal.GetComponent<Pathfinding>().IsWiner)
                 {
-                    int animalKind = animal.GetComponent<Pathfinding>().AnimalKind;
+                    var animalKind = animal.GetComponent<Pathfinding>().AnimalKind;
                     ShowEffect(animalKind);
                     animal.GetComponent<Pathfinding>().ScaleToBig();
                     animal.position = AnimalWiner.position;
@@ -276,12 +272,12 @@ namespace Assets.Scripts.Game.jsys
                     i++;
                 }
             }
-            for (int j = 0; j < 3; j++)
+            for (var j = 0; j < 3; j++)
             {
                 loseAnimal[j].GetComponent<Pathfinding>().ScaleToSmall();
                 loseAnimal[j].position = AnimalLose[j].position;
                 loseAnimal[j].LookAt(AnimalLookAt);
-                Animation an = loseAnimal[j].GetComponentInChildren<Animation>();
+                var an = loseAnimal[j].GetComponentInChildren<Animation>();
                 an.Play("rest");
             }
             LookatAnimal();
@@ -289,7 +285,7 @@ namespace Assets.Scripts.Game.jsys
 
         private void StopPath()
         {
-            foreach (Transform animal in AllAnimalObjs)
+            foreach (var animal in AllAnimalObjs)
             {
                 animal.GetComponent<NavMeshAgent>().enabled = false;
                 animal.GetComponent<Pathfinding>().ChoosePath = false;
@@ -299,7 +295,7 @@ namespace Assets.Scripts.Game.jsys
         //动物摄像头看动物
         public void LookatAnimal()
         {
-            AnimalCamera.transform.DOPath(animalPaths, 3f);
+            AnimalCamera.transform.DOPath(_animalPaths, 3f);
         }
 
         private void back()
@@ -368,29 +364,31 @@ namespace Assets.Scripts.Game.jsys
         {
             yield return new WaitForSeconds(3);
             HideEffect();
-            HaidiManager.Instance.Banjiangtai.SetActive(false);
-            for (int i = 0; i < AllAnimalObjs.Length; i++)
+            App.GetGameManager<JsysGameManager>().HaidiMgr.Banjiangtai.SetActive(false);
+            for (var i = 0; i < AllAnimalObjs.Length; i++)
             {
-                AllAnimalObjs[i].GetComponent<Pathfinding>().ScaleToNomal();
-                Animation ani = AllAnimalObjs[i].GetComponentInChildren<Animation>();
+                var allanimalObj = AllAnimalObjs[i];
+                var pathfinding = allanimalObj.GetComponent<Pathfinding>();
+                pathfinding.ScaleToNomal();
+                var ani = allanimalObj.GetComponentInChildren<Animation>();
                 if (ani)
                 {
                     ani.Play("move");
                 }
-                if (AllAnimalObjs[i].GetComponent<Pathfinding>().IsWiner == true)
+                if (pathfinding.IsWiner)
                 {
-                    AllAnimalObjs[i].GetComponent<Pathfinding>().IsWiner = false;
+                    pathfinding.IsWiner = false;
                 }
-                AllAnimalObjs[i].GetComponent<NavMeshAgent>().enabled = true;
-                AllAnimalObjs[i].GetComponent<Pathfinding>().ChoosePath = true;
+                allanimalObj.GetComponent<NavMeshAgent>().enabled = true;
+                pathfinding.ChoosePath = true;
             }
         }
 
         private void GetAnimalPath()
         {
-            for (int i = 0; i < AnimalPath.Length; i++)
+            for (var i = 0; i < AnimalPath.Length; i++)
             {
-                animalPaths[i] = AnimalPath[i].position;
+                _animalPaths[i] = AnimalPath[i].position;
             }
         }
 

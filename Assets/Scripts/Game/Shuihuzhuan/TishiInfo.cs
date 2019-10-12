@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Game.Shuihuzhuan.Scripts;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.Game.Shuihuzhuan
@@ -46,15 +45,6 @@ namespace Assets.Scripts.Game.Shuihuzhuan
                 TurnLeft.gameObject.SetActive(true);
                 gameObject.transform.GetComponent<Image>().sprite = Tishi[_turnNum];
             }
-        }
-        // Use this for initialization
-        void Start () {
-	
-        }
-	
-        // Update is called once per frame
-        void Update () {
-	
-        }
+        } 
     }
 }

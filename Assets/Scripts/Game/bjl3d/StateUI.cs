@@ -4,8 +4,6 @@ namespace Assets.Scripts.Game.bjl3d
 {
     public class StateUI : MonoBehaviour//G 11.15
     {
-        public static StateUI Instance;
-
         private Transform _waittf;
         private Transform _bettf;
         private Transform _sendCardtf;
@@ -15,9 +13,7 @@ namespace Assets.Scripts.Game.bjl3d
         /// 获取UI操作控件
         /// </summary>
         protected void Awake()
-        {
-            Instance = this;
-
+        { 
             _waittf = transform.FindChild("Text");
             if (_waittf == null) return;
 

@@ -57,6 +57,23 @@
 
         public const string KeyRule = "rule";
 
+        public const string KeyAllOutCards = "allOutC";
+
+        /// <summary>
+        /// 加倍字段
+        /// </summary>
+        public const string KeyIsRate = "isRate";
+
+        /// <summary>
+        /// 托管状态字段
+        /// </summary>
+        public const string KeyTf = "tf";
+
+        /// <summary>
+        /// 重连时,托管字段
+        /// </summary>
+        public const string KeyTrusteeship = "trusteeship";
+
         /// <summary>
         /// 接受玩家离线消息
         /// </summary>

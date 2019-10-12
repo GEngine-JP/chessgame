@@ -1,6 +1,7 @@
 ﻿using DG.Tweening;
 using UnityEngine;
 using System.Collections;
+using YxFramwork.Common;
 
 namespace Assets.Scripts.Game.jsys
 {
@@ -26,11 +27,13 @@ namespace Assets.Scripts.Game.jsys
 
         IEnumerator GotoPath(int time)
         {
+            if (_animation == null) { yield break; }
             if (time > 0)
             {
                 _animation.Play("rest");
             }
             yield return new WaitForSeconds(time);
+            if (_animation == null) { yield break; }
             if (_animal.isOnNavMesh && _animal.isActiveAndEnabled)
             {
                 _animation.Play("move");
@@ -49,13 +52,14 @@ namespace Assets.Scripts.Game.jsys
 
         private int RandomNum()
         {
+            var canChangebg = App.GetGameManager<JsysGameManager>().GoldSharkGameUIMgr;
             int rang = Random.Range(0, 8);
-            if (rang == _randomNum || GoldSharkGameUIManager.Instance.PathNum == rang)
+            if (rang == _randomNum || canChangebg.PathNum == rang)
             {
                 RandomNum();
             }
             _randomNum = rang;
-            GoldSharkGameUIManager.Instance.PathNum = rang;
+            canChangebg.PathNum = rang;
             return _randomNum;
         }
 

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
+using YxFramwork.Common.Adapters;
 using YxFramwork.Common.Utils;
-using YxFramwork.Framework;
+using YxFramwork.Enums;
 
 namespace Assets.Scripts.Common.Adapters
 {
@@ -8,8 +9,33 @@ namespace Assets.Scripts.Common.Adapters
     public class NguiPanelAdapter : YxBasePanelAdapter
     {
         private UIPanel _panel;
-        protected void Awake()
+        protected UIPanel Panel
         {
+            get { return _panel == null ? _panel = GetComponent<UIPanel>() : _panel; }
+        }       
+        
+        /// <summary>
+        /// 深度
+        /// </summary>
+        public override int Depth {
+            get
+            {
+                var panel = Panel;
+                return panel == null ? 0: panel.depth;
+            }
+            set
+            {
+                var panel = Panel;
+                if (panel != null)
+                {
+                    panel.depth = value;
+                }
+            }
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
             var mainCamera = Util.GetMainCamera();
             if (mainCamera == null) return;
             var uiCamera = mainCamera.GetComponent<UICamera>();
@@ -20,14 +46,32 @@ namespace Assets.Scripts.Common.Adapters
 
         protected override void OnSortingOrder(int order)
         {
-            var panel = GetPanel();
+            var panel = Panel;
+            if (panel == null) { return;}
             panel.depth = order + Order;
             panel.sortingOrder = order;
         }
 
-        public UIPanel GetPanel()
+        public override Vector4 GetBound()
         {
-            return _panel ?? (_panel = GetComponent<UIPanel>());
+            var panel = Panel;
+            if (panel == null) return new Vector4();
+            var bounds = panel.baseClipRegion;
+            var temp = bounds.z / 2;
+            var tempC = bounds.x;
+            bounds.x -= temp;
+            bounds.z = tempC + temp;
+            /****************************/
+            temp = bounds.w / 2;
+            tempC = bounds.y;
+            bounds.y -= temp;
+            bounds.w = tempC + temp;
+            return bounds;
+        }
+
+        public override YxEUIType UIType
+        {
+            get { return YxEUIType.Nguid; }
         }
     }
 }

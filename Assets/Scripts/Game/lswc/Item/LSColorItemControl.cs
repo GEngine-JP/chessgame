@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using Assets.Scripts.Game.lswc.Data;
 using UnityEngine;
 using YxFramwork.Common;
@@ -8,18 +7,6 @@ namespace Assets.Scripts.Game.lswc.Item
 {
     public class LSColorItemControl : LSItemControlBase
     {
-        private static LSColorItemControl _instance;
-
-        public static LSColorItemControl Instance
-        {
-            get { return _instance; }
-        }
-
-        private void Awake()
-        {
-            _instance = this;
-        }
-
         public void ResetLayout()
         {
             transform.localEulerAngles = Vector3.zero;
@@ -56,7 +43,7 @@ namespace Assets.Scripts.Game.lswc.Item
             for (int i = 0; i < Items.Count; i++)
             {
                 LSColorItem item = (LSColorItem)Items[i];
-                LSColorType type = App.GetGameData<GlobalData>().Colors[i];
+                LSColorType type = App.GetGameData<LswcGameData>().Colors[i];
                 item.SetColorType(type);
                 item.name = item.CurColor.ToString();
             }
@@ -72,16 +59,18 @@ namespace Assets.Scripts.Game.lswc.Item
             for (int i = 0; i <Items.Count; i++)
             {
                 LSColorItem item = (LSColorItem)Items[i];
-
-                item.SetColorType(LSColorType.DEFAULT);
-
+                if (item)
+                {
+                    item.SetColorType(LSColorType.DEFAULT);
+                }
+                
                 yield return new WaitForSeconds(_tweenFrame*Time.deltaTime);
             }
             for (int i = 0; i < Items.Count; i++)
             {
                 LSColorItem item = (LSColorItem)Items[i];
 
-                LSColorType type = App.GetGameData<GlobalData>().Colors[i];
+                LSColorType type = App.GetGameData<LswcGameData>().Colors[i];
 
                 item.SetColorType(type);
 

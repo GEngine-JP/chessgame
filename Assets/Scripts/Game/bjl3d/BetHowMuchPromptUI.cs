@@ -4,12 +4,13 @@ using UnityEngine.UI;
 using YxFramwork.Common;
 using YxFramwork.Manager;
 using com.yxixia.utile.YxDebug;
+using YxFramwork.Framework.Core;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.bjl3d
 {
     public class BetHowMuchPromptUI : MonoBehaviour//  g 11.15
     {
-        public static BetHowMuchPromptUI Instance;
         private Text _brankerText;
         private Text _freeHomeText;
         private Text _flatText;
@@ -17,15 +18,12 @@ namespace Assets.Scripts.Game.bjl3d
         private Transform _freeMode;
         private Text[] BrankModeTexts = new Text[12];
         private Text[] FreeModeTexts = new Text[12];
-
-        public static BetHowMuchPromptUI Intance;
-
+         
         /// <summary>
         /// 获取UI操作控件
         /// </summary>
         protected void Awake()
         {
-            Instance = this;
             Transform tf = transform.FindChild("Branker_Text");
             if (tf == null)
                 YxDebug.LogError("No Such Object");//没有该物体    
@@ -75,102 +73,105 @@ namespace Assets.Scripts.Game.bjl3d
                 if (FreeModeTexts[i] == null)
                     YxDebug.LogError("No Such  Component");//没有该组件
             }
-            Intance = this;
         }
 
-        private int[] BrankNum = new int[12];
-        private int[] FreeNum = new int[12];
+        private readonly int[] _brankNum = new int[12];
+        private readonly int[] _freeNum = new int[12];
 
         /// <summary>
         /// 初始化历史纪录的点数
         /// </summary>
-        /// <param name="history"></param>
-        public void SetLuziInfo(int[] history)
+        /// <param name="historys"></param>
+        public void SetLuziInfo(int[] historys)
         {
-            // 
-            for (int i = 0; i < history.Length; i++)
+            var len = historys.Length;
+            var hisidx = App.GetGameData<Bjl3DGameData>().Hisidx;
+            for (var i = 0; i < len; i++)
             {
-                FreeNum[i] = history[(i + App.GetGameData<GlobalData>().Hisidx)%12] & 0xf;
+                var history = historys[(i + hisidx) % 12];
+                var free = history & 0xf;
+                var brank = history >> 4 & 0xf;
+                _freeNum[i] = free;
+                _brankNum[i] = brank;
+                BrankModeTexts[i].text = brank.ToString();
+                FreeModeTexts[i].text = free.ToString();
                 //Debug.Log("闲家点数" + i + ":" + FreeNum[i]);
-                BrankNum[i] = history[(i + App.GetGameData<GlobalData>().Hisidx) % 12] >> 4 & 0xf;
                 //Debug.Log("庄家点数" + i + ":" + BrankNum[i]);
                 //Debug.Log("历史记录中的数据" + i + ":" + history[i]);
             }
-            for (int i = 0; i < history.Length; i++)
-            {
-                BrankModeTexts[i].text = BrankNum[i] + "";
-                FreeModeTexts[i].text = FreeNum[i] + "";
-            }
         }
         public int TotolIndex;
-        private bool IsInit=true;
+        private bool _isInit=true;
         
         /// <summary>
         /// 游戏底部的初始化历史纪录显示
         /// </summary>
         public void BottomLuzi()
         {
-            int HistoryData=0;
-            if (IsInit)
+            var gdata = App.GetGameData<Bjl3DGameData>();
+            var gameCfg = gdata.GameConfig;
+            var historyData=0;
+            if (_isInit)
             {
                 for (int i = 0; i < 12; i++)
                 {
                     int HistoryData1 = 0;
-                    if (FreeNum[i] > BrankNum[i])
+                    if (_freeNum[i] > _brankNum[i])
                     {
                         HistoryData1 = 1;
                     }
-                    if (FreeNum[i] < BrankNum[i])
+                    if (_freeNum[i] < _brankNum[i])
                     {
                         HistoryData1 = 2;
                     }
-                    if (FreeNum[i] == BrankNum[i])
+                    if (_freeNum[i] == _brankNum[i])
                     {
                         HistoryData1 = 3;
                     }
-                    UserInfoUI.Instance.GameConfig.LuziInfo.Add(HistoryData1);
-                    IsInit = false;
+                    gameCfg.LuziInfo.Add(HistoryData1);
+                    _isInit = false;
                 }
                 return;
             }
-                if (App.GetGameData<GlobalData>().XianValue > App.GetGameData<GlobalData>().ZhuangValue)
+                if (gdata.XianValue > gdata.ZhuangValue)
                 {
 
-                    StartCoroutine(PlaySoundDianShu(App.GetGameData<GlobalData>().XianValue, App.GetGameData<GlobalData>().ZhuangValue, false));
-                    HistoryData = 1;
+                    StartCoroutine(PlaySoundDianShu(gdata.XianValue, gdata.ZhuangValue, false));
+                    historyData = 1;
                 }
-                if (App.GetGameData<GlobalData>().XianValue < App.GetGameData<GlobalData>().ZhuangValue)
+                if (gdata.XianValue < gdata.ZhuangValue)
                 {
 
-                    StartCoroutine(PlaySoundDianShu(App.GetGameData<GlobalData>().XianValue, App.GetGameData<GlobalData>().ZhuangValue, true));
-                    HistoryData = 2;
+                    StartCoroutine(PlaySoundDianShu(gdata.XianValue, gdata.ZhuangValue, true));
+                    historyData = 2;
                 }
-                if (App.GetGameData<GlobalData>().XianValue == App.GetGameData<GlobalData>().ZhuangValue)
+                if (gdata.XianValue == gdata.ZhuangValue)
                 {
-                    HistoryData = 3;
+                    historyData = 3;
                 }
-                UserInfoUI.Instance.GameConfig.LuziInfo.Add(HistoryData);
+            gameCfg.LuziInfo.Add(historyData);
           
         }
 
         IEnumerator PlaySoundDianShu(int xianValue,int zhuangValue,bool isZhuang)
         {
             yield return new WaitForSeconds(6f);
+            var musicMgr = Facade.Instance<MusicManager>();
             if (isZhuang)
             {
-                MusicManager.Instance.Play("zhuangbet");
+                musicMgr.Play("zhuangbet");
                 yield return new WaitForSeconds(2f);
-                MusicManager.Instance.Play("zhuang" + zhuangValue);
+                musicMgr.Play("zhuang" + zhuangValue);
                 yield return new WaitForSeconds(2f);
-                MusicManager.Instance.Play("xian" + xianValue);
+                musicMgr.Play("xian" + xianValue);
             }
             else
             {
-                MusicManager.Instance.Play("xianbet");
+                musicMgr.Play("xianbet");
                 yield return new WaitForSeconds(1f);
-                MusicManager.Instance.Play("xian" + xianValue);
+                musicMgr.Play("xian" + xianValue);
                 yield return new WaitForSeconds(1f);
-                MusicManager.Instance.Play("zhuang" + zhuangValue);
+                musicMgr.Play("zhuang" + zhuangValue);
             }
                
         }
@@ -181,12 +182,13 @@ namespace Assets.Scripts.Game.bjl3d
         /// </summary>
         public void Data()
         {
-            FreeNum[(_myIndex - 1) % 12] = App.GetGameData<GlobalData>().XianValue;
-            BrankNum[(_myIndex - 1) % 12] = App.GetGameData<GlobalData>().ZhuangValue;
-            for (int i = 0; i < BrankNum.Length; i++)
+            var gdata = App.GetGameData<Bjl3DGameData>();
+            _freeNum[(_myIndex - 1) % 12] = gdata.XianValue;
+            _brankNum[(_myIndex - 1) % 12] = gdata.ZhuangValue;
+            for (int i = 0; i < _brankNum.Length; i++)
             {
-                BrankModeTexts[i].text = BrankNum[(_myIndex + i) % 12] + "";
-                FreeModeTexts[i].text = FreeNum[(_myIndex + i) % 12] + "";
+                BrankModeTexts[i].text = _brankNum[(_myIndex + i) % 12] + "";
+                FreeModeTexts[i].text = _freeNum[(_myIndex + i) % 12] + "";
             }
             _myIndex++;
 
@@ -196,29 +198,30 @@ namespace Assets.Scripts.Game.bjl3d
         /// </summary>
         public void HowMuchPrompt()
         {
-            if (App.GetGameData<GlobalData>().Allow[3] == 0)
+            var gdata = App.GetGameData<Bjl3DGameData>();
+            if (gdata.Allow[3] == 0)
             {
-                _brankerText.text = App.GetGameData<GlobalData>().Maxante + "";
+                _brankerText.text = YxUtiles.GetShowNumberToString(gdata.Maxante);
             }
             else
             {
-                _brankerText.text = App.GetGameData<GlobalData>().Allow[3] + "";
+                _brankerText.text = YxUtiles.GetShowNumberToString(gdata.Allow[3]);
             }
-            if (App.GetGameData<GlobalData>().Allow[0] == 0)
+            if (gdata.Allow[0] == 0)
             {
-                _freeHomeText.text = App.GetGameData<GlobalData>().Maxante + "";
-            }
-            else
-            {
-                _freeHomeText.text = App.GetGameData<GlobalData>().Allow[0] + "";
-            }
-            if (App.GetGameData<GlobalData>().Allow[6] == 0)
-            {
-                _flatText.text = App.GetGameData<GlobalData>().Maxante + "";
+                _freeHomeText.text = YxUtiles.GetShowNumberToString(gdata.Maxante);
             }
             else
             {
-                _flatText.text = App.GetGameData<GlobalData>().Allow[6] + "";
+                _freeHomeText.text = YxUtiles.GetShowNumberToString(gdata.Allow[0]);
+            }
+            if (gdata.Allow[6] == 0)
+            {
+                _flatText.text = YxUtiles.GetShowNumberToString(gdata.Maxante);
+            }
+            else
+            {
+                _flatText.text = YxUtiles.GetShowNumberToString(gdata.Allow[6]);
             }
         }
     }

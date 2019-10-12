@@ -1,0 +1,52 @@
+{"frames": {
+
+"ID_220 .png":
+{
+	"frame": {"x":2,"y":83,"w":206,"h":79},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":206,"h":79},
+	"sourceSize": {"w":206,"h":79}
+},
+"ID_242.png":
+{
+	"frame": {"x":2,"y":164,"w":107,"h":42},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":107,"h":42},
+	"sourceSize": {"w":107,"h":42}
+},
+"ID_608 .png":
+{
+	"frame": {"x":2,"y":2,"w":206,"h":79},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":206,"h":79},
+	"sourceSize": {"w":206,"h":79}
+},
+"ID_787.png":
+{
+	"frame": {"x":62,"y":208,"w":58,"h":27},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":58,"h":27},
+	"sourceSize": {"w":58,"h":27}
+},
+"ID_788.png":
+{
+	"frame": {"x":2,"y":208,"w":58,"h":27},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":58,"h":27},
+	"sourceSize": {"w":58,"h":27}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "skin_0034_Message.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":256},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:2cec72d3b5652d679f6b1042eb020455$"
+}
+}

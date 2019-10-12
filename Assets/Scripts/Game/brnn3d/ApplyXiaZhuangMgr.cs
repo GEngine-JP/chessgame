@@ -1,25 +1,25 @@
 ﻿using UnityEngine;
-using YxFramwork.Common;
-using YxFramwork.Manager;
+using YxFramwork.Common; 
 
 namespace Assets.Scripts.Game.brnn3d
 {
     public class ApplyXiaZhuangMgr : MonoBehaviour
     {
-        public static ApplyXiaZhuangMgr Instance;
-        protected void Awake()
-        {
-            Instance = this;
-        }
+        public ApplyXiaZhuangUI TheApplyXiaZhuangUI;
         //玩家上庄
         public void ApplyZhuangSendMsg()
         {
+            var gdata = App.GetGameData<Brnn3dGameData>();
+            var rserver = App.GetRServer<Brnn3dGameServer>();
+            if (!rserver.HasGetGameInfo) return;
             if (CheckIsZhuang()) return;
-            if (App.GetGameData<GlobalData>().CurrentUser.Gold < App.GetGameData<GlobalData>().Bkmingold)
-                NoteUI.Instance.Note(string.Format(App.GetGameData<GlobalData>().ShangZhuangMoneyLos, App.GetGameData<GlobalData>().Bkmingold));
+            if (gdata.GetPlayerInfo().CoinA < gdata.Bkmingold)
+            {
+                App.GetGameManager<Brnn3DGameManager>().TheNoteUI.Note(string.Format(gdata.ShangZhuangMoneyLos, gdata.Bkmingold));
+            }
             else
             {
-                App.GetRServer<GameServer>().ApplyBanker();
+                rserver.ApplyBanker();
             }
         }
 
@@ -28,9 +28,13 @@ namespace Assets.Scripts.Game.brnn3d
         {
             if (CheckIsZhuang())
             {
-                App.GetRServer<GameServer>().ApplyQuit();
-                if (App.GetGameData<GlobalData>().CurrentUser.Seat == App.GetGameData<GlobalData>().CurrentBanker.Seat)
-                    NoteUI.Instance.Note(App.GetGameData<GlobalData>().NextXiaZuang);
+                var gdata = App.GetGameData<Brnn3dGameData>();
+                App.GetRServer<Brnn3dGameServer>().ApplyQuit();
+                var gameMgr = App.GetGameManager<Brnn3DGameManager>();
+                if (gameMgr.TheUpUICtrl.TheBankersManager.BankerIsSelf())
+                {
+                    gameMgr.TheNoteUI.Note(gdata.NextXiaZuang);
+                }
             }
         }
 
@@ -43,23 +47,25 @@ namespace Assets.Scripts.Game.brnn3d
         //判断是否是庄
         bool CheckIsZhuang()
         {
-            if (App.GetGameData<GlobalData>().CurrentUser.Seat == App.GetGameData<GlobalData>().CurrentBanker.Seat)
-            {
-                return true;
-            }
-            var gdata = App.GetGameData<GlobalData>();
+            var gdata = App.GetGameData<Brnn3dGameData>();
             if (gdata == null)
             {
                 return false;
             }
+            var gameMgr = App.GetGameManager<Brnn3DGameManager>();
+            if (gameMgr.TheUpUICtrl.TheBankersManager.BankerIsSelf())
+            {
+                return true;
+            }
+           
             var bankList = gdata.BankList;
             if (bankList == null)
             {
                 return false;
             }
             var count = bankList.Count;
-            var seat = gdata.CurrentUser.Seat;
-            for (int i = 0; i < count; i++)
+            var seat = gdata.SelfSeat;
+            for (var i = 0; i < count; i++)
             {
                 if (bankList.GetSFSObject(i).GetInt("seat") == seat)
                 {
@@ -74,9 +80,13 @@ namespace Assets.Scripts.Game.brnn3d
         {
             //MusicManager.Instance.Play("UpAndDownRanker");
             if (isApply)
-                ApplyXiaZhuangUI.Instance.ShowApplyZhuang();
+            {
+                TheApplyXiaZhuangUI.ShowApplyZhuang();
+            }
             else
-                ApplyXiaZhuangUI.Instance.ShowXiaZhuang();
+            {
+                TheApplyXiaZhuangUI.ShowXiaZhuang();
+            }
         }
     }
 }

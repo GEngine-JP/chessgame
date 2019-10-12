@@ -1,16 +1,15 @@
 ﻿using UnityEngine;
-using YxFramwork.Common;
-using YxFramwork.View;
+using YxFramwork.Common; 
 
 namespace Assets.Scripts.Game.brnn3d
 {
     public class UpUIController : MonoBehaviour
     {
-        public static UpUIController Instance;
-        protected void Awake()
-        {
-            Instance = this;
-        }
+        public BankersManager TheBankersManager;
+        public CountDownUI TheCountDownUI;
+        public GamesNumUI TheGamesNumUI;
+        public StateUI TheStateUI;
+
         //返回大厅
         public void ReturnToHall()
         {
@@ -19,24 +18,24 @@ namespace Assets.Scripts.Game.brnn3d
         //上庄点击
         public void ApplyZhuangClicked()
         {
-            ApplyXiaZhuangMgr.Instance.ApplyZhuangSendMsg();
+            App.GetGameManager<Brnn3DGameManager>().TheApplyXiaZhuangMgr.ApplyZhuangSendMsg();
         }
 
         //下庄点击
         public void XiaZhuangClicked()
         {
-            ApplyXiaZhuangMgr.Instance.XiaZhuangSendMsg();
+            App.GetGameManager<Brnn3DGameManager>().TheApplyXiaZhuangMgr.XiaZhuangSendMsg();
         }
 
         public void BankListUIOn_OffClick()
         {
-            if (BankerListBg.Instance.IsZhanKai)
+            if (TheBankersManager.IsZhanKai)
             {
-                BankerListBg.Instance.HideBankListUI();
+                TheBankersManager.HideBankListUI();
             }
             else
             {
-                BankerListBg.Instance.ShowBankListUI();
+                TheBankersManager.ShowBankListUI();
             }
         }
 

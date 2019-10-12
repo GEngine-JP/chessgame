@@ -5,20 +5,17 @@ using YxFramwork.Common;
 namespace Assets.Scripts.Game.brnn3d
 {
     public class DicMode : MonoBehaviour
-    {
-        public static DicMode Instance;
+    { 
         public Transform DicTf;
+
+        public Transform BoultTf;
         //点数
-        int _pN = 0;
-        protected void Awake()
-        {
-            Instance = this;
-        }
+        int _pN = 0; 
 
         //玩骰子
         public void PlayDic()
         {
-            _pN = App.GetGameData<GlobalData>().DicNum;
+            _pN = App.GetGameData<Brnn3dGameData>().DicNum;
             if (DicTf.gameObject.activeSelf)
                 DicTf.gameObject.SetActive(false);
             DicTf.gameObject.SetActive(true);
@@ -31,19 +28,24 @@ namespace Assets.Scripts.Game.brnn3d
             switch (_pN)
             {
                 case 1:
+                    BoultTf.localEulerAngles = new Vector3(0, 0, 0);
                     DicTf.localEulerAngles = new Vector3(0, 0, 0);
                     break;
                 case 2:
-                    DicTf.localEulerAngles = new Vector3(0, 0, 90);
+                    BoultTf.localEulerAngles = new Vector3(0, 0, 90);
+                    DicTf.localEulerAngles = new Vector3(0, 90, 0);
                     break;
                 case 3:
-                    DicTf.localEulerAngles = new Vector3(-90, 0, 0);
+                    BoultTf.localEulerAngles = new Vector3(-90, 0, 0);
+                    DicTf.localEulerAngles = new Vector3(0, -90, 0);
                     break;
                 case 4:
-                    DicTf.localEulerAngles = new Vector3(0, 0, 180);
+                    BoultTf.localEulerAngles = new Vector3(0, 0, 180);
+                    DicTf.localEulerAngles = new Vector3(0, 180, 0);
                     break;
                 case 5:
-                    DicTf.localEulerAngles = new Vector3(0, 0, 270);
+                    BoultTf.localEulerAngles = new Vector3(0, 0, 270);
+                    DicTf.localEulerAngles = new Vector3(0, 270, 0);
                     break;
             }
         }
@@ -51,7 +53,7 @@ namespace Assets.Scripts.Game.brnn3d
         //停止骰子
         public void StopDic()
         {
-            StartCoroutine("HideDic", 2f);
+            StartCoroutine(HideDic(2f));
         }
 
         IEnumerator HideDic(float s)

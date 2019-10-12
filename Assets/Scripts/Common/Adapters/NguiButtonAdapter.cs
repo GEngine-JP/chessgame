@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 using YxFramwork.Common.Adapters;
 using YxFramwork.Enums;
 
@@ -6,24 +7,49 @@ namespace Assets.Scripts.Common.Adapters
 {
     public class NguiButtonAdapter : YxBaseButtonAdapter
     {
-        public UILabel Label;
+        [Tooltip("按钮的文本")]
+        public UILabel Label; 
+        [Tooltip("按钮的文本")]
         private UIButton _button;
 
-        public UIButton Button
+        private UIButton Button
         {
-            get
+            get { return _button == null ? _button = GetComponent<UIButton>() : _button; }
+        }
+
+        protected override void InitSoundListen()
+        {
+            var trigger = GetComponent<UIEventTrigger>();
+            if (trigger == null)
             {
-                if (_button == null)
-                {
-                    _button = GetComponent<UIButton>();
-                }
-                return _button;
+                trigger = gameObject.AddComponent<UIEventTrigger>();
+            }
+            var listener = GetComponent<UIEventListener>();
+            if (listener == null)
+            {
+                gameObject.AddComponent<UIEventListener>();
+            }
+            if (!string.IsNullOrEmpty(SoundPlayer.ClickSName))
+            {
+                trigger.onClick.Add(new EventDelegate(SoundPlayer.OnYxClick));
+            }
+            if (!string.IsNullOrEmpty(SoundPlayer.DoubleClickSName))
+            {
+                trigger.onDoubleClick.Add(new EventDelegate(SoundPlayer.OnYxDoubleClick));
+            }
+            if (!string.IsNullOrEmpty(SoundPlayer.PressSName))
+            {
+                trigger.onPress.Add(new EventDelegate(SoundPlayer.OnYxPress));
+            }
+            if (!string.IsNullOrEmpty(SoundPlayer.ReleaseSName))
+            {
+                trigger.onRelease.Add(new EventDelegate(SoundPlayer.OnYxRelease));
             }
         }
 
-        public override YxUIType UIType
+        public override YxEUIType UIType
         {
-            get { return YxUIType.Nguid; }
+            get { return YxEUIType.Nguid; }
         }
 
         public override bool SetSkinName(string skinName)
@@ -36,9 +62,9 @@ namespace Assets.Scripts.Common.Adapters
             if (atlas == null) return false;
             var list = atlas.spriteList;
             var count = list.Count;
-            var hover = string.Format("{0}_hover", skinName);
-            var press = string.Format("{0}_press", skinName);
-            var disable = string.Format("{0}_disable", skinName);
+            var hover = string.Format(HoverSuffix, skinName);
+            var press = string.Format(PressSuffix, skinName);
+            var disable = string.Format(DisableSuffix, skinName);
             var flag = 0;
             var dict = new Dictionary<string, bool>();
             for (var i = 0; i < count; i++)

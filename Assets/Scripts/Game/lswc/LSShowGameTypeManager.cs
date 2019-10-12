@@ -1,85 +1,74 @@
-﻿using Assets.Scripts.Game.lswc;
-using Assets.Scripts.Game.lswc.Core;
+﻿using Assets.Scripts.Game.lswc.Core;
 using UnityEngine;
-
-public class LSShowGameTypeManager : InstanceControl
+namespace Assets.Scripts.Game.lswc
 {
+    public class LSShowGameTypeManager : InstanceControl
+    { 
+        private LSFlyNumber _light2;
 
-    private static LSShowGameTypeManager _instance;
+        private LSFlyNumber _light3;
 
-    public static LSShowGameTypeManager Instance
-    {
-        get { return _instance; }
-    }
+        private LSFlyNumber _bigThree;
 
-    private LSFlyNumber _light2;
+        private LSBigFourType _bigFour;
 
-    private LSFlyNumber _light3;
+        private GameObject _lighting;
 
-    private LSFlyNumber _bigThree;
-
-    private LSBigFourType _bigFour;
-
-    private GameObject _lighting;
-
-    private void Awake()
-    {
-        _instance = this;
-        Find();
-    }
-
-    private void Find()
-    {
-        _light2 = transform.GetChild(0).GetComponent<LSFlyNumber>();
-        _light3 = transform.GetChild(1).GetComponent<LSFlyNumber>();
-        _bigThree = transform.GetChild(2).GetComponent<LSFlyNumber>();
-        _bigFour =transform.GetChild(3).GetComponent<LSBigFourType>();
-        _bigFour.Init();
-        _lighting=transform.GetChild(4).gameObject;
-    }
-
-    public void ShowGameTypeLighting(int multiple)
-    {
-
-        _lighting.SetActive(true);
-        if (multiple==2)
+        private void Awake()
         {
-            _light2.PlayAnimation();
+            Find();
         }
-        else
-        {
-            _light3.PlayAnimation();
-        }
-        Invoke("HideLight",multiple);
-    }
 
-    private void HideLight()
-    {
-        _lighting.SetActive(false);
-    }
-
-    public void ShowBigThree()
-    {
-        _bigThree.PlayAnimation();
-    }
-
-    public void ShowBigFour(bool show)
-    {
-        if (show)
+        private void Find()
         {
-            _bigFour.PlayAnimation();
+            _light2 = transform.GetChild(0).GetComponent<LSFlyNumber>();
+            _light3 = transform.GetChild(1).GetComponent<LSFlyNumber>();
+            _bigThree = transform.GetChild(2).GetComponent<LSFlyNumber>();
+            _bigFour =transform.GetChild(3).GetComponent<LSBigFourType>();
+            _bigFour.Init();
+            _lighting=transform.GetChild(4).gameObject;
         }
-        else
+
+        public void ShowGameTypeLighting(int multiple)
         {
-            _bigFour.HideBigFour();
+
+            _lighting.SetActive(true);
+            if (multiple==2)
+            {
+                _light2.PlayAnimation();
+            }
+            else
+            {
+                _light3.PlayAnimation();
+            }
+            Invoke("HideLight",multiple);
         }
+
+        private void HideLight()
+        {
+            _lighting.SetActive(false);
+        }
+
+        public void ShowBigThree()
+        {
+            _bigThree.PlayAnimation();
+        }
+
+        public void ShowBigFour(bool show)
+        {
+            if (show)
+            {
+                _bigFour.PlayAnimation();
+            }
+            else
+            {
+                _bigFour.HideBigFour();
+            }
         
-    }
+        }
 
-
-
-    public override void OnExit()
-    {
-        _instance = null;
+        public override void OnExit()
+        {
+        }
     }
 }

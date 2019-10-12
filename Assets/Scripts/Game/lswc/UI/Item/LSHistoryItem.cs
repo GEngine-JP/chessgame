@@ -47,8 +47,9 @@ namespace Assets.Scripts.Game.lswc.UI.Item
 
         public void InitItem(LSResult history)
         {
-            _animal.sprite = App.GetGameData<GlobalData>().SetHistoryAnimal(history);
-            _banker.sprite = App.GetGameData<GlobalData>().SetHistoryBanker(history.Banker);
+            var gdata = App.GetGameData<LswcGameData>();
+            _animal.sprite = gdata.SetHistoryAnimal(history);
+            _banker.sprite = gdata.SetHistoryBanker(history.Banker);
             _shanDianParent.SetActive(history.ResultType==LSRewardType.LIGHTING);
             SetMultiple(history.Multiple);
         }
@@ -62,15 +63,16 @@ namespace Assets.Scripts.Game.lswc.UI.Item
                 return;
             }
             _num2.gameObject.SetActive(true);
+            var gameMgr = App.GetGameManager<LswcGamemanager>();
             if(multiple>=10)
             {
                 _num1.gameObject.SetActive(true);
-                _num1.sprite = LSResourseManager.Instance.GetSprite((multiple / 10).ToString());
-                _num2.sprite = LSResourseManager.Instance.GetSprite((multiple % 10).ToString());
+                _num1.sprite = gameMgr.ResourseManager.GetSprite((multiple / 10).ToString());
+                _num2.sprite = gameMgr.ResourseManager.GetSprite((multiple % 10).ToString());
             }
             else
             {
-                _num2.sprite = LSResourseManager.Instance.GetSprite(multiple.ToString());
+                _num2.sprite = gameMgr.ResourseManager.GetSprite(multiple.ToString());
             }
         }
     }

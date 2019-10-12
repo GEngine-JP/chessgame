@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
-using YxFramwork.Framework;
+using YxFramwork.Common.Adapters;
+using YxFramwork.Enums;
 
 namespace Assets.Scripts.Common.Adapters
 { 
@@ -7,15 +8,28 @@ namespace Assets.Scripts.Common.Adapters
     public class NguiParticleAdapter : YxBasePanelAdapter
     {
         private Renderer _renderer;
-
+        protected Renderer Renderer
+        {
+            get { return _renderer == null ? _renderer = GetComponent<Renderer>() : _renderer; }
+        }
+      
         protected override void OnSortingOrder(int order)
         {
-            GetRenderer().sortingOrder = order;
+            var r = Renderer;
+            if (r == null) { return; }
+            r.sortingOrder = order;
         }
 
-        private Renderer GetRenderer()
+        public override Vector4 GetBound()
         {
-            return _renderer ?? (_renderer = GetComponent<ParticleSystem>().GetComponent<Renderer>());
+            return Vector4.zero;
+        }
+
+        public override int Depth { get; set; }
+
+        public override YxEUIType UIType
+        {
+            get { return YxEUIType.Nguid; }
         }
     }
 }

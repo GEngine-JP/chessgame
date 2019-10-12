@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
 
 namespace Assets.Scripts.Game.brnn3d
 {
     public class NiuNumberUI : MonoBehaviour
     {
-        public static NiuNumberUI Instance;
         public Transform bg;
         public Image[] niuImg = new Image[5];
         public Transform[] NiuAreas = new Transform[5];
@@ -20,10 +20,6 @@ namespace Assets.Scripts.Game.brnn3d
 
         private int[] paiNiuJi;
 
-        protected void Awake()
-        {
-            Instance = this;
-        }
         //显示牛数的界面
         public void ShowNumberUI(int[] paiShape)
         {
@@ -51,7 +47,7 @@ namespace Assets.Scripts.Game.brnn3d
         //播放牛数的声音
         public void PlayAudioNiuJi(int iareaId, int[] niu)
         {
-            MusicManager.Instance.Play("n" + niu[iareaId]);
+            Facade.Instance<MusicManager>().Play("n" + niu[iareaId]);
         }
         //隐藏显示牛数的界面
         public void HideNiuNumberUI()
@@ -63,7 +59,7 @@ namespace Assets.Scripts.Game.brnn3d
                 NiuAreas[i].gameObject.SetActive(false);
                 niuEffects[i].gameObject.SetActive(false);
             }
-            App.GetGameData<GlobalData>().PaiAllShow.Clear();
+            App.GetGameData<Brnn3dGameData>().PaiAllShow.Clear();
         }
 
     }

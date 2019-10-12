@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Common.Windows;
 using Assets.Scripts.Hall.View.AboutRoomWindows;
 using UnityEngine;
-using YxFramwork.Common;
+using YxFramwork.Common.Utils;
 using YxFramwork.Framework;
 using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
@@ -43,7 +43,10 @@ namespace Assets.Scripts.Tea
         public string KeyTeaId = "TeaId";
         [Tooltip("自动查找")]
         public bool AutoFind = true;
-
+        /// <summary>
+        /// 当前茶馆功能的命名 可以叫俱乐部 亲友圈 自己填写
+        /// </summary>
+        public string CurrentName = "茶馆";
         protected void Awake()
         {
             var count = Keyboards.Length;
@@ -93,52 +96,32 @@ namespace Assets.Scripts.Tea
             if (!int.TryParse(roomId, out roomType)) return;
             Dictionary<string, object> dic = new Dictionary<string, object>();
             dic["id"] = roomId;
-            Facade.Instance<TwManger>().SendAction("group.teaGetIn", dic, GetInTea);
+            Facade.Instance<TwManager>().SendAction("group.teaGetIn", dic, GetInTea);
         }
-        /// <summary>
-        /// 用于存储茶馆ID的key
-        /// </summary>
-        private string SaveTeaId
-        {
-            get { return string.Format("{0}_{1}_{2}", Application.bundleIdentifier, App.UserId, KeyTeaId); }
-        }
+     
         private void GetInTea(object msg)
         {
             Dictionary<string, object> dic = (Dictionary<string, object>) msg;
             long value = (long)dic["mstatus"];
             if (value != 4)
             {
-                string tea_name = (string)dic["name"];
                 YxWindow obj = CreateOtherWindow("TeaPanel");
                 TeaPanel panel = obj.GetComponent<TeaPanel>();
                 panel.UpdateView(dic);
-                if (dic.ContainsKey("only_owner"))
-                {
-                    panel.onlyOwner = Convert.ToInt32(dic["only_owner"]);
-                }
-                else
-                    panel.onlyOwner = -1;
-                panel.CasePower((int)value);
-                if (dic.ContainsKey("roomNum"))
-                {
-                    panel.roomNum = Convert.ToInt32(dic["roomNum"]);
-                }              
-                panel.SetTeaName(tea_name);
                 panel.SetTeaCode(int.Parse(GetCurRoomId()));
-                panel.TeaState = (int) value;
-                PlayerPrefs.SetString(SaveTeaId, GetCurRoomId());
+                Util.SetString(KeyTeaId, GetCurRoomId());
                 Close();
             }
             else
             {
-                YxMessageBox.Show("茶馆不存在");
+                YxMessageBox.Show(string.Format("{0}不存在", CurrentName));
             }
             Clear();
         }
 
         public void OnOpenCreateWindow()
         {
-            var win = YxWindowManager.OpenWindow("DefCreateRoomWindow", true);
+            var win = YxWindowManager.OpenWindow("CreateRoomWindow", true);
             var createWin = (CreateRoomWindow)win;
             if (createWin == null) return;
             createWin.TabDefaultIndex = TabDefaultIndex;

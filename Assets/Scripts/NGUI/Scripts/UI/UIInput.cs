@@ -22,8 +22,8 @@ public class UIInput : MonoBehaviour
 	{
 		Standard,
 		AutoCorrect,
-		Password,
-	}
+		Password
+    }
 
 	public enum Validation
 	{
@@ -179,7 +179,7 @@ public class UIInput : MonoBehaviour
 	/// </summary>
 
 	public OnValidate onValidate;
-    public string Asterisk = "*";
+    public char Asterisk = '*';
     /// <summary>
     /// Input field's value.
     /// </summary>
@@ -1307,25 +1307,22 @@ public class UIInput : MonoBehaviour
 			}
 			else
 			{
-				if (inputType == InputType.Password)
-				{
-					processed = "";
+			    if (inputType == InputType.Password)
+			    {
+			        processed = ""; 
+                    for (int i = 0, imax = fullText.Length; i < imax; ++i) processed += Asterisk;
+                } 
+                else
+                {
+                    processed = fullText;
+                }
 
-					
+                // Start with text leading up to the selection
+                int selPos = selected ? Mathf.Min(processed.Length, cursorPosition) : 0;
+                string left = processed.Substring(0, selPos);
 
-					if (label.bitmapFont != null && label.bitmapFont.bmFont != null &&
-						label.bitmapFont.bmFont.GetGlyph('*') == null) Asterisk = "x";
-
-					for (int i = 0, imax = fullText.Length; i < imax; ++i) processed += Asterisk;
-				}
-				else processed = fullText;
-
-				// Start with text leading up to the selection
-				int selPos = selected ? Mathf.Min(processed.Length, cursorPosition) : 0;
-				string left = processed.Substring(0, selPos);
-
-				// Append the composition string and the cursor character
-				if (selected) left += Input.compositionString;
+                // Append the composition string and the cursor character
+                if (selected) left += Input.compositionString;
 
 				// Append the text from the selection onwards
 				processed = left + processed.Substring(selPos, processed.Length - selPos);

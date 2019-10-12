@@ -1,47 +1,44 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using YxFramwork.Common;
+using YxFramwork.Framework.Core;
 using YxFramwork.Manager;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.brnn3d
 {
     public class SettleMentUI : MonoBehaviour
     {
-        public static SettleMentUI Instance;
         public Text SelfWinText;
-        public Text SelfBackText;
+//        public Text SelfBackText;
         public Text BankerWinText;
-        public Text BankerBackText;
+//        public Text BankerBackText;
 
         public Transform SettleMent;
-
-        protected void Awake()
-        {
-            Instance = this;
-        }
-
+         
         public void SetSettleMentUI()
         {
             if (!SettleMent.gameObject.activeSelf)
+            {
                 SettleMent.gameObject.SetActive(true);
+            }
+            var gdata = App.GetGameData<Brnn3dGameData>();
             if (SelfWinText != null)
             {
-                SelfWinText.text = App.GetGameData<GlobalData>().ResultUserTotal + "";
-                if (App.GetGameData<GlobalData>().ResultUserTotal > 0)
-                {
-                    MusicManager.Instance.Play("win");
-                }
-                else
-                {
-                    MusicManager.Instance.Play("lost");
-                }
+                var self = gdata.GetPlayerInfo<Brnn3DUserInfo>();
+                SelfWinText.text = YxUtiles.GetShowNumberForm(self.WinCoin);
+                Facade.Instance<MusicManager>().Play(self.WinCoin > 0 ? "win" : "lost");
             }
             else
             {
                 if (SelfWinText != null) SelfWinText.text = "";
             }
             if (BankerWinText != null)
-                BankerWinText.text = App.GetGameData<GlobalData>().ResultBnakerTotal + "";
+            {
+                var gameMgr = App.GetGameManager<Brnn3DGameManager>();
+                var banker = gameMgr.TheUpUICtrl.TheBankersManager.Banker;
+                BankerWinText.text = YxUtiles.GetShowNumberForm(banker.WinCoin);
+            }
             else
             {
                 if (BankerWinText != null) BankerWinText.text = "";
@@ -56,8 +53,10 @@ namespace Assets.Scripts.Game.brnn3d
         void WaitToHideSettelMentUI()
         {
             if (SettleMent.gameObject.activeSelf)
+            {
                 SettleMent.gameObject.SetActive(false);
-            BeiShuMode.Instance.PlayBeiShuEff();
+            }
+            App.GetGameManager<Brnn3DGameManager>().TheBeiShuMode.PlayBeiShuEff();
         }
 
 

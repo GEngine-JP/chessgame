@@ -1,73 +1,73 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using Assets.Scripts.Common.components;
+using UnityEngine;
 using YxFramwork.Manager;
-using com.yxixia.utile.YxDebug;
+using YxFramwork.Common;
+using YxFramwork.Framework.Core;
 
 namespace Assets.Scripts.Game.bjl3d
 {
     public class CoinTypeInfoUI : MonoBehaviour//G 11.15
     {
-        public static CoinTypeInfoUI Intance;
-
-        protected void Awake()
+        /// <summary>
+        /// 选择状态
+        /// </summary>
+        [Tooltip("选择状态")]
+        public Transform Selected;
+        [Tooltip("按钮预制体")]
+        public Chip ChipBtnPrefab;
+        public void InitChipBtns(IList<int> anteList)
         {
-            Intance = this;
-        }
-
-        public void SelectClickeCoinTypeAudio(int btnIndex)
-        {
-            for (int i = 0; i < 7; i++)
+            var count = anteList.Count;
+            var type = App.GetGameData<Bjl3DGameData>().GameConfig.CoinType;
+            for (var i = 0; i < count; i++)
             {
-                Transform tf = transform.Find("CoinTypeBtn" + i + "/effect");
-                if (tf == null)
-                    YxDebug.LogError("No Such Compent");
-                if (i == btnIndex)
+                var chip = CreateChipBtn(i);
+                var chipData = new ChipData
                 {
-                    MusicManager.Instance.Play("movebutton");
-                    //                    AudioClip clip = ResourcesLoader.instance.LoadAudio("music/movebutton");
-                    //                    AudioManager.Instance.Play(clip, false, .8f);
-                    if (tf != null) tf.gameObject.SetActive(true);
-                }
-                else
+                    BgId = i,
+                    Value = anteList[i]
+                };
+                chip.UpdateView(chipData);
+                if (type == i)
                 {
-                    if (tf != null) tf.gameObject.SetActive(false);
+                    CoinTypeBtnClick(chip.gameObject);
                 }
             }
         }
 
-        public void CoinTypeBtn_0()
+        public Chip CreateChipBtn(int type)
         {
-            UserInfoUI.Instance.GameConfig.CoinType = 0;
-            SelectClickeCoinTypeAudio(0);
+            var chipGo = Instantiate(ChipBtnPrefab);
+            chipGo.name = type.ToString();
+            chipGo.gameObject.SetActive(true);
+            var btnTs = chipGo.transform;
+            btnTs.parent = transform;
+            btnTs.localScale = Vector3.one;
+            btnTs.localRotation = Quaternion.identity;
+            return chipGo;
         }
-        public void CoinTypeBtn_1()
+
+        public void CoinTypeBtnClick(GameObject btn)
         {
-            UserInfoUI.Instance.GameConfig.CoinType = 1;
-            SelectClickeCoinTypeAudio(1);
+            var btnTs = btn.transform;
+            AddSelected(btnTs);
+            int index;
+            if (!int.TryParse(btn.name, out index)) { return;}
+            App.GetGameData<Bjl3DGameData>().GameConfig.CoinType = index;
         }
-        public void CoinTypeBtn_2()
+
+        public void AddSelected(Transform p)
         {
-            UserInfoUI.Instance.GameConfig.CoinType = 2;
-            SelectClickeCoinTypeAudio(2);
+            Selected.parent = p;
+            Selected.gameObject.SetActive(true);
+            Selected.localPosition = Vector3.zero;
+            Facade.Instance<MusicManager>().Play("movebutton");
         }
-        public void CoinTypeBtn_3()
+
+        public void DisplaySelected(bool isShow)
         {
-            UserInfoUI.Instance.GameConfig.CoinType = 3;
-            SelectClickeCoinTypeAudio(3);
-        }
-        public void CoinTypeBtn_4()
-        {
-            UserInfoUI.Instance.GameConfig.CoinType = 4;
-            SelectClickeCoinTypeAudio(4);
-        }
-        public void CoinTypeBtn_5()
-        {
-            UserInfoUI.Instance.GameConfig.CoinType = 5;
-            SelectClickeCoinTypeAudio(5);
-        }
-        public void CoinTypeBtn_6()
-        {
-            UserInfoUI.Instance.GameConfig.CoinType = 6;
-            SelectClickeCoinTypeAudio(6);
+            Selected.gameObject.SetActive(isShow);
         }
     }
 }

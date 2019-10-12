@@ -5,7 +5,6 @@ namespace Assets.Scripts.Game.brnn3d
 {
     public class LuziInfoUI : MonoBehaviour
     {
-        public static LuziInfoUI Instance;
         public Image[] EastImgs = new Image[10];
         public Image[] SouthImgs = new Image[10];
         public Image[] WestImgs = new Image[10];
@@ -14,26 +13,21 @@ namespace Assets.Scripts.Game.brnn3d
         //路子信息图片0：勾 1：差
         public Sprite[] LuziImgs;
 
-        protected void Awake()
-        {
-            Instance = this;
-        }
-
         public void InitImg()
         {
-            foreach (Image eastImg in EastImgs)
+            foreach (var eastImg in EastImgs)
             {
                 eastImg.gameObject.SetActive(false);
             }
-            foreach (Image southImg in SouthImgs)
+            foreach (var southImg in SouthImgs)
             {
                 southImg.gameObject.SetActive(false);
             }
-            foreach (Image westImg in WestImgs)
+            foreach (var westImg in WestImgs)
             {
                 westImg.gameObject.SetActive(false);
             }
-            foreach (Image northImg in NorthImgs)
+            foreach (var northImg in NorthImgs)
             {
                 northImg.gameObject.SetActive(false);
             }

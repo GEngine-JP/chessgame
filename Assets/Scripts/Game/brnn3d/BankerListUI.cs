@@ -1,15 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using YxFramwork.Tool;
 
 namespace Assets.Scripts.Game.brnn3d
 {
     public class BankerListUI : MonoBehaviour
     {
-        public static BankerListUI Instance;
-        protected void Awake()
-        {
-            Instance = this;
-        }
         public Transform BankerItem;
 
         //清理上下庄列表UI
@@ -23,11 +19,11 @@ namespace Assets.Scripts.Game.brnn3d
         }
 
         //设置庄家列表的UI
-        public void SetBankerListUI(string name, string money)
+        public void SetBankerListUI(string bankerName, long money)
         {
-            GameObject item = Instantiate(BankerItem.gameObject);
-            item.transform.FindChild("Name").GetComponent<Text>().text = name;
-            item.transform.FindChild("Money").GetComponent<Text>().text = money;
+            var item = Instantiate(BankerItem.gameObject);
+            item.transform.FindChild("Name").GetComponent<Text>().text = bankerName;
+            item.transform.FindChild("Money").GetComponent<Text>().text = YxUtiles.GetShowNumberForm(money);
             item.transform.parent = BankerItem.parent;
             item.transform.localPosition = new Vector3(item.transform.localPosition.x, item.transform.localPosition.y, 0);
             item.transform.localScale = Vector3.one;

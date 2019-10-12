@@ -6,15 +6,9 @@ namespace Assets.Scripts.Game.brnn3d
 {
     public class BeiShuMode : MonoBehaviour
     {
-        public static BeiShuMode Instance;
-
         public Transform BeishuBg;
         private bool _isOpenBeiShuUI;
         public Text Beishus;
-        protected void Awake()
-        {
-            Instance = this;
-        }
 
         //播放倍数效果
         public void PlayBeiShuEff()
