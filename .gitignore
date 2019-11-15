@@ -48,3 +48,6 @@ sysinfo.txt
 crashlytics-build.properties
 
 .svn/
+Assets/StreamingAssets/
+Assets/-tk2d.asset
+Assets/-tk2d.asset.meta

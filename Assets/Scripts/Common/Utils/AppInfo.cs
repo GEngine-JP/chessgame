@@ -21,7 +21,7 @@
 		/// <summary>
 		/// 应用启动配置，打包时会自动更改文件名
 		/// </summary>
-		public const string StartCfgUrl="http://cfg.yxixia.com/update/_cfg/yxhall/skin_00/damutong/StartCfgForAndroid1.0.0.cfg";
+		public const string StartCfgUrl="http://cfg.yxixia.com/update/_cfg/yxhall/skin_00/damutong/StartCfgForStandaloneWindows1.0.0.cfg";
 		/// <summary>
 		/// 指定的推广员【starcfg可修改该】
 		/// </summary>
@@ -29,27 +29,27 @@
 		/// <summary>
 		/// 【starcfg】大厅配置路径
 		/// </summary>
-		public const string HallCfgUrl="http://static.18yb.com/cfg/hall/skin_00/_default/4.0.0/201908140948/android";
+		public const string HallCfgUrl="http://static.18yb.com/cfgopen/halls/skin_00/_default/4.0.0/201908140948/windows";
 		/// <summary>
 		/// 【starcfg】大厅资源路径
 		/// </summary>
-		public const string HallResUrl="http://static.18yb.com/res/hall/skin_00/android";
+		public const string HallResUrl="http://static.18yb.com/res/hall/skin_00/windows";
 		/// <summary>
 		/// 【starcfg】游戏资源路径，读取游戏配置时先会去HallCfgUrl中查找
 		/// </summary>
-		public const string GameResCfgUrl="http://static.18yb.com/cfg/games/android";
+		public const string GameResCfgUrl="http://static.18yb.com/cfgopen/games/windows";
 		/// <summary>
 		/// 【starcfg】游戏配置路径
 		/// </summary>
-		public const string GameResUrl="http://static.18yb.com/res/games/android";
+		public const string GameResUrl="http://static.18yb.com/res/games/windows";
 		/// <summary>
 		/// 【starcfg】公用资源配置路径，读取此配置时先会去HallCfgUrl中查找
 		/// </summary>
-		public const string ShareCfgUrl="http://static.18yb.com/cfg/hall/share/share_00/4.0.0/201903160937/android";
+		public const string ShareCfgUrl="http://static.18yb.com/cfgopen/halls/share/share_00/4.0.0/201903160937/windows";
 		/// <summary>
 		/// 【starcfg】公用资源路径
 		/// </summary>
-		public const string ShareResUrl="http://static.18yb.com/res/hall/share/android";
+		public const string ShareResUrl="http://static.18yb.com/res/hall/share/windows";
 		/// <summary>
 		/// 屏幕分辨率配置路径
 		/// </summary>
@@ -105,11 +105,11 @@
 		/// <summary>
 		/// 【starcfg】是否有微信登录
 		/// </summary>
-		public const bool HasWechatLogin=true;
+		public const bool HasWechatLogin=false;
 		/// <summary>
 		/// 【starcfg】微信AppId
 		/// </summary>
-		public const string WxAppId="wx8b508899645d50a7";
+		public const string WxAppId="";
 		/// <summary>
 		/// 【starcfg】是否有QQ登录【starcfg可修改该】
 		/// </summary>

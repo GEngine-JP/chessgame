@@ -439,7 +439,7 @@ PlayerSettings:
   psmSplashimage: {fileID: 0}
   spritePackerPolicy: 
   scriptingDefineSymbols:
-    1: YX_DEVE
+    1: 
     4: YX_DEVE
     7: 
   metroPackageName: NewHall
