@@ -28,3 +28,5 @@ QQ群 726099812
 
 #### 演示包下载
 [下载演示包](http://d.yxixia.com/zydemo)
+
+![演示包](https://images.gitee.com/uploads/images/2019/1210/091857_8380f563_2525.png "qrcode.png")
